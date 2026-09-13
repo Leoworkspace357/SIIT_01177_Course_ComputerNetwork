@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小型交换式局域网构建 · 实验任务 · Linear Theme</title>
+<style>
+/* =====================================================================
+     LINEAR DARK · lab tutorial theme
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --status-good:#4cb782; --status-warning:#f2c94c;
+    --status-serious:#eb8c4a; --status-critical:#e34948;
+    --code:#1baf7a; --code-soft:rgba(76,183,130,.10);
+    --warn:#f2c94c; --warn-soft:rgba(242,201,76,.10);
+    --ease:cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out:cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-slide:720ms; --dur-frag:520ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{--bg:#08080a;--bg-elev-1:#0d0d10;--bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f;--ink:#f7f8f8;--ink-2:#b4b8c0;
+    --ink-3:#8a8f98;--ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;}
+  .deck[data-theme="light"]{--bg:#fbfbfc;--bg-elev-1:#fff;
+    --bg-elev-2:#f4f4f7;--bg-elev-3:#ebebef;--ink:#0a0a0c;
+    --ink-2:#4a4d57;--ink-3:#6f727a;--ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:5vh 6vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(48px);
+    transition:opacity var(--dur-slide) var(--ease),
+      transform var(--dur-slide) var(--ease);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px);
+    transition:opacity 380ms var(--ease),transform 380ms var(--ease)}
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2);transition:border-color 400ms var(--ease)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6vw,5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h3{font-size:1.05rem;margin:1rem 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(.95rem,1.05vw,1.1rem);line-height:1.55;color:var(--ink-2)}
+  .lead{font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--ink-2);
+    max-width:60ch;margin-top:.3rem;line-height:1.5;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--accent)}
+  code,kbd{font-family:var(--font-mono);font-size:.86em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+  /* lab-specific layout */
+  .content{max-width:1100px;margin:0 auto;width:100%}
+  .step-no{font-family:var(--font-mono);font-size:.78rem;
+    color:var(--accent);background:var(--bg-elev-2);
+    padding:.3rem .8rem;border-radius:6px;
+    border:1px solid var(--accent-ring);font-weight:600;
+    letter-spacing:.04em;display:inline-block}
+  .step-h{display:flex;align-items:center;gap:.8rem;margin-bottom:1rem}
+  .step-h h3{margin:0;font-size:1.2rem;color:var(--ink)}
+  /* code blocks */
+  .codeblock{background:var(--code-bg);border:1px solid var(--hairline);
+    border-radius:10px;padding:1rem 1.2rem;margin:1rem 0;
+    font-family:var(--font-mono);font-size:.88rem;
+    color:var(--ink-2);line-height:1.55;overflow-x:auto;
+    white-space:pre}
+  .codeblock .comment{color:var(--ink-3);font-style:italic}
+  .codeblock .kw{color:var(--accent)}
+  .codeblock .str{color:var(--code)}
+  .codeblock .num{color:var(--warn)}
+  /* topology diagram */
+  .topo{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:10px;padding:1.4rem 2rem;margin:1rem 0;
+    font-family:var(--font-mono);font-size:.92rem;
+    color:var(--ink-2);line-height:1.55;white-space:pre;
+    overflow-x:auto;letter-spacing:.01em}
+  /* tables */
+  table.t{width:100%;border-collapse:collapse;margin:.8rem 0;
+    font-variant-numeric:tabular-nums;
+    border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  table.t th,table.t td{text-align:left;padding:.7rem .9rem;
+    border-bottom:1px solid var(--hairline);font-size:.92rem;color:var(--ink-2);
+    background:var(--bg-elev-2)}
+  table.t th{color:var(--ink-3);font-weight:500;
+    border-bottom:1px solid var(--hairline-strong);
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--bg-elev-1)}
+  table.t tr:last-child td{border-bottom:0}
+  /* lists */
+  ul.clean,ol.steps{list-style:none;padding:0;margin:.8rem 0;max-width:80ch}
+  ul.clean>li{padding:.6rem 0 .6rem 1.4rem;position:relative;
+    border-bottom:1px solid var(--hairline);color:var(--ink-2)}
+  ul.clean>li:last-child{border-bottom:0}
+  ul.clean>li::before{content:"▸";position:absolute;left:0;top:.7rem;
+    color:var(--accent);font-weight:600}
+  ol.steps{counter-reset:labstep}
+  ol.steps>li{counter-increment:labstep;
+    padding:.8rem 0 .8rem 3rem;position:relative;
+    border-bottom:1px solid var(--hairline);color:var(--ink-2)}
+  ol.steps>li:last-child{border-bottom:0}
+  ol.steps>li::before{content:counter(labstep,decimal-leading-zero);
+    position:absolute;left:0;top:.85rem;
+    font-family:var(--font-mono);font-size:.85rem;color:var(--accent);
+    font-weight:600}
+  ol.steps>li strong{color:var(--ink)}
+  /* callout panels */
+  .tip,.warn,.err{display:flex;gap:1rem;padding:.9rem 1.1rem;
+    border-radius:10px;margin:.8rem 0;border:1px solid var(--hairline);
+    background:var(--bg-elev-2);transition:border-color 300ms var(--ease)}
+  .tip{border-left:3px solid var(--code)}
+  .warn{border-left:3px solid var(--warn)}
+  .err{border-left:3px solid var(--status-critical)}
+  .tip .lbl,.warn .lbl,.err .lbl{font-family:var(--font-mono);
+    font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:600;flex:none;width:4rem}
+  .tip .lbl{color:var(--code)}
+  .warn .lbl{color:var(--warn)}
+  .err .lbl{color:var(--status-critical)}
+  .tip p,.warn p,.err p{margin:0;color:var(--ink-2);font-size:.95rem}
+  /* fragments */
+  .fragment{opacity:0;transform:translateY(14px);
+    transition:opacity var(--dur-frag) var(--ease-out),
+      transform var(--dur-frag) var(--ease-out)}
+  .fragment.visible{opacity:1;transform:translateY(0)}
+  /* chrome */
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.65rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:4px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;
+    overflow:hidden;max-height:calc(100vh - 80px)}
+  .sidebar .nav-dot{width:4px;height:4px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;
+    transition:opacity 200ms var(--ease),transform 200ms var(--ease),
+      background 200ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 4px var(--accent-ring);transform:scale(1.6)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);
+    letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
+    letter-spacing:.02em;transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.toolbar button,.progress,.nav-dot,
+    .tip,.warn,.err{transition-duration:0ms!important}}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar{display:none!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">实验 01  <strong>·  小型交换式局域网构建</strong>  ·  Leonard F. Li</div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">19</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">PART 01</span><h3>实验目的</h3></div>
+        <ol class="steps">
+        <li class="fragment">熟悉 <strong>Cisco Packet Tracer 6.2</strong> 的界面与基本操作（设备选择、连线、配置）。</li>
+        <li class="fragment">掌握<strong>主机名、IP 地址、子网掩码、默认网关</strong>的基本配置方法。</li>
+        <li class="fragment">学会使用 <code>ping</code>、<code>ipconfig</code> 验证网络连通性。</li>
+        <li class="fragment">理解<strong>共享式 LAN（HUB）</strong> 与 <strong>交换式 LAN（Switch）</strong> 的区别。</li>
+        <li class="fragment">培养观察指示灯、阅读命令输出的排错能力。</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">PART 02</span><h3>实验环境</h3></div>
+        <table class="t">
+          <thead><tr><th>项目</th><th>规格 / 数量</th></tr></thead>
+          <tbody>
+        <tr><td>PC</td><td>4 台（型号 PC-PT）</td></tr>
+        <tr><td>集线器 HUB</td><td>1 台（型号 Hub-PT）</td></tr>
+        <tr><td>交换机 Switch</td><td>1 台（型号 2960-24TT）</td></tr>
+        <tr><td>控制线</td><td>1 根（首次配置交换机）</td></tr>
+        <tr><td>直连双绞线</td><td>若干（Copper Straight-Through）</td></tr>
+        <tr><td>软件</td><td>Cisco Packet Tracer 6.2</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">PART 03</span><h3>实验拓扑</h3></div>
+        <div class="topo">                       ┌─────────────┐
+  PC0 ─┐               │  Switch0    │
+  PC1 ─┼─ Hub0 ──────┤  (2960)     │
+  PC2 ─┘               │             │
+                       PC3 ────────┘</div>
+        <p class="muted" style="margin-top:.6rem;font-size:.92rem">4 台 PC 同一网段 <code>192.168.10.0/24</code>，PC0/PC1/PC2 接 HUB，PC3 直连交换机。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">BG · 01</span><h3>背景 · Packet Tracer 6.2 界面</h3></div>
+        <p class="fragment">打开 PT 6.2 后，左下角 <strong>Network Devices</strong> 与 <strong>End Devices</strong> 是设备库。</p>
+<p class="fragment">单击设备 → 在工作区拖出；按住 <code>Ctrl</code> 多选批量放置。</p>
+<p class="fragment">用 <strong>Connections</strong> 选择线缆类型（最常用 <code>Copper Straight-Through</code> 与 <code>Copper Cross-Over</code>）。</p>
+<p class="fragment">单击设备 → 弹出配置窗口，有 <strong>Physical / Config / CLI / Desktop</strong> 四个标签。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01.1</span><h3>设备端口速查</h3></div>
+        <p class="muted" style="margin-bottom:.8rem">不同设备的默认端口与状态不同，配置前确认清楚。</p>
+        <table class="t">
+          <thead><tr><th>设备</th><th>常用端口</th><th>默认状态</th></tr></thead>
+          <tbody>
+<tr><td>PC-PT</td><td>FastEthernet0</td><td>已启用</td></tr><tr><td>Hub-PT</td><td>Port0 ~ PortN</td><td>即插即用</td></tr><tr><td>Switch 2960-24TT</td><td>FastEthernet0/1 ~ 0/24</td><td>默认 VLAN1</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01.2</span><h3>新建拓扑文件</h3></div>
+        
+        <ul class='clean'><li>启动 Packet Tracer 6.2 → <strong>File → New</strong>。</li><li><strong>File → Save As…</strong> → 文件名 <code>Lab1-SmallLAN.pkt</code> → 保存到本地。</li><li>在右下角 <strong>End Devices</strong> 中选 <strong>PC</strong> → 拖出 4 台。</li><li>在 <strong>Network Devices</strong> 中选 <strong>Hub</strong> → 拖出 1 台；选 <strong>Switches</strong> → <strong>2960-24TT</strong> → 拖出 1 台。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01.3</span><h3>连线（按拓扑图）</h3></div>
+        
+        <ul class='clean'><li>选择 <strong>Connections → Copper Straight-Through</strong>。</li><li>单击 PC0 → 选 <code>FastEthernet0</code>，再单击 Hub0 → 选 <code>Port0</code>。</li><li>同样连接 PC1-Hub0(Port1)、PC2-Hub0(Port2)。</li><li>选择一根线把 Hub0 的某端口接到 Switch0 的 Fa0/1（HUB ↔ SWITCH 异种设备 → 直连线）。</li><li>再用一根直连线连接 PC3 的 Fa0 到 Switch0 的 Fa0/2。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="tip">
+          <span class="lbl">TIP</span>
+          <p><strong>HUB ↔ SWITCH</strong> 是异种设备 → 用<strong>直连线</strong>；同种设备（如 SWITCH-SWITCH 早期）才用交叉线。本实验所有连线都是<strong>直连线</strong>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01.4</span><h3>配置 PC 的 IP 地址</h3></div>
+        <p class="muted" style="margin-bottom:.8rem">每台 PC 设为静态 IP。单击 PC → Desktop → IP Configuration → Static → 填写。</p>
+        <table class="t">
+          <thead><tr><th>PC</th><th>IP 地址</th><th>子网掩码</th></tr></thead>
+          <tbody>
+<tr><td>PC0</td><td>192.168.10.10</td><td>255.255.255.0</td></tr><tr><td>PC1</td><td>192.168.10.11</td><td>255.255.255.0</td></tr><tr><td>PC2</td><td>192.168.10.12</td><td>255.255.255.0</td></tr><tr><td>PC3</td><td>192.168.10.20</td><td>255.255.255.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="tip">
+          <span class="lbl">TIP</span>
+          <p>也可以在 <strong>Config</strong> 标签的 <strong>FastEthernet0</strong> 接口里直接填写 IP，效果一样。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01.5</span><h3>观察指示灯</h3></div>
+        
+        <ul class='clean'><li>仔细观察设备上的小圆点（指示灯）。</li><li><strong>HUB 端口</strong>：插线后立即变绿；数据传输时闪烁。</li><li><strong>Switch 端口</strong>：绿 = up，灭 = down；PC3 的端口指示灯应为绿色。</li><li>如果某个端口指示灯不亮 → 检查物理连线是否牢固。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01.6</span><h3>测试连通性（ping）</h3></div>
+        
+        <ul class='clean'><li>单击 <strong>PC0</strong> → <strong>Desktop</strong> → <strong>Command Prompt</strong>。</li><li>在命令提示符输入 <code>ping 192.168.10.11</code> — 看到「Reply from 192.168.10.11 ...」表示 PC0 ↔ PC1 通。</li><li>同样测试 PC0 → PC2、PC0 → PC3：都应通。</li><li>测试 PC1 → PC3：应通。</li><li>测试 PC0 → 192.168.10.99（不存在的 IP）：应显示「Request timed out」。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01.7</span><h3>观察 HUB 与 SWITCH 的差异（Simulation 模式）</h3></div>
+        
+        <ul class='clean'><li>进入 <strong>Simulation</strong> 模式（右下角切换）。</li><li>让 PC0 ping PC1，并单步跟踪数据包。</li><li><strong>HUB</strong> 会把 PC0 的帧<strong>广播</strong>给 Port0、Port1、Port2（PC0、PC1、PC2 都收到），然后只有 PC1 应答；PC2 也会收到 PC0 的包但丢弃。</li><li><strong>Switch</strong> 收到 PC0 的帧后，先<strong>学习</strong> PC0 的 MAC，记录到 MAC 表；接着查 MAC 表看 PC1 在哪个端口 → <strong>直接转发</strong>给 PC3 那条链路上的端口（不广播）。</li><li>切回 <strong>Realtime</strong> 模式继续。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01.8</span><h3>交换机 CLI 基本查看</h3></div>
+        <p>单击 Switch0 → <strong>CLI</strong> 标签。等出现提示符 <code>Switch></code> 后输入以下命令，观察输出。</p>
+        <div class="codeblock">Switch> <span class=<span class="str">"kw"</span>>enable</span>
+Switch# <span class=<span class="str">"kw"</span>>show</span> <span class=<span class="str">"kw"</span>>version</span>
+Switch# <span class=<span class="str">"kw"</span>>show</span> mac-address-table
+Switch# <span class=<span class="str">"kw"</span>>show</span> interfaces status
+Switch# <span class=<span class="str">"kw"</span>>exit</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">VERIFY</span><h3>验证结果对照表</h3></div>
+        <table class="t">
+          <thead><tr><th>测试</th><th>命令</th><th>期望</th></tr></thead>
+          <tbody>
+<tr><td>PC0 → PC1 同网段</td><td>ping 192.168.10.11</td><td>Reply from ... · time<10ms</td></tr><tr><td>PC0 → PC3 跨 HUB+Switch</td><td>ping 192.168.10.20</td><td>Reply from ... · time<10ms</td></tr><tr><td>PC1 → PC3</td><td>ping 192.168.10.20</td><td>Reply from ... · time<10ms</td></tr><tr><td>PC0 → 不存在 IP</td><td>ping 192.168.10.99</td><td>Request timed out</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">ERR · 01</span><h3>常见错误与排错</h3></div>
+        <p class="fragment"><strong>ping 不通（Request timed out）</strong></p>
+<p class="fragment">可能原因：IP 错 / 子网掩码错 / 网线松。处理：重新检查 IP 配置与指示灯。</p>
+<p class="fragment"><strong>ping 不通（Destination unreachable）</strong></p>
+<p class="fragment">可能原因：默认网关未配且跨网段（本实验内无路由器，可忽略）。</p>
+<p class="fragment"><strong>Switch 端口指示灯不亮</strong></p>
+<p class="fragment">可能原因：线缆物理故障 / 端口损坏。处理：换线或换端口。</p>
+<p class="fragment"><strong>Simulation 中 HUB 也显示单播转发</strong></p>
+<p class="fragment">视图问题。切到 Hub 中间观察「广播」效果。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">REPORT</span><h3>实验报告要求</h3></div>
+        <ol class="steps">
+<li class="fragment">画出实验拓扑图（用 Packet Tracer 截图即可）。</li>
+<li class="fragment">列出各 PC 的 IP 配置表（含子网掩码、网关）。</li>
+<li class="fragment">记录所有 <code>ping</code> 命令的输出，并解释每条结果的含义。</li>
+<li class="fragment">对比 HUB 与 Switch 的转发行为（结合 Simulation 模式观察）。</li>
+<li class="fragment">给出 <code>show mac-address-table</code> 的输出，并解释每一行。</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">思考题</span><h3>思考题</h3></div>
+        <ol class="steps">
+<li class="fragment">同一网段内 IP 不同、子网掩码相同，能 ping 通吗？为什么？</li>
+<li class="fragment">为什么 HUB 会引起「冲突域」问题，而 Switch 不会？</li>
+<li class="fragment">在只有 Switch 的网络中，A 给从未通信过的 B 发包，Switch 会怎么处理？</li>
+<li class="fragment">如果把 PC0 的子网掩码错填为 <code>255.255.0.0</code>，其他 PC 不变，会发生什么现象？</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">END · 实验完成</p>
+      <h2>实验完毕</h2>
+      <p class="lead">保存 <code>.pkt</code> 文件并撰写实验报告，下次实验课将进入「子网规划」。</p>
+    </section>
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  let i=0;
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>d.classList.toggle('active',k===i))}
+  function currentSlide(){return slides.find(s=>s.classList.contains('active'))||slides[i]}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    setTimeout(()=>{out.classList.remove('active','leaving')},460);
+    i=next;now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot();
+    // Reveal fragments on the new active slide
+    inn.querySelectorAll('.fragment').forEach((f,idx)=>{
+      setTimeout(()=>f.classList.add('visible'),100+idx*60);
+    });
+  }
+  function next(){if(i<slides.length-1)show(i+1)}
+  function prev(){if(i>0)show(i-1)}
+  function toggleTheme(){const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light')}
+  document.addEventListener('keydown',e=>{
+    switch(e.key){
+      case'ArrowRight':case'PageDown':case' ':next();e.preventDefault();break;
+      case'ArrowLeft':case'PageUp':prev();e.preventDefault();break;
+      case'Home':show(0);e.preventDefault();break;
+      case'End':show(slides.length-1);e.preventDefault();break;
+      case't':case'T':toggleTheme();break;
+      case'f':case'F':if(document.fullscreenElement)document.exitFullscreen();
+        else deck.requestFullscreen&&deck.requestFullscreen();break;
+    }
+  });
+  stage.addEventListener('click',e=>{
+    if(e.target.closest('.sidebar'))return;
+    const x=e.clientX/window.innerWidth;
+    if(x>0.5)next();else prev();
+  });
+  document.getElementById('b-theme')?.addEventListener('click',toggleTheme);
+  document.getElementById('b-print')?.addEventListener('click',()=>window.print());
+  const start=Math.max(0,parseInt(location.hash.replace('#',''),10)-1)||0;
+  show(start);
+})();
+</script>
+</body>
+</html>

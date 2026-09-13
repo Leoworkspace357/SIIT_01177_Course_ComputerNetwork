@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>子网规划与单臂路由 · 实验任务 · Linear Theme</title>
+<style>
+/* =====================================================================
+     LINEAR DARK · lab tutorial theme
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --status-good:#4cb782; --status-warning:#f2c94c;
+    --status-serious:#eb8c4a; --status-critical:#e34948;
+    --code:#1baf7a; --code-soft:rgba(76,183,130,.10);
+    --warn:#f2c94c; --warn-soft:rgba(242,201,76,.10);
+    --ease:cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out:cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-slide:720ms; --dur-frag:520ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{--bg:#08080a;--bg-elev-1:#0d0d10;--bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f;--ink:#f7f8f8;--ink-2:#b4b8c0;
+    --ink-3:#8a8f98;--ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;}
+  .deck[data-theme="light"]{--bg:#fbfbfc;--bg-elev-1:#fff;
+    --bg-elev-2:#f4f4f7;--bg-elev-3:#ebebef;--ink:#0a0a0c;
+    --ink-2:#4a4d57;--ink-3:#6f727a;--ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:5vh 6vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(48px);
+    transition:opacity var(--dur-slide) var(--ease),
+      transform var(--dur-slide) var(--ease);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px);
+    transition:opacity 380ms var(--ease),transform 380ms var(--ease)}
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2);transition:border-color 400ms var(--ease)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6vw,5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h3{font-size:1.05rem;margin:1rem 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(.95rem,1.05vw,1.1rem);line-height:1.55;color:var(--ink-2)}
+  .lead{font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--ink-2);
+    max-width:60ch;margin-top:.3rem;line-height:1.5;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--accent)}
+  code,kbd{font-family:var(--font-mono);font-size:.86em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+  /* lab-specific layout */
+  .content{max-width:1100px;margin:0 auto;width:100%}
+  .step-no{font-family:var(--font-mono);font-size:.78rem;
+    color:var(--accent);background:var(--bg-elev-2);
+    padding:.3rem .8rem;border-radius:6px;
+    border:1px solid var(--accent-ring);font-weight:600;
+    letter-spacing:.04em;display:inline-block}
+  .step-h{display:flex;align-items:center;gap:.8rem;margin-bottom:1rem}
+  .step-h h3{margin:0;font-size:1.2rem;color:var(--ink)}
+  /* code blocks */
+  .codeblock{background:var(--code-bg);border:1px solid var(--hairline);
+    border-radius:10px;padding:1rem 1.2rem;margin:1rem 0;
+    font-family:var(--font-mono);font-size:.88rem;
+    color:var(--ink-2);line-height:1.55;overflow-x:auto;
+    white-space:pre}
+  .codeblock .comment{color:var(--ink-3);font-style:italic}
+  .codeblock .kw{color:var(--accent)}
+  .codeblock .str{color:var(--code)}
+  .codeblock .num{color:var(--warn)}
+  /* topology diagram */
+  .topo{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:10px;padding:1.4rem 2rem;margin:1rem 0;
+    font-family:var(--font-mono);font-size:.92rem;
+    color:var(--ink-2);line-height:1.55;white-space:pre;
+    overflow-x:auto;letter-spacing:.01em}
+  /* tables */
+  table.t{width:100%;border-collapse:collapse;margin:.8rem 0;
+    font-variant-numeric:tabular-nums;
+    border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  table.t th,table.t td{text-align:left;padding:.7rem .9rem;
+    border-bottom:1px solid var(--hairline);font-size:.92rem;color:var(--ink-2);
+    background:var(--bg-elev-2)}
+  table.t th{color:var(--ink-3);font-weight:500;
+    border-bottom:1px solid var(--hairline-strong);
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--bg-elev-1)}
+  table.t tr:last-child td{border-bottom:0}
+  /* lists */
+  ul.clean,ol.steps{list-style:none;padding:0;margin:.8rem 0;max-width:80ch}
+  ul.clean>li{padding:.6rem 0 .6rem 1.4rem;position:relative;
+    border-bottom:1px solid var(--hairline);color:var(--ink-2)}
+  ul.clean>li:last-child{border-bottom:0}
+  ul.clean>li::before{content:"▸";position:absolute;left:0;top:.7rem;
+    color:var(--accent);font-weight:600}
+  ol.steps{counter-reset:labstep}
+  ol.steps>li{counter-increment:labstep;
+    padding:.8rem 0 .8rem 3rem;position:relative;
+    border-bottom:1px solid var(--hairline);color:var(--ink-2)}
+  ol.steps>li:last-child{border-bottom:0}
+  ol.steps>li::before{content:counter(labstep,decimal-leading-zero);
+    position:absolute;left:0;top:.85rem;
+    font-family:var(--font-mono);font-size:.85rem;color:var(--accent);
+    font-weight:600}
+  ol.steps>li strong{color:var(--ink)}
+  /* callout panels */
+  .tip,.warn,.err{display:flex;gap:1rem;padding:.9rem 1.1rem;
+    border-radius:10px;margin:.8rem 0;border:1px solid var(--hairline);
+    background:var(--bg-elev-2);transition:border-color 300ms var(--ease)}
+  .tip{border-left:3px solid var(--code)}
+  .warn{border-left:3px solid var(--warn)}
+  .err{border-left:3px solid var(--status-critical)}
+  .tip .lbl,.warn .lbl,.err .lbl{font-family:var(--font-mono);
+    font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:600;flex:none;width:4rem}
+  .tip .lbl{color:var(--code)}
+  .warn .lbl{color:var(--warn)}
+  .err .lbl{color:var(--status-critical)}
+  .tip p,.warn p,.err p{margin:0;color:var(--ink-2);font-size:.95rem}
+  /* fragments */
+  .fragment{opacity:0;transform:translateY(14px);
+    transition:opacity var(--dur-frag) var(--ease-out),
+      transform var(--dur-frag) var(--ease-out)}
+  .fragment.visible{opacity:1;transform:translateY(0)}
+  /* chrome */
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.65rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:4px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;
+    overflow:hidden;max-height:calc(100vh - 80px)}
+  .sidebar .nav-dot{width:4px;height:4px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;
+    transition:opacity 200ms var(--ease),transform 200ms var(--ease),
+      background 200ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 4px var(--accent-ring);transform:scale(1.6)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);
+    letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
+    letter-spacing:.02em;transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.toolbar button,.progress,.nav-dot,
+    .tip,.warn,.err{transition-duration:0ms!important}}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar{display:none!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">实验 02  <strong>·  子网规划与单臂路由</strong>  ·  Leonard F. Li</div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">22</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">PART 01</span><h3>实验目的</h3></div>
+        <ol class="steps">
+        <li class="fragment">掌握 <strong>IP 子网掩码</strong> 的计算方法。</li>
+        <li class="fragment">学会根据给定需求<strong>划分子网</strong>（借位、子网数、主机数计算）。</li>
+        <li class="fragment">在 PT 6.2 中按子网规划配置多台主机的 IP 与网关。</li>
+        <li class="fragment">验证子网间通过<strong>路由器</strong>的互通。</li>
+        <li class="fragment">理解子网划分对网络性能与管理的影响。</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">PART 02</span><h3>实验环境</h3></div>
+        <table class="t">
+          <thead><tr><th>项目</th><th>规格 / 数量</th></tr></thead>
+          <tbody>
+        <tr><td>PC</td><td>6 台（PC0 ~ PC5）</td></tr>
+        <tr><td>路由器</td><td>1 台（Router 2911）</td></tr>
+        <tr><td>交换机</td><td>2 台（2960-24TT）</td></tr>
+        <tr><td>直连双绞线</td><td>若干</td></tr>
+        <tr><td>控制线</td><td>1 根（首次配置路由器）</td></tr>
+        <tr><td>软件</td><td>Cisco Packet Tracer 6.2</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">BG · 01</span><h3>实验背景</h3></div>
+        <p class="fragment">某公司有 4 个部门：行政（10 人）、研发（30 人）、市场（50 人）、财务（20 人），合计 <strong>110 人</strong>。公司从运营商获得一段公网地址 <strong><code>192.168.100.0/24</code></strong>，现要求：</p>
+<p class="fragment">1. 把 <code>192.168.100.0/24</code> 划分为 <strong>4 个等长子网</strong>（每个子网最多 64 台主机）。
+2. 每个部门使用一个子网，并在 Packet Tracer 中模拟。
+3. 各子网之间通过<strong>路由器</strong>互通。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01.1</span><h3>借位分析</h3></div>
+        <p>需要 4 个子网 → 至少 2 位子网号（<code>2^2 = 4</code>）。</p>
+<p>原始 <code>/24</code> → 借 2 位 → 新掩码 <code>/26</code> = <code>255.255.255.192</code>。</p>
+<p>每个子网主机位 = <code>32 - 26 = 6</code> → 最多 <code>2^6 - 2 = 62</code> 台主机 ✓（满足 ≤ 64 人的需求）。</p>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01.2</span><h3>子网划分表</h3></div>
+        <p class="muted" style="margin-bottom:.8rem">本实验采用「单臂路由（Router-on-a-Stick）」。</p>
+        <table class="t">
+          <thead><tr><th>部门</th><th>子网号</th><th>网络地址</th><th>子网掩码</th><th>可用 IP 范围</th><th>广播地址</th></tr></thead>
+          <tbody>
+<tr><td>行政</td><td>0</td><td>192.168.100.0/26</td><td>255.255.255.192</td><td>192.168.100.1 ~ .62</td><td>192.168.100.63</td></tr><tr><td>研发</td><td>64</td><td>192.168.100.64/26</td><td>255.255.255.192</td><td>192.168.100.65 ~ .126</td><td>192.168.100.127</td></tr><tr><td>市场</td><td>128</td><td>192.168.100.128/26</td><td>255.255.255.192</td><td>192.168.100.129 ~ .190</td><td>192.168.100.191</td></tr><tr><td>财务</td><td>192</td><td>192.168.100.192/26</td><td>255.255.255.192</td><td>192.168.100.193 ~ .254</td><td>192.168.100.255</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="warn">
+          <span class="lbl">注意</span>
+          <p>第一个子网（.0/26）的网络号与原始 /24 相同，主机号全 0 也保留——本实验保留使用；如需严格禁用，可在路由器上关闭 <code>ip subnet-zero</code>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">PART 03</span><h3>实验拓扑（Router-on-a-Stick）</h3></div>
+        <div class="topo">                ┌── SW0 ──┐
+  行政 .0/26   ──┤          │
+  市场 .128/26  ─┤    │     │
+                │   Trunk──┼── R0 (Fa0/0)
+                │          │   ├─ sub-if Fa0/0.1  → 行政 .0/26
+                │          │   ├─ sub-if Fa0/0.2  → 市场 .128/26
+                └── SW1 ──┘
+  研发 .64/26   ──┤
+  财务 .192/26  ─┘</div>
+        <p class="muted" style="margin-top:.6rem;font-size:.92rem">单条 Trunk 链路 + 802.1Q + 子接口承载多个子网。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">BG · 02</span><h3>背景 · 子网划分原理</h3></div>
+        <p class="fragment"><strong>借位</strong>：从主机位借 N 位作子网号；N 位可分 <code>2^N</code> 个子网（去全 0/全 1）。</p>
+<p class="fragment"><strong>主机位</strong>：<code>32 - 原前缀 - 借位数</code>；可用主机 = <code>2^主机位 - 2</code>（去网络地址 + 广播地址）。</p>
+<p class="fragment"><strong>子网掩码</strong>：网络号 + 子网号对应位为 1，主机号对应位为 0。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">BG · 03</span><h3>背景 · Router-on-a-Stick</h3></div>
+        <p class="fragment">通过<strong>单条物理链路 + 802.1Q Trunk + 子接口</strong>承载多个 VLAN / 子网的路由。</p>
+<p class="fragment"><strong>优点</strong>：节省路由器端口。</p>
+<p class="fragment"><strong>缺点</strong>：单链路瓶颈（实验环境下够用）。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 02.1</span><h3>搭建拓扑</h3></div>
+        
+        <ul class='clean'><li>启动 PT 6.2 → 保存为 <code>Lab2-Subnet.pkt</code>。</li><li>拖出：<strong>1 × 2911 路由器、2 × 2960-24TT 交换机、4 × PC</strong>（每子网 1 台代表 PC）。</li><li><strong>连线</strong>：PC0/PC1 → SW0，PC2/PC3 → SW1；SW0(Gi0/1) ↔ SW1(Gi0/1)（直连线）；SW0(Gi0/2) ↔ R0(Fa0/0)（直连线）。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 02.2</span><h3>配置 PC 的 IP 与网关</h3></div>
+        <p class="muted" style="margin-bottom:.8rem">按子网划分表配置 4 台 PC（每子网配一台代表主机）。PC → Desktop → IP Configuration → Static → 填写。</p>
+        <table class="t">
+          <thead><tr><th>PC</th><th>IP</th><th>子网掩码</th><th>网关</th></tr></thead>
+          <tbody>
+<tr><td>PC0（行政）</td><td>192.168.100.1</td><td>255.255.255.192</td><td>192.168.100.62</td></tr><tr><td>PC1（市场）</td><td>192.168.100.129</td><td>255.255.255.192</td><td>192.168.100.190</td></tr><tr><td>PC2（研发）</td><td>192.168.100.65</td><td>255.255.255.192</td><td>192.168.100.126</td></tr><tr><td>PC3（财务）</td><td>192.168.100.193</td><td>255.255.255.192</td><td>192.168.100.254</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 02.3</span><h3>配置路由器（R0）的物理接口与子接口</h3></div>
+        
+        <ul class='clean'><li>单击 R0 → <strong>CLI</strong> 标签，等待提示符出现。</li><li>按以下脚本配置物理接口与 4 个子接口：</li><li>物理接口 Fa0/0 要 no shutdown；4 个子接口用 <code>encapsulation dot1Q <vlan></code> 配置。</li><li>完成后 <code>end; write memory</code> 保存。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 02.4</span><h3>路由器 CLI 完整脚本</h3></div>
+        <p>R0 上执行的完整配置：</p>
+        <div class="codeblock"><span class=<span class="str">"kw"</span>>enable</span>
+<span class=<span class="str">"kw"</span>>configure</span> <span class=<span class="str">"kw"</span>>terminal</span>
+<span class=<span class="str">"kw"</span>>hostname</span> R0
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"kw"</span>>interface</span> FastEthernet0/0
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 行政子接口（VLAN 1 / 子网 192.168.100.0/26）</span>
+<span class=<span class="str">"kw"</span>>interface</span> FastEthernet0/0.1
+ encapsulation dot1Q 1
+ <span class=<span class="str">"kw"</span>>ip</span> address 192.168.100.62 255.255.255.192
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 市场子接口（VLAN 10 / 子网 192.168.100.128/26）</span>
+<span class=<span class="str">"kw"</span>>interface</span> FastEthernet0/0.10
+ encapsulation dot1Q 10
+ <span class=<span class="str">"kw"</span>>ip</span> address 192.168.100.190 255.255.255.192
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 研发子接口（VLAN 20 / 子网 192.168.100.64/26）</span>
+<span class=<span class="str">"kw"</span>>interface</span> FastEthernet0/0.20
+ encapsulation dot1Q 20
+ <span class=<span class="str">"kw"</span>>ip</span> address 192.168.100.126 255.255.255.192
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 财务子接口（VLAN 30 / 子网 192.168.100.192/26）</span>
+<span class=<span class="str">"kw"</span>>interface</span> FastEthernet0/0.30
+ encapsulation dot1Q 30
+ <span class=<span class="str">"kw"</span>>ip</span> address 192.168.100.254 255.255.255.192
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"kw"</span>>end</span>
+<span class=<span class="str">"kw"</span>>write</span> <span class=<span class="str">"kw"</span>>memory</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 02.5</span><h3>配置交换机的 VLAN 与 Trunk</h3></div>
+        
+        <ul class='clean'><li>SW0 → CLI，创建 VLAN 1、VLAN 10、VLAN 20、VLAN 30 并命名。</li><li>将 Gi0/1 配置为 Trunk 模式（接 SW1）。</li><li>将 Gi0/2 配置为 Trunk 模式（接 R0）。</li><li>把 PC0 接入的端口划入 VLAN 1（行政）。</li><li>PC1 接入的端口划入 VLAN 10（市场）；SW1 上的 PC2 → VLAN 20、PC3 → VLAN 30。</li><li>配置完成后 <code>end; write memory</code>。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 02.6</span><h3>SW0 CLI 关键配置</h3></div>
+        
+        <ul class='clean'><li>enable</li><li>configure terminal</li><li>hostname SW0</li><li>vlan 10</li><li> name Market</li><li>vlan 20</li><li> name RD</li><li>vlan 30</li><li> name Finance</li><li>exit</li><li>interface GigabitEthernet0/1</li><li> switchport mode trunk</li><li>interface GigabitEthernet0/2</li><li> switchport mode trunk</li><li>interface FastEthernet0/1</li><li> switchport mode access</li><li> switchport access vlan 1</li><li>interface FastEthernet0/2</li><li> switchport mode access</li><li> switchport access vlan 10</li><li>end</li><li>write memory</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 02.7</span><h3>验证子网配置</h3></div>
+        
+        <ul class='clean'><li>在每台 PC 上 → Desktop → Command Prompt：<code>ipconfig</code>。</li><li>确认 IP、子网掩码、网关正确。</li><li>在 R0 CLI：<code>show ip interface brief</code> — 应看到 5 个 UP 接口（Fa0/0 + 4 个 sub-if）。</li><li><code>show ip route</code> — 应看到 4 条直连路由（行政 / 研发 / 市场 / 财务）。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 02.8</span><h3>测试跨子网连通性</h3></div>
+        
+        <ul class='clean'><li>PC0 ping PC1（行政 → 市场）：应通；TTL ≈ 126。</li><li>PC0 ping PC2（行政 → 研发）：应通。</li><li>PC0 ping PC3（行政 → 财务）：应通。</li><li>PC2 ping PC3（研发 → 财务）：应通。</li><li>注意：跨路由器子接口转发一次，TTL 减 1（TTL 由 128 → 126 → 124）。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">VERIFY</span><h3>验证结果对照</h3></div>
+        <table class="t">
+          <thead><tr><th>测试</th><th>期望 TTL</th><th>期望</th></tr></thead>
+          <tbody>
+<tr><td>PC0 (行政) → PC1 (市场)</td><td>126</td><td>通</td></tr><tr><td>PC0 (行政) → PC2 (研发)</td><td>126</td><td>通</td></tr><tr><td>PC0 (行政) → PC3 (财务)</td><td>126</td><td>通</td></tr><tr><td>PC2 (研发) → PC3 (财务)</td><td>126</td><td>通</td></tr><tr><td>跨多接口 (PC0 → PC2 跨 2 接口)</td><td>125</td><td>通</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">ERR · 01</span><h3>常见错误与排错</h3></div>
+        <p class="fragment"><strong>PC 不能 ping 通网关</strong></p>
+<p class="fragment">子网掩码错 / 网关错 → 重新核对 <code>ipconfig</code>。</p>
+<p class="fragment"><strong>同子网内能 ping，跨子网不通</strong></p>
+<p class="fragment">路由器子接口未 <code>no shutdown</code> → 检查 R0 CLI 中 <code>show ip interface brief</code>。</p>
+<p class="fragment"><strong>跨子网时通时不通</strong></p>
+<p class="fragment">Trunk 配置丢失 → 确认 SW0/SW1 的 Gi0/1、Gig0/2 都是 trunk。</p>
+<p class="fragment"><strong>Simulation 中显示「Encapsulation failure」</strong></p>
+<p class="fragment">子接口的 VLAN ID 与交换机不一致 → 检查 <code>encapsulation dot1Q N</code> 的 N。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">REPORT</span><h3>实验报告要求</h3></div>
+        <ol class="steps">
+<li class="fragment"><strong>子网规划计算表</strong>：列出 4 个子网的子网号、掩码、可用范围、广播地址。</li>
+<li class="fragment"><strong>配置脚本</strong>：粘贴路由器与交换机的完整 CLI 输出（含 <code>show run</code> 摘要）。</li>
+<li class="fragment"><strong>连通性测试表</strong>：列出所有 PC 对的 ping 测试结果（成功 / 失败 + TTL）。</li>
+<li class="fragment"><strong>路由表截图</strong>：<code>show ip route</code> 输出，标注每条直连路由对应的子网。</li>
+<li class="fragment"><strong>问题与思考</strong>：为什么划分子网后广播域缩小了？如果财务部门只需 20 台 IP，应如何调整掩码？</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">思考题</span><h3>思考题</h3></div>
+        <ol class="steps">
+<li class="fragment">借 N 位能分出多少子网？可用多少主机？为什么？</li>
+<li class="fragment">单臂路由的优缺点各是什么？生产环境中常被什么方案替代？</li>
+<li class="fragment">子网号「全 0」「全 1」在不同设备上行为是否一致？</li>
+<li class="fragment">在路由器上 <code>no ip subnet-zero</code> 命令有什么作用？启用会怎样？</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">END · 实验完成</p>
+      <h2>实验完毕</h2>
+      <p class="lead">保存 <code>.pkt</code> 文件并撰写实验报告，下次实验课进入「静态路由配置」。</p>
+    </section>
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  let i=0;
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>d.classList.toggle('active',k===i))}
+  function currentSlide(){return slides.find(s=>s.classList.contains('active'))||slides[i]}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    setTimeout(()=>{out.classList.remove('active','leaving')},460);
+    i=next;now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot();
+    // Reveal fragments on the new active slide
+    inn.querySelectorAll('.fragment').forEach((f,idx)=>{
+      setTimeout(()=>f.classList.add('visible'),100+idx*60);
+    });
+  }
+  function next(){if(i<slides.length-1)show(i+1)}
+  function prev(){if(i>0)show(i-1)}
+  function toggleTheme(){const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light')}
+  document.addEventListener('keydown',e=>{
+    switch(e.key){
+      case'ArrowRight':case'PageDown':case' ':next();e.preventDefault();break;
+      case'ArrowLeft':case'PageUp':prev();e.preventDefault();break;
+      case'Home':show(0);e.preventDefault();break;
+      case'End':show(slides.length-1);e.preventDefault();break;
+      case't':case'T':toggleTheme();break;
+      case'f':case'F':if(document.fullscreenElement)document.exitFullscreen();
+        else deck.requestFullscreen&&deck.requestFullscreen();break;
+    }
+  });
+  stage.addEventListener('click',e=>{
+    if(e.target.closest('.sidebar'))return;
+    const x=e.clientX/window.innerWidth;
+    if(x>0.5)next();else prev();
+  });
+  document.getElementById('b-theme')?.addEventListener('click',toggleTheme);
+  document.getElementById('b-print')?.addEventListener('click',()=>window.print());
+  const start=Math.max(0,parseInt(location.hash.replace('#',''),10)-1)||0;
+  show(start);
+})();
+</script>
+</body>
+</html>

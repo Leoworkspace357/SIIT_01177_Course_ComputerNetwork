@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 7 章  网线制作</title>
+<style>
+/* =====================================================================
+     LINEAR DARK · design tokens
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --status-good:#4cb782; --status-warning:#f2c94c;
+    --status-serious:#eb8c4a; --status-critical:#e34948;
+    --ease:cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-out:cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-soft:cubic-bezier(0.45, 0, 0.15, 1);
+    --dur-slide:900ms; --dur-frag:720ms;
+    --stagger:90ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{
+    --bg:#08080a; --bg-elev-1:#0d0d10; --bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f; --ink:#f7f8f8; --ink-2:#b4b8c0;
+    --ink-3:#8a8f98; --ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;
+  }
+  .deck[data-theme="light"]{
+    --bg:#fbfbfc; --bg-elev-1:#fff; --bg-elev-2:#f4f4f7;
+    --bg-elev-3:#ebebef; --ink:#0a0a0c; --ink-2:#4a4d57;
+    --ink-3:#6f727a; --ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:6vh 7vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(36px) scale(.985);
+    transition:opacity var(--dur-slide) var(--ease-soft),
+      transform var(--dur-slide) var(--ease-soft);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px) scale(.985);
+    transition:opacity 540ms var(--ease-soft),transform 540ms var(--ease-soft)}
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2);transition:border-color 400ms var(--ease)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6vw,5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h3{font-size:1.05rem;margin:1rem 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(.95rem,1.05vw,1.1rem);line-height:1.55;color:var(--ink-2)}
+  .lead{font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--ink-2);
+    max-width:60ch;margin-top:.3rem;line-height:1.5;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--accent)}
+  code,kbd{font-family:var(--font-mono);font-size:.86em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+  ul.clean{list-style:none;padding:0;margin:1.4rem 0 0;max-width:64ch}
+  ul.clean>li{padding:.9rem 0 .9rem 1.6rem;position:relative;
+    border-bottom:1px solid var(--hairline);
+    transition:border-color 300ms var(--ease)}
+  ul.clean>li:last-child{border-bottom:0}
+  ul.clean>li::before{content:"";position:absolute;left:0;top:1.4rem;
+    width:6px;height:6px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--accent-ring)}
+  ol.steps{counter-reset:step;list-style:none;padding:0;
+    margin:1.6rem 0 0;max-width:64ch}
+  ol.steps>li{counter-increment:step;padding:1.4rem 0 1.4rem 4rem;
+    position:relative;border-top:1px solid var(--hairline)}
+  ol.steps>li:last-child{border-bottom:1px solid var(--hairline)}
+  ol.steps>li::before{content:counter(step,decimal-leading-zero);
+    position:absolute;left:0;top:1.45rem;font-family:var(--font-mono);
+    font-size:.82rem;color:var(--accent);font-weight:500;letter-spacing:.04em}
+  .grid-2{display:grid;grid-template-columns:1.15fr 1fr;gap:2rem;
+    align-items:start;margin-top:1.4rem}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.4rem}
+  .card{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.4rem 1.5rem;background:var(--bg-elev-2);
+    transition:border-color 400ms var(--ease),transform 400ms var(--ease),
+      background 400ms var(--ease)}
+  .card:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .card.compact{padding:1rem 1.2rem}
+  .card h3{margin-top:.3rem}
+  .card .tag{display:inline-flex;align-items:center;gap:.35rem;
+    font-family:var(--font-mono);font-size:.68rem;letter-spacing:.04em;
+    color:var(--accent);margin-bottom:.6rem;font-weight:500}
+  .card .tag::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--accent)}
+  table.t{width:100%;border-collapse:collapse;margin-top:1.4rem;
+    font-variant-numeric:tabular-nums;
+    border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  table.t th,table.t td{text-align:left;padding:.85rem 1rem;
+    border-bottom:1px solid var(--hairline);font-size:.95rem;color:var(--ink-2);
+    background:var(--bg-elev-2)}
+  table.t th{color:var(--ink-3);font-weight:500;
+    border-bottom:1px solid var(--hairline-strong);
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--bg-elev-1)}
+  table.t tr:last-child td{border-bottom:0}
+  table.t tbody tr{transition:background 300ms var(--ease)}
+  table.t tbody tr:hover td{background:var(--bg-elev-3)}
+  blockquote{margin:1.4rem 0;padding:.4rem 0 .4rem 1.2rem;
+    border-left:2px solid var(--accent);color:var(--ink-2);font-style:normal;
+    font-size:clamp(1.05rem,1.25vw,1.22rem);line-height:1.55}
+  .callout{display:flex;gap:1.2rem;padding:1.1rem 1.3rem;border-radius:10px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    margin-top:1rem;transition:border-color 300ms var(--ease)}
+  .callout:hover{border-color:var(--accent-ring)}
+  .callout .ico{flex:none;font-family:var(--font-mono);font-weight:500;
+    font-size:.8rem;color:var(--accent);padding-top:.15rem}
+  .callout p{margin:0;color:var(--ink-2)}
+  .callout p+p{margin-top:.3rem}
+  /* ============ Wire color visual ============ */
+  .wire-bar{display:grid;grid-template-columns:repeat(8,1fr);gap:.35rem;
+    margin-top:1.4rem;max-width:780px}
+  .wire-pin{border-radius:6px;padding:.8rem .4rem;text-align:center;
+    font-family:var(--font-mono);font-size:.7rem;letter-spacing:.04em;
+    color:#fff;border:1px solid var(--hairline);
+    transition:transform 300ms var(--ease),box-shadow 300ms var(--ease)}
+  .wire-pin:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+  .wire-pin .pin-num{font-size:.6rem;opacity:.7;margin-bottom:.3rem;
+    letter-spacing:.05em}
+  .wire-pin .wire-name{font-weight:600;font-size:.7rem;line-height:1.2}
+  .wire-pin.ow{background:repeating-linear-gradient(45deg,#ff8c1a 0,#ff8c1a 4px,#fff 4px,#fff 8px);color:#ff8c1a}
+  .wire-pin.o{background:#ff8c1a}
+  .wire-pin.gw{background:repeating-linear-gradient(45deg,#3cb371 0,#3cb371 4px,#fff 4px,#fff 8px);color:#3cb371}
+  .wire-pin.g{background:#3cb371}
+  .wire-pin.bw{background:repeating-linear-gradient(45deg,#4a90e2 0,#4a90e2 4px,#fff 4px,#fff 8px);color:#4a90e2}
+  .wire-pin.b{background:#4a90e2}
+  .wire-pin.bw2{background:repeating-linear-gradient(45deg,#87ceeb 0,#87ceeb 4px,#fff 4px,#fff 8px);color:#87ceeb}
+  .wire-pin.b2{background:#87ceeb}
+  .wire-pin.brw{background:repeating-linear-gradient(45deg,#a0522d 0,#a0522d 4px,#fff 4px,#fff 8px);color:#a0522d}
+  .wire-pin.br{background:#a0522d}
+  /* ============ RJ-45 pinout diagram ============ */
+  .rj45{display:grid;grid-template-columns:repeat(8,1fr);gap:.4rem;
+    margin-top:1.4rem;max-width:780px}
+  .rj45-pin{display:flex;flex-direction:column;align-items:center;
+    padding:.7rem .3rem;border:1px solid var(--hairline);
+    border-radius:8px;background:var(--bg-elev-2);
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .rj45-pin:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .rj45-pin .num{font-family:var(--font-mono);font-size:.7rem;
+    color:var(--ink-3);margin-bottom:.3rem}
+  .rj45-pin .col{width:14px;height:50px;border-radius:4px;
+    background:var(--status-good);box-shadow:inset 0 0 6px rgba(0,0,0,.3);
+    margin-bottom:.3rem}
+  .rj45-pin .label{font-family:var(--font-mono);font-size:.65rem;
+    color:var(--ink);font-weight:600}
+  /* ============ Step diagram ============ */
+  .step-flow{display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;
+    margin-top:1.6rem}
+  .step-node{border:1px solid var(--hairline);border-radius:10px;
+    padding:1rem;background:var(--bg-elev-2);text-align:center;
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .step-node:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .step-node .num{font-family:var(--font-mono);font-size:.78rem;
+    color:var(--accent);font-weight:600;margin-bottom:.4rem}
+  .step-node .name{color:var(--ink);font-weight:600;font-size:.9rem}
+  .step-node .desc{color:var(--ink-3);font-size:.75rem;margin-top:.4rem;
+    letter-spacing:.02em}
+  /* ============ Case box ============ */
+  .case-box{border:1px solid var(--accent-ring);border-radius:10px;
+    padding:1.2rem 1.4rem;background:var(--bg-elev-2);
+    margin-top:1.4rem;transition:border-color 300ms var(--ease)}
+  .case-box .case-title{font-family:var(--font-mono);font-size:.7rem;
+    color:var(--accent);margin-bottom:.6rem;letter-spacing:.04em}
+  .case-box p{margin:.4rem 0;color:var(--ink-2);font-size:.98rem}
+  /* ============ Tester pattern ============ */
+  .tester{display:flex;gap:1rem;align-items:center;margin-top:1.4rem;
+    font-family:var(--font-mono)}
+  .tester .end{display:flex;flex-direction:column;gap:.4rem;padding:1rem;
+    border:1px solid var(--hairline);border-radius:10px;
+    background:var(--bg-elev-2)}
+  .tester .end .lbl{font-size:.7rem;color:var(--ink-3);text-align:center;
+    margin-bottom:.3rem;letter-spacing:.04em}
+  .tester .leds{display:flex;gap:.3rem}
+  .tester .led{width:18px;height:18px;border-radius:50%;
+    background:var(--bg-elev-3);border:1px solid var(--hairline);
+    transition:background 300ms var(--ease),box-shadow 300ms var(--ease)}
+  .tester .led.on{background:var(--status-good);
+    box-shadow:0 0 8px var(--status-good)}
+  .tester .led.bad{background:var(--status-critical);
+    box-shadow:0 0 8px var(--status-critical)}
+  .tester .cable{flex:1;height:3px;background:linear-gradient(90deg,
+    var(--accent),var(--status-serious));border-radius:2px;
+    align-self:center;position:relative}
+  .tester .cable::before{content:"";position:absolute;top:-3px;bottom:-3px;
+    left:0;right:0;background:repeating-linear-gradient(90deg,
+      transparent 0,transparent 14px,rgba(255,255,255,.1) 14px,
+      rgba(255,255,255,.1) 28px)}
+  .fragment{opacity:0;transform:translateY(22px) scale(.97);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .fragment.visible{opacity:1;transform:translateY(0) scale(1);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.72rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:3px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;overflow-y:auto}
+  .sidebar .nav-dot{width:3px;height:3px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;flex:none;
+    transition:opacity 300ms var(--ease),transform 300ms var(--ease),
+      background 300ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 6px var(--accent-ring);transform:scale(1.4)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
+    letter-spacing:.02em;transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  .deck.overview .stage{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+    padding:80px 28px 80px 72px;overflow:auto;height:100vh;inset:0}
+  .deck.overview .slide{position:relative;inset:auto;aspect-ratio:16/9;
+    padding:1rem;border:1px solid var(--hairline);border-radius:10px;
+    background:var(--bg-elev-1);cursor:pointer;overflow:hidden;
+    transform:none!important;opacity:1!important}
+  .deck.overview .slide.active{border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent),0 0 16px var(--accent-glow)}
+  .deck.overview .slide>*{transform:scale(.18);transform-origin:top left}
+  .help{position:fixed;inset:0;background:rgba(8,8,10,.65);
+    backdrop-filter:blur(8px);display:none;align-items:center;
+    justify-content:center;z-index:40}
+  .help.open{display:flex;animation:helpFade 280ms var(--ease)}
+  @keyframes helpFade{from{opacity:0}to{opacity:1}}
+  .help .panel{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:12px;padding:1.8rem 2.2rem;max-width:520px;min-width:380px;
+    box-shadow:0 24px 80px rgba(0,0,0,.5);animation:helpIn 380ms var(--ease)}
+  @keyframes helpIn{from{opacity:0;transform:translateY(20px) scale(.97)}
+    to{opacity:1;transform:translateY(0) scale(1)}}
+  .help h3{margin-top:0}
+  .help .row{display:flex;justify-content:space-between;
+    padding:.55rem 0;border-bottom:1px solid var(--hairline)}
+  .help .row:last-child{border-bottom:0}
+  .help .row span:last-child{font-family:var(--font-mono);font-size:.82em;color:var(--ink-3)}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.chip,.card,.toolbar button,
+    .help,.help .panel,.progress,.nav-dot{transition-duration:0ms!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">第 7 章  网线制作  <strong>|  Leonard F. Li</strong></div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">34</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide title active">
+      <p class="eyebrow">Chapter 07  |  Cable Making</p>
+      <h1 class="title-h">网线<br><span class="accent">制作</span></h1>
+      <p class="lead">从一根双绞线到一根<strong>能用的网线</strong>——亲手做一根 RJ-45。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        Instructor · Leonard F. Li　　·　　Period · 07　　·　　Spring 2026
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Objectives</p>
+      <h2>通过本次课,你将能够:</h2>
+      <ol class="steps">
+        <li class="fragment">区分 <strong>STP / UTP</strong> 双绞线,理解<em>为什么绞合</em></li>
+        <li class="fragment">熟记 <strong>568A / 568B</strong> 两种线序标准</li>
+        <li class="fragment">区分 <strong>直通线 / 交叉线</strong> 的使用场合</li>
+        <li class="fragment">说出网线制作的<strong>六步流程</strong>与每一步要点</li>
+        <li class="fragment">用 <strong>测线仪</strong> 验证一根网线是否合格</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Agenda</p>
+      <h2>本章结构</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>PART 01</strong>　认识双绞线 (UTP/STP · 绞合原理 · 5 类)</li>
+        <li class="fragment"><strong>PART 02</strong>　两种线序标准 (568A · 568B · 直通/交叉)</li>
+        <li class="fragment"><strong>PART 03</strong>　工具与水晶头 (压线钳 · RJ-45 · 测线仪)</li>
+        <li class="fragment"><strong>PART 04</strong>　制作流程 (六步走 + 案例)</li>
+      </ul>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 01</p>
+      <h2>认识双绞线</h2>
+      <p class="lead">局域网中最常见的传输介质——<em>「8 根铜线,4 对绞合」</em>。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Twisted Pair</p>
+      <h2>双绞线的两种形态</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">STP</span>
+          <h3>屏蔽双绞线</h3>
+          <p class="muted">带屏蔽层,能有效防止<strong>外部电磁干扰</strong>;传输质量较高,但价格高、安装复杂。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">UTP</span>
+          <h3>非屏蔽双绞线</h3>
+          <p class="muted">无屏蔽层,<strong>成本低</strong>、易弯曲、易安装;普通办公与家庭环境的主力。</p>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        教学楼里看到的<strong>几乎都是 UTP</strong>;只有强电磁干扰环境才考虑 STP。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">4 Pairs</p>
+      <h2>UTP 的内部结构 · 8 芯 4 对</h2>
+      <p class="muted">一根 UTP 内有 <strong>4 对</strong>双绞线,共 8 芯:</p>
+      <div class="grid-3" style="margin-top:1.4rem">
+        <div class="card fragment">
+          <span class="tag">橙对</span>
+          <h3>Orange Pair</h3>
+          <p class="muted">橙白 + 橙　·　承担 100M / 1G 传输的主要数据</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">绿对</span>
+          <h3>Green Pair</h3>
+          <p class="muted">绿白 + 绿　·　与橙对协同收发(百兆时收)</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">蓝对 + 棕对</span>
+          <h3>Blue + Brown</h3>
+          <p class="muted">蓝白蓝 + 棕白棕　·　千兆时全部 4 对参与收发</p>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.9rem">
+        记忆:<strong>橙、绿、蓝、棕</strong>——这是 568A / 568B 中必须保持的<em>颜色顺序</em>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Why Twist</p>
+      <h2>为什么要把两根导线绞合在一起?</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>抵消辐射</strong></p>
+          <p class="muted" style="margin-top:.3rem">两根导线中的电流大小相等、方向相反,每根的辐射电波被另一根<strong>抵消</strong>。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>减少串扰</strong></p>
+          <p class="muted" style="margin-top:.3rem">绞合把线对<em>切割</em>成若干小回路,减少信号传输中的串扰。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>结论</strong></p>
+          <p class="muted" style="margin-top:.3rem">绞结越紧密,绞距越短,<strong>抗干扰能力越强</strong>。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">04</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>工程含义</strong></p>
+          <p class="muted" style="margin-top:.3rem">解绞的长度<strong>不能太长</strong>——剥线后要把 8 芯线尽快恢复成平整的 4 对。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Categories</p>
+      <h2>UTP 类别速查</h2>
+      <table class="t">
+        <thead><tr><th>类别</th><th>频率</th><th>最高速率</th><th>典型场景</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>Cat 3</td><td>16 MHz</td><td>10 Mbps</td><td>电话、令牌环(已淘汰)</td></tr>
+          <tr class="fragment"><td>Cat 5</td><td>100 MHz</td><td>100 Mbps</td><td>百兆以太网</td></tr>
+          <tr class="fragment"><td><strong>Cat 5e</strong></td><td>200 MHz</td><td>1 Gbps</td><td><strong>主流 — 办公 / 家用首选</strong></td></tr>
+          <tr class="fragment"><td>Cat 6</td><td>250 MHz</td><td>1–10 Gbps</td><td>机房 / 数据中心短距</td></tr>
+          <tr class="fragment"><td>Cat 6a / Cat 7</td><td>500–600 MHz</td><td>10 Gbps</td><td>万兆骨干</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.9rem">
+        课堂上用的是 <strong>Cat 5e</strong>——成本低、足够百米内跑 1 Gbps。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Pros & Cons</p>
+      <h2>UTP 的优缺点</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">优点</span>
+          <h3>便宜、灵活、易装</h3>
+          <p class="muted">尺寸小、重量轻、容易弯曲;价格便宜;RJ-45 连接器<strong>牢固可靠</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">缺点</span>
+          <h3>抗干扰弱、距离短</h3>
+          <p class="muted">抗电磁干扰能力较弱;最大传输距离较短(典型 <strong>100m</strong>)。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 02</p>
+      <h2>两种线序标准</h2>
+      <p class="lead">568A 与 568B——网线制作的<strong>「标准答案」</strong>。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">568A</p>
+      <h2>T568A 线序 · 从左到右 1-8</h2>
+      <div class="wire-bar">
+        <div class="wire-pin gw fragment"><div class="pin-num">Pin 1</div><div class="wire-name">绿白</div></div>
+        <div class="wire-pin g fragment"><div class="pin-num">Pin 2</div><div class="wire-name">绿</div></div>
+        <div class="wire-pin ow fragment"><div class="pin-num">Pin 3</div><div class="wire-name">橙白</div></div>
+        <div class="wire-pin bw fragment"><div class="pin-num">Pin 4</div><div class="wire-name">蓝</div></div>
+        <div class="wire-pin b fragment"><div class="pin-num">Pin 5</div><div class="wire-name">蓝白</div></div>
+        <div class="wire-pin o fragment"><div class="pin-num">Pin 6</div><div class="wire-name">橙</div></div>
+        <div class="wire-pin brw fragment"><div class="pin-num">Pin 7</div><div class="wire-name">棕白</div></div>
+        <div class="wire-pin br fragment"><div class="pin-num">Pin 8</div><div class="wire-name">棕</div></div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        关键:<strong>1-2 是绿对</strong>,<strong>3-6 是橙对</strong>,4-5 蓝对,7-8 棕对。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">568B</p>
+      <h2>T568B 线序 · 从左到右 1-8</h2>
+      <div class="wire-bar">
+        <div class="wire-pin ow fragment"><div class="pin-num">Pin 1</div><div class="wire-name">橙白</div></div>
+        <div class="wire-pin o fragment"><div class="pin-num">Pin 2</div><div class="wire-name">橙</div></div>
+        <div class="wire-pin gw fragment"><div class="pin-num">Pin 3</div><div class="wire-name">绿白</div></div>
+        <div class="wire-pin bw fragment"><div class="pin-num">Pin 4</div><div class="wire-name">蓝</div></div>
+        <div class="wire-pin b fragment"><div class="pin-num">Pin 5</div><div class="wire-name">蓝白</div></div>
+        <div class="wire-pin g fragment"><div class="pin-num">Pin 6</div><div class="wire-name">绿</div></div>
+        <div class="wire-pin brw fragment"><div class="pin-num">Pin 7</div><div class="wire-name">棕白</div></div>
+        <div class="wire-pin br fragment"><div class="pin-num">Pin 8</div><div class="wire-name">棕</div></div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        工程上<strong>默认两端都用 T568B</strong>;T568B 中 <strong>1-2 橙对、3-6 绿对</strong>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">A vs B</p>
+      <h2>568A 与 568B · 关键差别</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">相同</span>
+          <h3>4-5 / 7-8</h3>
+          <p class="muted">蓝对和棕对在两种标准里<strong>顺序一致</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">差别</span>
+          <h3>1-2 ↔ 3-6 互换</h3>
+          <p class="muted">568A 用绿对占 1-2、橙对占 3-6;568B 反过来——<strong>橙对 1-2、绿对 3-6</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">应用</span>
+          <h3>国内主流</h3>
+          <p class="muted">国内<strong>绝大多数工程用 T568B</strong>;568A 较少用,美国政府项目常见。</p>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
+        <strong>记忆口诀</strong>　568B:1 橙 2 橙白,3 绿白 6 绿,4 蓝 5 蓝白,7 棕白 8 棕。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">RJ-45</p>
+      <h2>RJ-45 水晶头 · 8 芯连接器</h2>
+      <div class="rj45">
+        <div class="rj45-pin fragment"><div class="num">1</div><div class="col"></div><div class="label">TX+</div></div>
+        <div class="rj45-pin fragment"><div class="num">2</div><div class="col"></div><div class="label">TX−</div></div>
+        <div class="rj45-pin fragment"><div class="num">3</div><div class="col"></div><div class="label">RX+</div></div>
+        <div class="rj45-pin fragment"><div class="num">4</div><div class="col"></div><div class="label">—</div></div>
+        <div class="rj45-pin fragment"><div class="num">5</div><div class="col"></div><div class="label">—</div></div>
+        <div class="rj45-pin fragment"><div class="num">6</div><div class="col"></div><div class="label">RX−</div></div>
+        <div class="rj45-pin fragment"><div class="num">7</div><div class="col"></div><div class="label">—</div></div>
+        <div class="rj45-pin fragment"><div class="num">8</div><div class="col"></div><div class="label">—</div></div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        <strong>关键脚位</strong>:1-2 是<strong>发送对</strong>(TX),3-6 是<strong>接收对</strong>(RX)——这是直通/交叉线区分的依据。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Straight</p>
+      <h2>直通线 · Straight-Through</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">定义</span>
+          <h3>两端线序相同</h3>
+          <p class="muted">一条网线两端线序排列<strong>完全相同</strong>(都 568B)。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">信号</span>
+          <h3>1↔1, 2↔2, 3↔3, 6↔6</h3>
+          <p class="muted">发送对接到发送对,接收对接到接收对——<em>「端到端直通」</em>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">场景</span>
+          <h3>不同设备互连</h3>
+          <p class="muted">PC ↔ 交换机、PC ↔ 路由器、交换机 ↔ 路由器。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Crossover</p>
+      <h2>交叉线 · Crossover</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">定义</span>
+          <h3>两端线序不同</h3>
+          <p class="muted">一端 568A,另一端 568B——1-2 与 3-6 互换。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">信号</span>
+          <h3>1↔3, 2↔6</h3>
+          <p class="muted">发送对接到对方<strong>接收对</strong>——同种设备必须这样。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">场景</span>
+          <h3>相同设备互连</h3>
+          <p class="muted">PC ↔ PC、交换机 ↔ 交换机、路由器 ↔ 路由器。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">When to Use</p>
+      <h2>使用场合 · 直通 vs 交叉</h2>
+      <table class="t">
+        <thead><tr><th>设备 A</th><th>设备 B</th><th>线型</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>PC</td><td>PC</td><td>交叉线</td><td>同种设备,发送/接收需要交叉</td></tr>
+          <tr class="fragment"><td>PC</td><td>交换机</td><td>直通线</td><td>异种设备,端口已自适应</td></tr>
+          <tr class="fragment"><td>交换机</td><td>交换机</td><td>交叉线</td><td>同种设备(早期需要)</td></tr>
+          <tr class="fragment"><td>交换机</td><td>路由器</td><td>直通线</td><td>异种设备</td></tr>
+          <tr class="fragment"><td>路由器</td><td>路由器</td><td>交叉线</td><td>同种设备</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        现代设备大多支持 <strong>Auto-MDI/MDIX</strong>,能自动识别线序——直通/交叉区分在工程上正在淡化,但<strong>作为理论知识仍要掌握</strong>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Why Learn</p>
+      <h2>Auto-MDIX 时代 · 还要学交叉线吗?</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>理论上</strong>　现代设备支持 Auto-MDI/MDIX,直通线接同种设备也能通</li>
+        <li class="fragment"><strong>但</strong>　老旧设备没有此功能——你做的网线要<em>兼容各种场合</em></li>
+        <li class="fragment"><strong>考试</strong>　网络工程师认证、企业面试,<strong>一定会考</strong> 568A/B 与交叉线</li>
+        <li class="fragment"><strong>排错</strong>　当 Auto-MDIX 协商失败时,手动<em>换一根交叉线</em>即可恢复</li>
+        <li class="fragment">结论:<strong>通原理、知应用、能排错</strong>——这才是工程师的素养</li>
+      </ul>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 03</p>
+      <h2>工具与水晶头</h2>
+      <p class="lead">工欲善其事,必先利其器。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Tools</p>
+      <h2>网线制作工具 · 四件套</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">01</span>
+          <h3>压线钳</h3>
+          <p class="muted">集<strong>剪线、剥线、压线</strong>三大功能于一体——网线制作的核心工具。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">02</span>
+          <h3>RJ-45 水晶头</h3>
+          <p class="muted">网线末端的 8 芯连接器;与 RJ-45 插座配合——<em>一次性</em>使用。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">03</span>
+          <h3>双绞线 (UTP)</h3>
+          <p class="muted">按类别(Cat 5 / Cat 5e / Cat 6)选用合适规格的网线。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">04</span>
+          <h3>网线测试仪</h3>
+          <p class="muted">检测每根芯线<strong>是否连通</strong>、是否短路或断路——制作完成的<em>质检员</em>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Crimper</p>
+      <h2>压线钳 · 三大功能区</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">Cut</span>
+          <h3>剪线处</h3>
+          <p class="muted">刀口用于剪断网线,也能<strong>剪齐 8 芯线</strong>的末端。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Strip</span>
+          <h3>剥线处</h3>
+          <p class="muted">刀口用于剥开网线外护套,露出内部 4 对双绞线。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Crimp</span>
+          <h3>压线处</h3>
+          <p class="muted">8P 槽位把水晶头的 8 根铜片<strong>压入线芯</strong>,完成电气连接。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">RJ-45 Detail</p>
+      <h2>水晶头使用要点</h2>
+      <ul class="clean">
+        <li class="fragment">8 芯连接器,每芯对应一根铜片——<strong>压入线芯后刺破绝缘层导电</strong></li>
+        <li class="fragment">插入时<strong>卡榫朝下</strong>,铜片面朝向插座</li>
+        <li class="fragment">水晶头<strong>只能压一次</strong>——压坏就要<em>剪掉重做</em></li>
+        <li class="fragment">工程上常备<strong>两倍用量</strong>的水晶头(新手损耗较大)</li>
+        <li class="fragment">不同类别有不同型号——Cat 6 用 <strong>带骨架</strong> 的水晶头,普通 Cat 5e 用普通款即可</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Tester</p>
+      <h2>测线仪 · 8 灯验证法</h2>
+      <p class="muted">两端插入测线仪后,观察 8 个 LED 灯的闪烁模式:</p>
+      <div class="tester fragment">
+        <div class="end">
+          <div class="lbl">MASTER</div>
+          <div class="leds">
+            <div class="led on"></div><div class="led on"></div><div class="led on"></div>
+            <div class="led on"></div><div class="led on"></div><div class="led on"></div>
+            <div class="led on"></div><div class="led on"></div>
+          </div>
+        </div>
+        <div class="cable"></div>
+        <div class="end">
+          <div class="lbl">REMOTE</div>
+          <div class="leds">
+            <div class="led on"></div><div class="led on"></div><div class="led on"></div>
+            <div class="led on"></div><div class="led on"></div><div class="led on"></div>
+            <div class="led on"></div><div class="led on"></div>
+          </div>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        ✅ 正常 · 两端 1–8 <strong>依次亮起</strong>(部分型号同步闪)——8 芯全部连通。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Tester · Errors</p>
+      <h2>测线仪 · 3 种异常模式</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">断路</span>
+          <h3>某灯不亮</h3>
+          <p class="muted">对应芯线<strong>断路</strong>——剪掉水晶头重做。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">短路</span>
+          <h3>多芯同时亮</h3>
+          <p class="muted">芯线之间<strong>短路</strong>(解绞太长导致搭接)。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">错序</span>
+          <h3>亮灯顺序乱</h3>
+          <p class="muted"><strong>线序错误</strong>——剪掉重排。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 04</p>
+      <h2>制作流程 · 六步走</h2>
+      <p class="lead">剪线 → 剥线 → 排线 → 插线 → 压线 → 测线。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">6 Steps</p>
+      <h2>六步流程总览</h2>
+      <div class="step-flow">
+        <div class="step-node fragment">
+          <div class="num">Step 01</div>
+          <div class="name">剪线</div>
+          <div class="desc">Cut</div>
+        </div>
+        <div class="step-node fragment">
+          <div class="num">Step 02</div>
+          <div class="name">剥线</div>
+          <div class="desc">Strip</div>
+        </div>
+        <div class="step-node fragment">
+          <div class="num">Step 03</div>
+          <div class="name">排线</div>
+          <div class="desc">Arrange</div>
+        </div>
+        <div class="step-node fragment">
+          <div class="num">Step 04</div>
+          <div class="name">插线</div>
+          <div class="desc">Insert</div>
+        </div>
+        <div class="step-node fragment">
+          <div class="num">Step 05</div>
+          <div class="name">压线</div>
+          <div class="desc">Crimp</div>
+        </div>
+        <div class="step-node fragment">
+          <div class="num">Step 06</div>
+          <div class="name">测线</div>
+          <div class="desc">Test</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Step 1+2</p>
+      <h2>① 剪线 → ② 剥线</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">Step 01 · 剪线</span>
+          <h3>预留长度</h3>
+          <p class="muted">按需要预留 1–2m 余量(两端都要),用压线钳的剪线口<strong>整齐剪断</strong>。<em>断面要齐</em>,不要急弯。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Step 02 · 剥线</span>
+          <h3>约 1.5 cm</h3>
+          <p class="muted">用剥线口<strong>轻转一圈</strong>,剥去外护套,不要切到芯线——保留约 1.5 cm 的解绞空间。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Step 3+4</p>
+      <h2>③ 排线 → ④ 插线</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">Step 03 · 排线</span>
+          <h3>扯直 · 压平 · 切齐</h3>
+          <p class="muted">按 T568B 从左到右:橙白、橙、绿白、蓝、蓝白、绿、棕白、棕。<strong>扯直并压扁</strong>,顶部裁剪约 1.2–1.5 cm。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Step 04 · 插线</span>
+          <h3>铜片朝上 · 插到底</h3>
+          <p class="muted">水晶头<strong>铜片面朝上</strong>,<em>卡榫朝下</em>,从左到右插入 1–8 芯。<strong>插到底</strong>,外护套塞入约 5mm。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Step 5+6</p>
+      <h2>⑤ 压线 → ⑥ 测线</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">Step 05 · 压线</span>
+          <h3>「咔」一声</h3>
+          <p class="muted">放入压线钳 8P 槽,<strong>用力均匀地压到底</strong>,听到「咔」一声即松手。<em>不可复用</em>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Step 06 · 测线</span>
+          <h3>1→8 依次亮</h3>
+          <p class="muted">两端插入测线仪,打开电源,<strong>8 个灯依次亮起</strong>说明芯线全通。<em>异常需剪掉重做</em>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 01</p>
+      <h2>案例 1 · 灯亮顺序乱(线序错误)</h2>
+      <div class="case-box">
+        <div class="case-title">故障现象</div>
+        <p>刚做好的网线插入测线仪,主端 1-2-3-4-5-6-7-8 依次亮,但<strong>远端亮灯顺序是 1-3-2-6-4-5-7-8</strong>。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">诊断</div>
+        <p>两端 LED 编号对应位置<strong>对调</strong>——可能是<em>两端都用了 T568B</em>但其中一端从水晶头背面看。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">排查步骤</div>
+        <p>① 看水晶头的<strong>铜片面朝向</strong>——确定 1-8 顺序</p>
+        <p>② 若两端都是 T568B 但顺序错乱,说明<em>有一端做错</em></p>
+        <p>③ 重新核对线序,剪掉两端<strong>重做</strong></p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-warning)">
+        <div class="case-title" style="color:var(--status-warning)">结论</div>
+        <p>⚠️ 测线仪<strong>两端都要按相同顺序读</strong>;如果用了不标准的线序,信号会乱。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 02</p>
+      <h2>案例 2 · 灯不亮(芯线没压到)</h2>
+      <div class="case-box">
+        <div class="case-title">故障现象</div>
+        <p>测线仪显示:<strong>第 3 灯不亮</strong>,其余正常——绿白线对应的芯线没接通。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">最常见原因</div>
+        <p>① 芯线<strong>没插到底</strong>,铜片未接触到铜芯</p>
+        <p>② 剥线时<strong>切伤了芯线</strong>——铜芯被切断</p>
+        <p>③ 水晶头<strong>压接不紧</strong>——压线钳未压到位</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">排除方法</div>
+        <p>① 重新剪掉水晶头<strong>重做</strong></p>
+        <p>② 剥线时<strong>只切外护套</strong>,不要伤到芯线</p>
+        <p>③ 压线时<strong>用力到底</strong>,听到「咔」一声</p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-good)">
+        <div class="case-title" style="color:var(--status-good)">结论</div>
+        <p>✅ 水晶头是<strong>一次性的</strong>——剪掉重做是最高效的方法。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Recap</p>
+      <h2>本章小结</h2>
+      <ol class="steps">
+        <li class="fragment"><strong>UTP</strong> 是局域网主流介质,5 类/超 5 类/6 类是常见规格</li>
+        <li class="fragment">为什么绞合?<strong>抵消辐射 + 减少串扰</strong></li>
+        <li class="fragment"><strong>T568B</strong>:1 橙白 2 橙 3 绿白 4 蓝 5 蓝白 6 绿 7 棕白 8 棕</li>
+        <li class="fragment"><strong>直通线</strong>:两端同序　·　<strong>交叉线</strong>:两端互换 1-2 ↔ 3-6</li>
+        <li class="fragment"><strong>六步流程</strong>:剪 → 剥 → 排 → 插 → 压 → 测</li>
+        <li class="fragment"><strong>水晶头一次性</strong>,错误剪掉重做是最高效方法</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Homework</p>
+      <h2>实验任务</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>实操 · 直通线</strong></p>
+          <p class="muted" style="margin-top:.3rem">制作 <strong>1 根 T568B 直通线</strong>(两端都用 568B),长度约 1.5 m,完成后用测线仪自测。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>实操 · 交叉线</strong></p>
+          <p class="muted" style="margin-top:.3rem">制作 <strong>1 根交叉线</strong>(一端 568A,另一端 568B),长度约 1.5 m,完成后测线验证。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>互测</strong></p>
+          <p class="muted" style="margin-top:.3rem">同学之间<strong>互换测试</strong>:你的直通线在他机器上能否正常 ping 通网关。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">04</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>记录 · 实验报告</strong></p>
+          <p class="muted" style="margin-top:.3rem">拍照记录<strong>六步过程</strong>(剪线、剥线、排线、插线、压线、测线),整理为实验报告。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">05</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>思考</strong></p>
+          <p class="muted" style="margin-top:.3rem">现代交换机支持 Auto-MDI/MDIX,我们仍要学<em>直通线 vs 交叉线</em>的区分——为什么?</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide title">
+      <p class="eyebrow">End of Chapter 07</p>
+      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">认识局域网</span></h1>
+      <p class="lead" style="margin-top:1.4rem">从<strong>一根线</strong>到<strong>一个网络</strong>——认识 LAN 的架构与组成。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        End · 34 slides · Chapter 07
+      </p>
+    </section>
+
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-help" title="键盘帮助 (?)">Help</button>
+    <button id="b-overview" title="总览 (Esc)">Overview</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+
+  <div class="help" id="help">
+    <div class="panel">
+      <h3>Keyboard | Mouse</h3>
+      <div class="row"><span>Next slide</span><span>→ / Space / PageDown</span></div>
+      <div class="row"><span>Prev slide</span><span>← / PageUp</span></div>
+      <div class="row"><span>First / Last</span><span>Home / End</span></div>
+      <div class="row"><span>Overview (click to jump)</span><span>Esc</span></div>
+      <div class="row"><span>Toggle theme</span><span>T</span></div>
+      <div class="row"><span>Fullscreen</span><span>F</span></div>
+      <div class="row"><span>Help</span><span>?</span></div>
+      <p class="muted" style="margin-top:.8rem;font-size:.82rem">
+        Click empty area to advance; press <kbd>?</kbd> to dismiss.
+      </p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  const help=document.getElementById('help');
+  let i=0;
+  let fragIdx=0;
+  function slideFrags(slide){ return slide.querySelectorAll('.fragment'); }
+  function revealFragments(){
+    const frags=slideFrags(slides[i]);
+    for(let k=0;k<frags.length;k++){
+      if(k<fragIdx){
+        frags[k].classList.add('visible');
+        frags[k].style.setProperty('--frag-stagger',(k*90)+'ms');
+      } else {
+        frags[k].classList.remove('visible');
+        frags[k].style.setProperty('--frag-stagger','0ms');
+      }
+    }
+  }
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>d.classList.toggle('active',k===i))}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    if(next===i)return;
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    setTimeout(()=>{out.classList.remove('active','leaving')},600);
+    i=next;
+    fragIdx=0;
+    revealFragments();
+    now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot()}
+  function next(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx<frags.length){
+      fragIdx++;revealFragments();
+    } else if(i<slides.length-1){
+      show(i+1);
+    }
+  }
+  function prev(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx>1){
+      fragIdx--;revealFragments();
+    } else if(fragIdx===1){
+      fragIdx=0;revealFragments();
+    } else if(i>0){
+      const prevIdx=i-1;
+      const inn=slides[prevIdx];
+      const prevFrags=slideFrags(inn);
+      inn.classList.add('active');
+      const out=slides[i];
+      out.classList.add('leaving');
+      setTimeout(()=>{out.classList.remove('active','leaving')},600);
+      i=prevIdx;
+      fragIdx=prevFrags.length;
+      revealFragments();
+      now.textContent=String(i+1).padStart(2,'0');
+      progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+      history.replaceState(null,'','#'+(i+1));setActiveDot();
+    }
+  }
+  function toggleOverview(){
+    const on=deck.classList.toggle('overview');
+    if(on){
+      stage.style.display='grid';
+      stage.style.gridTemplateColumns='repeat(4, 1fr)';
+      stage.style.gap='14px';
+      stage.style.padding='80px 28px 80px 72px';
+      stage.style.overflow='auto';
+      slides.forEach((s)=>{
+        s.style.display='flex';
+        s.style.position='relative';
+        s.style.inset='auto';
+        s.style.aspectRatio='16/9';
+        s.style.padding='1rem';
+        s.style.border='1px solid var(--hairline)';
+        s.style.borderRadius='10px';
+        s.style.background='var(--bg-elev-1)';
+        s.style.cursor='pointer';
+        s.style.overflow='hidden';
+        s.style.transform='none';
+        s.style.opacity='1';
+        Array.from(s.children).forEach((c)=>{
+          c.style.transform='scale(.18)';
+          c.style.transformOrigin='top left';
+        });
+      });
+    } else {
+      stage.style.display='';
+      slides.forEach((s)=>{s.style.display='';});
+      show(i);
+    }
+  }
+  function toggleTheme(){
+    const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light');
+  }
+  function toggleHelp(){help.classList.toggle('open')}
+  document.addEventListener('keydown',(e)=>{
+    if(help.classList.contains('open')){
+      if(e.key==='Escape'||e.key==='?'){toggleHelp();e.preventDefault()}
+      return;
+    }
+    if(deck.classList.contains('overview')){
+      if(e.key==='Escape'){toggleOverview();e.preventDefault()}
+      return;
+    }
+    switch(e.key){
+      case'ArrowRight':case'PageDown':case' ':case'Spacebar':
+        next();e.preventDefault();break;
+      case'ArrowLeft':case'PageUp':prev();e.preventDefault();break;
+      case'Home':show(0);e.preventDefault();break;
+      case'End':show(slides.length-1);e.preventDefault();break;
+      case'Escape':toggleOverview();e.preventDefault();break;
+      case't':case'T':toggleTheme();break;
+      case'f':case'F':if(document.fullscreenElement)document.exitFullscreen();
+        else deck.requestFullscreen&&deck.requestFullscreen();break;
+      case'?':case'/':toggleHelp();e.preventDefault();break;
+    }
+  });
+  stage.addEventListener('click',(e)=>{
+    if(deck.classList.contains('overview')){
+      const s=e.target.closest('.slide');
+      if(!s)return;
+      const idx=slides.indexOf(s);
+      if(idx>=0){toggleOverview();show(idx)}
+    } else {
+      const x=e.clientX/window.innerWidth;
+      if(x>0.5)next();else prev();
+    }
+  });
+  document.getElementById('b-theme').addEventListener('click',toggleTheme);
+  document.getElementById('b-help').addEventListener('click',toggleHelp);
+  document.getElementById('b-overview').addEventListener('click',toggleOverview);
+  document.getElementById('b-print').addEventListener('click',()=>window.print());
+
+  fragIdx=0;
+  revealFragments();
+})();
+</script>
+</body>
+</html>

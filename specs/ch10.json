@@ -1,0 +1,266 @@
+{
+  "chapter": 10,
+  "title": "配置 VLAN",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "period": "10",
+  "term": "Spring 2026",
+  "eyebrow": "Chapter 10 · 计算机网络",
+  "lead": "用 VLAN 把一个大的广播域切成多个小的逻辑网络，控制流量、保障安全。",
+  "slides": [
+    {
+      "layout": "callouts",
+      "eyebrow": "Scenario",
+      "title": "任务情境 · 公司又慢了",
+      "items": [
+        {"ico":"扩张","title":"规模扩大",
+         "body":"Alice 与 Bob 的公司规模越来越大，部门越来越多。"},
+        {"ico":"症状","title":"传输越来越慢",
+         "body":"老员工纳闷：计算机配置越来越高，文件传输却越来越慢。"},
+        {"ico":"诉求","title":"网络改造",
+         "body":"网络改造的呼声越来越高——如何优化、解决拥堵？"},
+        {"ico":"答案","title":"VLAN",
+         "body":"把一个大的广播域切成多个小的**逻辑网络**，让广播范围可控。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Solution",
+      "title": "解决方案 · VLAN",
+      "cards": [
+        {"tag":"现状","title":"仍是一个广播域",
+         "body":"交换式局域网隔离了**冲突域**，但所有主机仍处于同一**广播域**，广播会泛洪到每一台主机。"},
+        {"tag":"方案","title":"VLAN 划分",
+         "body":"管理员根据实际应用与管理的需要，把局域网划分为多个小的**逻辑网络**。"},
+        {"tag":"效果","title":"隔断广播",
+         "body":"VLAN 内部的广播与单播流量**不会**转发到其他 VLAN，**隔断**不同 VLAN 间的广播。"},
+        {"tag":"价值","title":"控制流量 + 安全",
+         "body":"有助于控制流量、减少设备投资、简化管理、提升安全性。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Concept",
+      "title": "VLAN 是什么？",
+      "cards": [
+        {"tag":"定义","title":"逻辑广播域",
+         "body":"VLAN 是一种**逻辑广播域**，可以跨越多个物理 LAN 网段。"},
+        {"tag":"分组","title":"按逻辑分组",
+         "body":"按逻辑功能、项目组、应用程序来分组工作站，**无需考虑用户的物理位置**。"},
+        {"tag":"示例","title":"学生卡",
+         "body":"学生持红卡或蓝卡；只能与同色卡的学生「说话」——就被逻辑分成了两个 VLAN。"},
+        {"tag":"作用","title":"限制广播 + 分组",
+         "body":"VLAN 可以**限制广播**；不同 VLAN 中的设备相互**不可见**。"}
+      ]
+    },
+    {
+      "layout": "objectives",
+      "eyebrow": "Objectives",
+      "title": "通过本次课，<br>你将能够：",
+      "items": [
+        "**认识 VLAN**　理解什么是虚拟局域网及其作用",
+        "**学会配置 VLAN**　在交换机上创建 VLAN 并将端口分配给 VLAN",
+        "**了解 VLAN 的划分方法**　基于端口 / MAC 地址 / 网络层"
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Task 01",
+      "title": "任务一 · 认识 VLAN",
+      "items": [
+        {"ico":"01","title":"定义",
+         "body":"VLAN 是一种逻辑广播域，可以跨越多个物理 LAN 网段。"},
+        {"ico":"02","title":"分组原则",
+         "body":"按逻辑功能、项目组或应用程序分组工作站，**不依赖物理位置**。"},
+        {"ico":"03","title":"运行特点",
+         "body":"每个 VLAN 像独立 LAN 一样运行；可在一台或多台交换机上。"},
+        {"ico":"04","title":"类比",
+         "body":"学生持红卡或蓝卡——只能与同色卡的学生「说话」——这就是两个 VLAN。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Task 02",
+      "title": "任务二 · 配置 VLAN · 步骤概览",
+      "items": [
+        {"ico":"01","title":"搭建实验",
+         "body":"设置 PC0 = 192.168.1.2、PC1 = 192.168.1.3；先 ping 验证同网段互通。"},
+        {"ico":"02","title":"创建 VLAN",
+         "body":"「配置」 → VLAN 数据库 → 添加 VLAN2；将端口分别加入 VLAN。"},
+        {"ico":"03","title":"测试隔离",
+         "body":"再用 ping 测试两台 PC——同 VLAN 通，不同 VLAN 不通。"},
+        {"ico":"04","title":"结论",
+         "body":"**VLAN 隔离广播**——同一 VLAN 内的计算机可互通，不同 VLAN 不可互通。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Notes",
+      "title": "配置 VLAN 注意事项",
+      "items": [
+        {"ico":"!","title":"VLAN1",
+         "body":"VLAN1 是交换机**默认**的 VLAN，既**不能创建也不能删除**；所有端口默认都属于 VLAN1。"},
+        {"ico":"!","title":"命名",
+         "body":"VLAN 命名应规范，如 VLAN10 = 行政、VLAN20 = 研发。"},
+        {"ico":"!","title":"中继",
+         "body":"跨交换机的 VLAN 需要**中继端口（Trunk）**——下一章会学到。"}
+      ]
+    },
+    {
+      "layout": "paragraphs",
+      "eyebrow": "Observation",
+      "title": "实验观察 · VLAN 的运行特点",
+      "paragraphs": [
+        "每个 VLAN 就像**独立**的 LAN 一样运行；一个 VLAN 可以跨越一台或多台交换机，主机设备如同位于同一个网段中。",
+        "**VLAN 主要有两项作用**：**限制广播**——把广播控制在 VLAN 内部；**分组设备**——不同 VLAN 的设备相互不可见，提供基础的网络隔离与安全。"
+      ]
+    },
+    {
+      "layout": "table",
+      "eyebrow": "Scenarios",
+      "title": "判断：以下场景 VLAN 能解决吗？",
+      "headers": ["场景", "VLAN 能解决？", "理由"],
+      "rows": [
+        ["仓管部访问薪酬管理部门的记录，需要将薪酬部门与网络其他部分隔离", "✓", "按部门分组 + 限制访问"],
+        ["销售部人员变动大，机器间相互发现产生大量广播，影响制图部", "✓", "按部门划分 VLAN，限制广播"],
+        ["市场、销售、公关临时协作需要直接互访资源", "×", "VLAN 隔离会阻碍临时协作"]
+      ]
+    },
+    {
+      "layout": "section",
+      "eyebrow": "Part 02",
+      "title": "VLAN 的划分方法",
+      "lead": "三种常见的 VLAN 划分方式：基于端口、基于 MAC、基于网络层。"
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "3 Methods",
+      "title": "常见的 VLAN 划分方式",
+      "cards": [
+        {"tag":"01","title":"基于端口",
+         "body":"按交换机**端口**划分——最常见、最简单。"},
+        {"tag":"02","title":"基于 MAC 地址",
+         "body":"按终端的 **MAC 地址**划分——节点移动后 VLAN 资格保持。"},
+        {"tag":"03","title":"基于网络层",
+         "body":"按 **IP 子网或协议**划分——最灵活，也最复杂。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Port-based",
+      "title": "基于端口的 VLAN 划分",
+      "cards": [
+        {"tag":"原理","title":"端口归组",
+         "body":"网络管理员针对交换机的**端口**重新分配组合到不同逻辑网段。"},
+        {"tag":"优点","title":"简单稳定",
+         "body":"无需考虑端口所连设备是什么；配置简单、清晰。"},
+        {"tag":"局限","title":"不够灵活",
+         "body":"用户更换物理位置时，需要**重新配置端口**。"},
+        {"tag":"适用","title":"PC 直接接入",
+         "body":"最适合「**每端口一台 PC**」的接入层场景。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Port-based · Edge",
+      "title": "边界情况 · 端口接的是 HUB",
+      "items": [
+        {"ico":"情况","title":"端口接 HUB",
+         "body":"交换机端口连接的是**集线器**。"},
+        {"ico":"原理","title":"共享介质",
+         "body":"HUB 是共享介质的多用户网络。"},
+        {"ico":"结论","title":"整 HUB 一组",
+         "body":"按端口划分只能把**整个 HUB**下的所有用户划分到**同一个 VLAN**。"},
+        {"ico":"解决","title":"改用 MAC 划分",
+         "body":"要让 HUB 下的不同用户进不同 VLAN，需要**基于 MAC 地址**的 VLAN。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Port Grouping",
+      "title": "端口分组的特点",
+      "cards": [
+        {"tag":"范围","title":"可跨交换机",
+         "body":"一组端口可在一台交换机上，也可**跨越几台交换机**——前提是配置中继。"},
+        {"tag":"广播域","title":"组内互通",
+         "body":"同一 VLAN 内的所有终端**共享一个广播域**，相互可通信。"},
+        {"tag":"跨 VLAN","title":"需要路由",
+         "body":"不同 VLAN 之间通信**必须经过路由**（路由器或三层交换机）。"},
+        {"tag":"实践","title":"接入层标配",
+         "body":"端口 VLAN 是**接入层**最常见的方案，配置简单、易排错。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "MAC-based",
+      "title": "基于 MAC 地址的 VLAN",
+      "cards": [
+        {"tag":"原理","title":"MAC 绑定 VLAN",
+         "body":"交换机维护「终端 MAC + 端口 + VLAN」对应表，新终端入网时**自动归入对应 VLAN**。"},
+        {"tag":"优势","title":"移动友好",
+         "body":"终端**物理位置变化**不影响 VLAN 归属——MAC 不变，VLAN 不变。"},
+        {"tag":"解决","title":"HUB 细粒度",
+         "body":"可把同一 HUB 下的不同用户**划分到不同 VLAN**——端口 VLAN 做不到。"},
+        {"tag":"局限","title":"维护成本",
+         "body":"MAC 地址**毫无规律**，建表与维护工作量较大。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Network-based",
+      "title": "基于网络层地址的 VLAN",
+      "cards": [
+        {"tag":"原理","title":"按子网 / 协议",
+         "body":"使用协议或网络层地址（如 TCP/IP 子网）确定 VLAN 成员。"},
+        {"tag":"优势","title":"协议层分组",
+         "body":"可按**传输协议**划分网段；用户自由移动无需重新配置。"},
+        {"tag":"性能","title":"减少延迟",
+         "body":"减少协议转换造成的网络延迟。"},
+        {"tag":"前提","title":"防 IP 盗用",
+         "body":"需要明确两件事：**IP 盗用**问题；并非所有设备都支持。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Exercise · Large",
+      "title": "实践练习一 · 按部门划分 VLAN",
+      "items": [
+        {"ico":"部门","title":"5 个部门",
+         "body":"研发部、销售部、财务部、生产管理部、人事部——作为 VLAN 划分依据。"},
+        {"ico":"目标","title":"广播域控制",
+         "body":"让广播流量**控制在部门内部**，提高网络性能。"},
+        {"ico":"地址","title":"172.16.X.0",
+         "body":"使用地址段 172.16.X.0，每个部门占一段。"},
+        {"ico":"验证","title":"同部门通 / 跨部门不通",
+         "body":"用 ping 验证：同 VLAN 通、不同 VLAN 不通——直到下一章用三层交换解决互通。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Exercise · Project",
+      "title": "实践练习二 · 按项目组划分 VLAN",
+      "items": [
+        {"ico":"分组","title":"两个项目组",
+         "body":"PC0 与 PC2 为**项目组 A**；PC1 与 PC3 为**项目组 B**。"},
+        {"ico":"目标","title":"VLAN 实现",
+         "body":"通过 VLAN 实现——组内互通、组间隔离。"},
+        {"ico":"地址","title":"172.16.1.0/24",
+         "body":"4 台 PC 共用 172.16.1.0/24 网段，但分属不同 VLAN。"},
+        {"ico":"提示","title":"不同 VLAN 同子网",
+         "body":"即使 IP 在同一子网，**不同 VLAN 默认不能直接 ping 通**——这是关键观察。"}
+      ]
+    },
+    {
+      "layout": "objectives",
+      "eyebrow": "Recap",
+      "title": "本章小结",
+      "items": [
+        "**VLAN**　逻辑广播域，跨越物理网段",
+        "**两大作用**　限制广播 + 分组设备",
+        "**三种划分**　基于端口、基于 MAC、基于网络层",
+        "**配置要点**　VLAN1 默认；端口分组；测试同/异 VLAN 连通性",
+        "**下一章**　VLAN 互通——三层交换让不同 VLAN 互相通信"
+      ]
+    }
+  ]
+}

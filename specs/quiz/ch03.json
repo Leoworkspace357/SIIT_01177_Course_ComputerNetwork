@@ -1,0 +1,198 @@
+{
+  "chapter": 3,
+  "title": "TCP/IP",
+  "questions": [
+    {
+      "type": "single",
+      "q": "TCP/IP 协议族起源于哪个网络？",
+      "options": {"A": "NSFNET", "B": "ARPANET", "C": "BITNET", "D": "以太网"},
+      "answer": "B",
+      "explain": "TCP/IP 起源于美国国防部 ARPANET 项目，70 年代末 80 年代初成型。"
+    },
+    {
+      "type": "single",
+      "q": "TCP/IP 协议族中，**面向连接**的传输层协议是：",
+      "options": {"A": "UDP", "B": "IP", "C": "TCP", "D": "ICMP"},
+      "answer": "C",
+      "explain": "TCP 面向连接，提供可靠字节流；UDP 无连接、不可靠。"
+    },
+    {
+      "type": "single",
+      "q": "「UDP」的主要特点是：",
+      "options": {"A": "可靠、有序、面向连接", "B": "无连接、尽力交付、开销小", "C": "提供路由选择", "D": "用于文件下载"},
+      "answer": "B",
+      "explain": "UDP 无连接、不可靠、效率高，常用于实时音视频。"
+    },
+    {
+      "type": "single",
+      "q": "「ICMP」属于 TCP/IP 的哪一层？",
+      "options": {"A": "应用层", "B": "传输层", "C": "互联层", "D": "网络接口层"},
+      "answer": "C",
+      "explain": "ICMP（Internet Control Message Protocol）与 IP 同属互联层，用于差错报告与诊断。"
+    },
+    {
+      "type": "single",
+      "q": "「DNS」的作用是：",
+      "options": {"A": "动态分配 IP", "B": "域名解析为 IP 地址", "C": "路由选择", "D": "加密传输"},
+      "answer": "B",
+      "explain": "DNS 把域名解析为 IP 地址。"
+    },
+    {
+      "type": "single",
+      "q": "HTTP 默认端口是：",
+      "options": {"A": "21", "B": "23", "C": "80", "D": "443"},
+      "answer": "C",
+      "explain": "HTTP = 80；HTTPS = 443；FTP = 21；Telnet = 23。"
+    },
+    {
+      "type": "single",
+      "q": "在 TCP/IP 中，**ARP** 协议的作用是：",
+      "options": {"A": "域名解析", "B": "IP → MAC 地址映射", "C": "IP 分配", "D": "路由选择"},
+      "answer": "B",
+      "explain": "ARP 将 IP 地址解析为本局域网内的 MAC 地址。"
+    },
+    {
+      "type": "single",
+      "q": "关于 IP 协议，下列说法正确的是：",
+      "options": {"A": "IP 提供可靠的端到端传输", "B": "IP 是面向连接的协议", "C": "IP 是无连接、尽力交付的协议", "D": "IP 只用于局域网"},
+      "answer": "C",
+      "explain": "IP 是无连接、不可靠、尽力交付的网络层协议。"
+    },
+    {
+      "type": "single",
+      "q": "HTTPS 在 HTTP 之上加入了：",
+      "options": {"A": "压缩", "B": "加密（TLS/SSL）", "C": "路由", "D": "缓存"},
+      "answer": "B",
+      "explain": "HTTPS = HTTP + TLS/SSL 加密，默认端口 443。"
+    },
+    {
+      "type": "single",
+      "q": "下列哪种协议**不属于** TCP/IP 协议族？",
+      "options": {"A": "TCP", "B": "UDP", "C": "NetBEUI", "D": "ICMP"},
+      "answer": "C",
+      "explain": "NetBEUI 是早期 Windows 局域网协议，不属于 TCP/IP。"
+    },
+    {
+      "type": "single",
+      "q": "TCP 三次握手中，第一次握手发送的标志位是：",
+      "options": {"A": "SYN", "B": "ACK", "C": "FIN", "D": "RST"},
+      "answer": "A",
+      "explain": "TCP 连接建立：客户端先发 SYN；服务端回 SYN+ACK；客户端再 ACK。"
+    },
+    {
+      "type": "single",
+      "q": "下列哪个端口是 HTTPS 的默认端口？",
+      "options": {"A": "21", "B": "80", "C": "443", "D": "8080"},
+      "answer": "C",
+      "explain": "HTTPS = 443；HTTP = 80；FTP = 21；8080 常用作 HTTP 代理。"
+    },
+    {
+      "type": "multi",
+      "q": "下列哪些是 TCP/IP 协议族**应用层**协议？",
+      "options": {"A": "HTTP", "B": "FTP", "C": "SMTP", "D": "ARP"},
+      "answer": ["A", "B", "C"],
+      "explain": "HTTP/FTP/SMTP 是应用层协议；ARP 是网络层（互联层）的辅助协议。"
+    },
+    {
+      "type": "multi",
+      "q": "下列哪些是 TCP/IP **传输层**协议？",
+      "options": {"A": "TCP", "B": "UDP", "C": "IP", "D": "ICMP"},
+      "answer": ["A", "B"],
+      "explain": "TCP 与 UDP 是传输层协议；IP 在互联层；ICMP 在互联层。"
+    },
+    {
+      "type": "multi",
+      "q": "「TCP」协议的特点包括：",
+      "options": {"A": "面向连接", "B": "可靠传输", "C": "无连接", "D": "字节流服务"},
+      "answer": ["A", "B", "D"],
+      "explain": "TCP：面向连接 + 可靠 + 字节流；UDP 是无连接。"
+    },
+    {
+      "type": "multi",
+      "q": "下列哪些是 TCP/IP 的**优点**？",
+      "options": {"A": "开放标准", "B": "跨网络类型", "C": "强制使用特定硬件", "D": "统一地址方案"},
+      "answer": ["A", "B", "D"],
+      "explain": "TCP/IP 开放、可跨 LAN/WAN/Internet、地址统一；与硬件无关。"
+    },
+    {
+      "type": "multi",
+      "q": "「UDP」协议的典型应用场景包括：",
+      "options": {"A": "DNS 查询", "B": "实时音视频", "C": "在线游戏", "D": "文件下载"},
+      "answer": ["A", "B", "C"],
+      "explain": "UDP 适合对实时性要求高、能容忍少量丢包的场景；文件下载用 TCP。"
+    },
+    {
+      "type": "multi",
+      "q": "下列哪些是「互联层」的功能？",
+      "options": {"A": "IP 寻址", "B": "分组转发", "C": "差错报告（ICMP）", "D": "端到端连接"},
+      "answer": ["A", "B", "C"],
+      "explain": "互联层处理 IP 编址、转发与 ICMP 差错报告；端到端是传输层。"
+    },
+    {
+      "type": "fill",
+      "text": "TCP/IP 四层模型自下而上为：网络接口层、{{1}}、{{2}}、应用层。",
+      "answer": ["互联层", "传输层"],
+      "explain": "TCP/IP 四层：网络接口层、互联层（IP）、传输层（TCP/UDP）、应用层。"
+    },
+    {
+      "type": "fill",
+      "text": "TCP 是 {{1}} 连接的协议，UDP 是 {{2}} 连接的协议。",
+      "answer": ["面向", "无"],
+      "explain": "TCP：面向连接（先握手再传数据）；UDP：无连接（直接发）。"
+    },
+    {
+      "type": "fill",
+      "text": "「{{1}}」用于 IP 到 MAC 地址的解析；「{{2}}」用于差错报告与诊断。",
+      "answer": ["ARP", "ICMP"],
+      "explain": "ARP = Address Resolution Protocol；ICMP = Internet Control Message Protocol。"
+    },
+    {
+      "type": "fill",
+      "text": "TCP 三次握手：客户端发 {{1}}；服务端回 {{2}}；客户端再 {{3}}。",
+      "answer": ["SYN", "SYN+ACK", "ACK"],
+      "explain": "标准 TCP 连接建立三次握手：SYN → SYN+ACK → ACK。"
+    },
+    {
+      "type": "fill",
+      "text": "HTTP 默认端口是 {{1}}；HTTPS 默认端口是 {{2}}。",
+      "answer": ["80", "443"],
+      "explain": "HTTP = 80；HTTPS = 443。"
+    },
+    {
+      "type": "fill",
+      "text": "FTP 默认端口是 {{1}}；Telnet 默认端口是 {{2}}。",
+      "answer": ["21", "23"],
+      "explain": "FTP = 21；Telnet = 23；SSH = 22（不属 TCP/IP 标准但常见）。"
+    },
+    {
+      "type": "fill",
+      "text": "DNS 默认端口是 {{1}}；SMTP 默认端口是 {{2}}。",
+      "answer": ["53", "25"],
+      "explain": "DNS = 53；SMTP = 25；POP3 = 110；IMAP = 143。"
+    },
+    {
+      "type": "fill",
+      "text": "IP 协议是 {{1}} 层的核心，TCP/UDP 是 {{2}} 层的核心。",
+      "answer": ["互联（网络）", "传输"],
+      "explain": "互联层（IP）+ 传输层（TCP/UDP）构成 TCP/IP 的骨干。"
+    },
+    {
+      "type": "fill",
+      "text": "TCP/IP 之所以叫「事实标准」，是因为它**不是**由标准化组织强制推行，而是被业界{{1}}采用形成的标准。",
+      "answer": ["广泛"],
+      "explain": "与 ISO/OSI 的「法定标准」不同，TCP/IP 因实际广泛使用而成为事实标准。"
+    },
+    {
+      "type": "fill",
+      "text": "TCP 提供 {{1}} 字节流服务；UDP 提供 {{2}} 报文服务。",
+      "answer": ["面向连接的可靠", "无连接的不可靠"],
+      "explain": "TCP 是有连接、可靠、有序；UDP 是无连接、不可靠、按报文。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 与 RIP 都是 {{1}} 协议；它们工作在 TCP/IP 模型的 {{2}} 层以上（应用层）。",
+      "answer": ["路由", "互联层"],
+      "explain": "路由协议用 TCP/UDP 承载，运行于应用层；为互联层（IP）提供路由表。"
+    }
+  ]
+}

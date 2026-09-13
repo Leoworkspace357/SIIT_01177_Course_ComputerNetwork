@@ -1,0 +1,193 @@
+{
+  "chapter": 15,
+  "title": "动态路由 - RIP",
+  "questions": [
+    {
+      "type": "single",
+      "q": "「RIP」基于哪种算法？",
+      "options": {"A": "向量-距离", "B": "链路-状态", "C": "路径向量", "D": "Dijkstra"},
+      "answer": "A",
+      "explain": "RIP = Routing Information Protocol，基于向量-距离算法。"
+    },
+    {
+      "type": "single",
+      "q": "「RIP」路由的度量值是：",
+      "options": {"A": "带宽", "B": "延迟", "C": "跳数", "D": "负载"},
+      "answer": "C",
+      "explain": "RIP 用「跳数」作为度量值；最大 15 跳。"
+    },
+    {
+      "type": "single",
+      "q": "「RIP」路由器之间默认多久交换一次路由信息？",
+      "options": {"A": "10 秒", "B": "30 秒", "C": "60 秒", "D": "180 秒"},
+      "answer": "B",
+      "explain": "RIP 每 30 秒交换一次完整路由表。"
+    },
+    {
+      "type": "single",
+      "q": "「RIP」跳数达到多少时视为不可达？",
+      "options": {"A": "8", "B": "15", "C": "16", "D": "255"},
+      "answer": "C",
+      "explain": "RIP 跳数 16 = 不可达（15 是最大可用跳数）。"
+    },
+    {
+      "type": "single",
+      "q": "「RIP」过时的路由信息会在多久后被丢弃？",
+      "options": {"A": "30 秒", "B": "60 秒", "C": "180 秒", "D": "300 秒"},
+      "answer": "C",
+      "explain": "RIP 超时 = 180 秒（约 6 个刷新周期）。"
+    },
+    {
+      "type": "single",
+      "q": "「RIP」的**最大**适用网络规模是：",
+      "options": {"A": "2–10 个网络", "B": "10–50 个网络", "C": "50–500 个网络", "D": "无限"},
+      "answer": "B",
+      "explain": "RIP 适合小型到中型（10–50 网络）；大型应选 OSPF。"
+    },
+    {
+      "type": "single",
+      "q": "「RIPv1」是哪种类型？",
+      "options": {"A": "无类", "B": "有类（classful）", "C": "组播", "D": "支持 VLSM"},
+      "answer": "B",
+      "explain": "RIPv1 = 有类路由协议；不携带子网掩码；不支持 VLSM。"
+    },
+    {
+      "type": "single",
+      "q": "「RIPv2」相对 RIPv1 的改进**不包括**：",
+      "options": {"A": "支持 VLSM / CIDR", "B": "组播更新 224.0.0.9", "C": "身份验证", "D": "链路-状态算法"},
+      "answer": "D",
+      "explain": "RIPv2 仍是向量-距离；改进是 VLSM/CIDR、组播、认证；不是链路-状态。"
+    },
+    {
+      "type": "single",
+      "q": "「RIPv2」默认使用什么更新方式？",
+      "options": {"A": "广播 255.255.255.255", "B": "组播 224.0.0.9", "C": "组播 224.0.0.5", "D": "单播"},
+      "answer": "B",
+      "explain": "RIPv2 用组播 224.0.0.9；降低非 RIP 主机的负担。"
+    },
+    {
+      "type": "single",
+      "q": "「RIP」的收敛速度通常被认为是：",
+      "options": {"A": "很快", "B": "中等", "C": "慢", "D": "极快"},
+      "answer": "C",
+      "explain": "RIP 是「慢收敛」的典型——路由变化要像波浪一样从邻居慢慢传播。"
+    },
+    {
+      "type": "single",
+      "q": "「RIP」防止路由环路的方法**不**包括：",
+      "options": {"A": "最大跳数", "B": "水平分割", "C": "毒性逆转", "D": "OSPF LSA"},
+      "answer": "D",
+      "explain": "RIP 用最大跳数 / 水平分割 / 毒性逆转 / 触发更新等防环；OSPF LSA 是另一种协议。"
+    },
+    {
+      "type": "single",
+      "q": "「RIP」宣告网络的命令是：",
+      "options": {"A": "network x.x.x.x", "B": "ip route x.x.x.x", "C": "router rip", "D": "rip enable"},
+      "answer": "A",
+      "explain": "进入 router rip 后用 network <网络号> 宣告——只宣告直连主类网络。"
+    },
+    {
+      "type": "multi",
+      "q": "「RIPv1」的主要问题包括：",
+      "options": {"A": "不携带子网掩码", "B": "不支持 VLSM", "C": "广播更新", "D": "链路-状态算法"},
+      "answer": ["A", "B", "C"],
+      "explain": "RIPv1：有类、无掩码、不支持 VLSM、广播更新——是 OSPF 之前的旧式协议。"
+    },
+    {
+      "type": "multi",
+      "q": "「RIPv2」的改进包括：",
+      "options": {"A": "支持 VLSM 与 CIDR", "B": "组播更新", "C": "身份验证", "D": "改为链路-状态"},
+      "answer": ["A", "B", "C"],
+      "explain": "RIPv2 改进：VLSM/CIDR、组播、认证；仍是向量-距离。"
+    },
+    {
+      "type": "multi",
+      "q": "「RIP」防环机制：",
+      "options": {"A": "最大跳数 15", "B": "水平分割（Split Horizon）", "C": "毒性逆转（Poison Reverse）", "D": "触发更新（Triggered Update）"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "这些都是 RIP 经典的防环机制。"
+    },
+    {
+      "type": "multi",
+      "q": "「RIP」适用场景：",
+      "options": {"A": "小型 LAN", "B": "中型多路径网", "C": "网络规模 10–50", "D": "动态拓扑频繁变化"},
+      "answer": ["A", "B", "C"],
+      "explain": "RIP 适合小到中型；频繁变化的网络收敛太慢。"
+    },
+    {
+      "type": "multi",
+      "q": "「RIP」路由条目来源：",
+      "options": {"A": "直连", "B": "静态", "C": "RIP 学习", "D": "OSPF 学习"},
+      "answer": ["A", "B", "C"],
+      "explain": "RIP 路由表可包含直连、静态、动态 RIP 三类条目。"
+    },
+    {
+      "type": "multi",
+      "q": "「向量-距离算法」的特征：",
+      "options": {"A": "邻居之间交换路由表", "B": "距离加 1 后比较", "C": "需要全网拓扑", "D": "算法简单"},
+      "answer": ["A", "B", "D"],
+      "explain": "向量-距离：邻居互告「我能到达的网络 + 距离」；算法简单但慢收敛。"
+    },
+    {
+      "type": "multi",
+      "q": "「RIPv1 vs RIPv2」相同点：",
+      "options": {"A": "基于 UDP 520", "B": "跳数度量", "C": "30 秒更新", "D": "链路-状态算法"},
+      "answer": ["A", "B", "C"],
+      "explain": "都基于 UDP 520、跳数度量、30 秒周期；仍是向量-距离。"
+    },
+    {
+      "type": "fill",
+      "text": "RIP 基于「向量-{{1}}」算法；OSPF 基于「链路-{{2}}」算法。",
+      "answer": ["距离", "状态"],
+      "explain": "RIP = 向量-距离；OSPF = 链路-状态。"
+    },
+    {
+      "type": "fill",
+      "text": "RIP 的度量值是 {{1}}，最大 {{2}} 跳。",
+      "answer": ["跳数", "15"],
+      "explain": "RIP 度量 = 跳数；最大 15。"
+    },
+    {
+      "type": "fill",
+      "text": "RIP 路由器之间每 {{1}} 秒交换一次路由表；超时 {{2}} 秒认为路由失效。",
+      "answer": ["30", "180"],
+      "explain": "RIP 30 秒周期；180 秒超时。"
+    },
+    {
+      "type": "fill",
+      "text": "「RIPv1」是有类路由协议，不携带 {{1}}；「RIPv2」支持 {{2}} 与 CIDR。",
+      "answer": ["子网掩码", "VLSM"],
+      "explain": "RIPv1 无掩码；RIPv2 携带掩码，支持 VLSM/CIDR。"
+    },
+    {
+      "type": "fill",
+      "text": "「RIPv2」使用组播 {{1}} 发送更新（而非广播）。",
+      "answer": ["224.0.0.9"],
+      "explain": "RIPv2 组播 224.0.0.9。"
+    },
+    {
+      "type": "fill",
+      "text": "「RIP」使用 UDP {{1}} 端口收发路由更新。",
+      "answer": ["520"],
+      "explain": "RIP 使用 UDP 520。"
+    },
+    {
+      "type": "fill",
+      "text": "「RIP」收敛较慢、易形成路由{{1}}——催生了 {{2}}（OSPF）等更好的协议。",
+      "answer": ["环路", "链路-状态协议"],
+      "explain": "RIP 慢收敛、路由环路——OSPF 解决了这些问题。"
+    },
+    {
+      "type": "fill",
+      "text": "RIP 配置步骤：进入「{{1}} rip」进程；用「{{2}}」命令宣告直连主类网络。",
+      "answer": ["router", "network"],
+      "explain": "router rip → network x.x.x.x 宣告。"
+    },
+    {
+      "type": "fill",
+      "text": "RIP 适合 {{1}} 网络；大型网络应选 {{2}}。",
+      "answer": ["小到中型（10–50 网络）", "OSPF"],
+      "explain": "RIP 小到中型；OSPF 大型。"
+    }
+  ]
+}

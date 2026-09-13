@@ -1,0 +1,230 @@
+{
+  "id": 4,
+  "chapter": "RIP 动态路由",
+  "title": "RIP 动态路由",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "brand": "实验 04",
+  "software": "Cisco Packet Tracer 6.2",
+  "duration": "2 学时",
+  "difficulty": "★★★☆☆",
+  "lead": "掌握 RIPv2 的基本配置与自动学习观察，理解 RIP 周期性更新与慢收敛。",
+  "slides": [
+    {
+      "layout": "goals",
+      "title": "实验目的",
+      "items": [
+        "掌握 **RIPv2** 的基本配置（启用、宣告网络、版本切换）。",
+        "理解 RIP **周期性**交换路由信息的工作机制（30 秒）。",
+        "观察 RIP 路由的**自动学习**过程。",
+        "学会关闭**自动汇总**、配置**被动接口**等高级特性。",
+        "验证 RIP 网络的端到端连通性。",
+        "掌握 RIP 排错命令（`show ip protocols`、`debug ip rip`）。"
+      ]
+    },
+    {
+      "layout": "environment",
+      "title": "实验环境",
+      "items": [
+        ["路由器", "3 台（R1、R2、R3，Router-PT）"],
+        ["交换机", "3 台（每台路由器下挂 1 台 LAN 交换机）"],
+        ["PC", "3 台（PC1、PC2、PC3，每路由器下挂 1 台）"],
+        ["串口线", "2 根（Serial）"],
+        ["直连双绞线", "若干"],
+        ["软件", "Cisco Packet Tracer 6.2"]
+      ]
+    },
+    {
+      "layout": "topology",
+      "title": "实验拓扑",
+      "body": "        LAN1                LAN2                LAN3\n     192.168.1.0/24      192.168.2.0/24     192.168.3.0/24\n        │                    │                    │\n       SW1                  SW2                  SW3\n        │                    │                    │\n       PC1                 PC2                  PC3\n       │                    │                    │\n     Fa0/0                Fa0/0                Fa0/0\n      R1                   R2                  R3\n       │                    │                    │\n     S0/0/0 ─── S0/0/0    S0/0/1 ─── S0/0/0\n       │    10.1.0.0/24         │     10.2.0.0/24"
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 01",
+      "title": "背景 · RIP 概述",
+      "body": "**RIP（Routing Information Protocol）**：基于「向量-距离」算法。\n\n- **度量**：跳数（hop count），最大 15 跳（16 = 不可达）\n- **更新周期**：每 30 秒广播 / 组播一次完整路由表\n- **版本**：RIPv1（有类、广播）、RIPv2（无类、组播 224.0.0.9、支持 VLSM）\n- **管理距离**：120"
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 02",
+      "title": "背景 · RIP 关键命令",
+      "body": "RIP 配置常用命令汇总：",
+      "cli": "router rip                  ! 启动 RIP 进程\nversion 2                  ! 切换到 RIPv2\nnetwork x.x.x.x            ! 宣告直连主类网络\nno auto-summary             ! 关闭自动汇总（推荐）\npassive-interface Fa0/0     ! 该接口不发送 RIP 更新\ndefault-information originate  ! 产生默认路由\ntimers basic 30 180 180 240 ! 自定义计时器"
+    },
+    {
+      "layout": "step_substeps",
+      "no": "01",
+      "title": "搭建拓扑",
+      "items": [
+        "PT 6.2 新建 `Lab4-RIP.pkt`。",
+        "拖设备、连线（同 Lab 3）。",
+        "**不要配置静态路由**——本实验目的是让 RIP 自动学习。",
+        "Serial DCE 端配 `clock rate 64000`。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "02",
+      "title": "路由器基本配置 + 接口 IP",
+      "items": [
+        "每台路由器同 Lab 3 配置 hostname、密码、接口 IP（按地址规划表）。",
+        "Serial DCE 端记得 `clock rate 64000`。",
+        "PC IP 与网关也按 Lab 3 配置。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "03",
+      "title": "启动 RIP 并宣告网络（R1）",
+      "items": [
+        "在 R1 CLI 输入以下命令：",
+        "`enable` → `configure terminal`",
+        "`router rip` — 启动 RIP 进程",
+        "`version 2` — 切换到 RIPv2",
+        "`no auto-summary` — 关闭自动汇总",
+        "`network 192.168.1.0` — 宣告 LAN1（主类网）",
+        "`network 10.0.0.0` — 宣告串口链路（10.x 都属于 10.0.0.0/8）",
+        "`passive-interface FastEthernet0/0` — LAN 口不发 RIP 更新",
+        "`end` → `write memory`"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "04",
+      "title": "R2 的 RIP 配置",
+      "items": [
+        "启动 RIP 进程：`router rip`。",
+        "`version 2`、`no auto-summary`。",
+        "宣告：`network 10.0.0.0`、`network 192.168.2.0`。",
+        "`passive-interface FastEthernet0/0`。",
+        "`end; write memory`。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "05",
+      "title": "R3 的 RIP 配置",
+      "items": [
+        "`router rip` → `version 2` → `no auto-summary`。",
+        "宣告：`network 192.168.3.0`、`network 10.0.0.0`。",
+        "`passive-interface FastEthernet0/0`。",
+        "`end; write memory`。"
+      ]
+    },
+    {
+      "layout": "tip",
+      "body": "`network 10.0.0.0` 是关键——R1/R2/R3 的 Serial 链路（10.1.0.0/24 + 10.2.0.0/24）都属于主类 `10.0.0.0/8`，所以一条 network 命令就宣告了两段串行链路。"
+    },
+    {
+      "layout": "step_substeps",
+      "no": "06",
+      "title": "观察 RIP 自动学习",
+      "items": [
+        "等约 30 秒，让 RIP 完成第一次完整更新。",
+        "在 R1 上 `show ip protocols`：可看到 RIP 进程信息、宣告的网络、被动接口、计时器。",
+        "在 R1 上 `show ip route`：应能看到 `R 192.168.2.0/24 [120/1] via 10.1.0.2` 与 `R 192.168.3.0/24 [120/2] via 10.1.0.2` 与 `R 10.2.0.0/24 [120/1] via 10.1.0.2`。",
+        "等 30 秒后再看一次——RIP 每 30 秒交换路由表。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "07",
+      "title": "测试连通性",
+      "items": [
+        "PC1 ping PC2：通",
+        "PC1 ping PC3：通",
+        "PC2 ping PC3：通",
+        "注意 TTL：跨 1 跳 → 127；跨 2 跳 → 126。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "08",
+      "title": "抓包观察 RIP 报文",
+      "items": [
+        "切到 **Simulation** 模式。",
+        "让 PC1 ping 一次 PC1 网关或触发 RIP 更新（也可在 R1 上 `debug ip rip`）。",
+        "观察过滤器中 RIP 报文：RIPv2 用**组播 224.0.0.9** 发送更新（不是广播）。",
+        "每 30 秒看到一次。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "09",
+      "title": "观察 RIP 的慢收敛与防环",
+      "items": [
+        "把 R1 的 S0/0/0 串口 `shutdown`（模拟链路断开）。",
+        "等 180 秒（6 个 RIP 周期），观察 R1 的路由表：",
+        "`192.168.2.0` 与 `192.168.3.0` 的 RIP 条目消失（超时）。",
+        "把 R1 的 S0/0/0 `no shutdown` 恢复。",
+        "再等约 30 秒，路由表恢复——**RIP 慢收敛**的典型现象。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "10",
+      "title": "进阶 · debug ip rip",
+      "items": [
+        "在 R2 的 CLI：`enable` → `debug ip rip`。",
+        "观察实时 RIP 收发更新——会看到大量 `RIP: Received packet from ...` 信息。",
+        "关闭调试：`no debug all` 或 `undebug all`。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "11",
+      "title": "进阶 · RIPv1 与 RIPv2 兼容",
+      "items": [
+        "把 R1 的版本改回 `version 1`。",
+        "等 30 秒，观察 R2 收到的路由——RIPv1 不携带子网掩码，会按主类（10.0.0.0/8）汇总。",
+        "再把 R1 改回 `version 2`，恢复正常。"
+      ]
+    },
+    {
+      "layout": "verify_table",
+      "title": "验证结果对照",
+      "headers": ["测试", "期望 TTL", "期望"],
+      "rows": [
+        ["PC1 ping PC2", "127", "通"],
+        ["PC1 ping PC3", "126", "通"],
+        ["PC2 ping PC3", "127", "通"],
+        ["R1 show ip route 192.168.2.0", "—", "via 10.1.0.2"],
+        ["R1 show ip route 192.168.3.0", "—", "via 10.1.0.2"],
+        ["R2 show ip protocols passive", "—", "FastEthernet0/0"]
+      ]
+    },
+    {
+      "layout": "text",
+      "badge": "ERR · 01",
+      "title": "常见错误与排错",
+      "body": "**路由表没有 R 条目**\n\nnetwork 未宣告 / Serial 未 up → `show ip protocols` 检查。\n\n**邻居路由不通**\n\nnetwork 漏配 / 掩码不一致 → 检查所有 router 的 network。\n\n**实验 7 中 PC1 仍能 ping PC2（应不通）**\n\nRIP 没真超时 → 等满 180 秒或 `clear ip route *`。\n\n**RIPv1 把路由按主类汇总**\n\n未关闭 `auto-summary` → `no auto-summary` + `version 2`。"
+    },
+    {
+      "layout": "report",
+      "title": "实验报告要求",
+      "items": [
+        "**完整配置脚本**：3 台路由器的 `show running-config | section rip`。",
+        "**路由表截图**：3 台路由器的 `show ip route`——用荧光笔标出 R 条目。",
+        "**连通性测试**：3×3 PC 对的 ping 测试。",
+        "**Routing Protocol 状态**：`show ip protocols` 输出。",
+        "**故障分析**：故意把 R2 的 S0/0/1 关闭，PC2 还能 ping PC3 吗？为什么？把 R1 的 RIP 版本改回 RIPv1，观察 R2 路由表的变化。"
+      ]
+    },
+    {
+      "layout": "think",
+      "title": "思考题",
+      "items": [
+        "RIP 每 30 秒全表广播，会带来哪些问题？",
+        "为什么说 RIP「收敛慢」？什么场景下问题最严重？",
+        "RIPv2 关闭 `auto-summary` 的意义是什么？不关闭会有什么后果？",
+        "`passive-interface` 命令节省了什么资源？会带来什么副作用？"
+      ]
+    },
+    {
+      "layout": "end",
+      "title": "实验完毕",
+      "lead": "保存 `.pkt` 文件并撰写实验报告，下次实验课进入「OSPF 单区域」。"
+    }
+  ]
+}

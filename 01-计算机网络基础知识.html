@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 1 章　计算机网络基础知识 — Linear Theme</title>
+<style>
+
+/* =====================================================================
+     LINEAR DARK · design tokens
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --status-good:#4cb782; --status-warning:#f2c94c;
+    --status-serious:#eb8c4a; --status-critical:#e34948;
+    --ease:cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-out:cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-soft:cubic-bezier(0.45, 0, 0.15, 1);
+    --dur-slide:900ms; --dur-frag:720ms;
+    --stagger:90ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{--bg:#08080a;--bg-elev-1:#0d0d10;--bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f;--ink:#f7f8f8;--ink-2:#b4b8c0;
+    --ink-3:#8a8f98;--ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;}
+  .deck[data-theme="light"]{--bg:#fbfbfc;--bg-elev-1:#fff;
+    --bg-elev-2:#f4f4f7;--bg-elev-3:#ebebef;--ink:#0a0a0c;
+    --ink-2:#4a4d57;--ink-3:#6f727a;--ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:6vh 7vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(36px) scale(.985);
+    transition:opacity var(--dur-slide) var(--ease-soft),
+      transform var(--dur-slide) var(--ease-soft);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px) scale(.985);
+    transition:opacity 540ms var(--ease-soft),transform 540ms var(--ease-soft)}
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2);transition:border-color 400ms var(--ease)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6vw,5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h3{font-size:1.05rem;margin:1rem 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(.95rem,1.05vw,1.1rem);line-height:1.55;color:var(--ink-2)}
+  .lead{font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--ink-2);
+    max-width:60ch;margin-top:.3rem;line-height:1.5;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--accent)}
+  code,kbd{font-family:var(--font-mono);font-size:.86em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+  ul.clean{list-style:none;padding:0;margin:1.4rem 0 0;max-width:64ch}
+  ul.clean > li{padding:.9rem 0 .9rem 1.6rem;position:relative;
+    border-bottom:1px solid var(--hairline);transition:border-color 300ms var(--ease)}
+  ul.clean > li:last-child{border-bottom:0}
+  ul.clean > li::before{content:"";position:absolute;left:0;top:1.4rem;
+    width:6px;height:6px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--accent-ring)}
+  ol.steps{counter-reset:step;list-style:none;padding:0;
+    margin:1.6rem 0 0;max-width:64ch}
+  ol.steps > li{counter-increment:step;
+    padding:1.4rem 0 1.4rem 4rem;position:relative;
+    border-top:1px solid var(--hairline)}
+  ol.steps > li:last-child{border-bottom:1px solid var(--hairline)}
+  ol.steps > li::before{content:counter(step,decimal-leading-zero);
+    position:absolute;left:0;top:1.45rem;
+    font-family:var(--font-mono);font-size:.82rem;
+    color:var(--accent);font-weight:500;letter-spacing:.04em}
+  .grid-2{display:grid;grid-template-columns:1.15fr 1fr;gap:2rem;
+    align-items:start;margin-top:1.4rem}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:1.4rem}
+  .grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;margin-top:1.4rem}
+  .card{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.4rem 1.5rem;background:var(--bg-elev-2);
+    transition:border-color 400ms var(--ease),transform 400ms var(--ease),
+      background 400ms var(--ease)}
+  .card:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .card h3{margin-top:.3rem;font-size:1rem}
+  .card .tag{display:inline-flex;align-items:center;gap:.35rem;
+    font-family:var(--font-mono);font-size:.68rem;letter-spacing:.04em;
+    color:var(--accent);margin-bottom:.6rem;font-weight:500}
+  .card .tag::before{content:"";width:4px;height:4px;border-radius:50%;
+    background:var(--accent)}
+  .card.compact{padding:1rem 1.2rem}
+  .card.compact h3{font-size:.95rem;margin:.2rem 0 .2rem}
+  .card.compact p{font-size:.85rem;line-height:1.45;margin:0}
+  .card.compact .tag{margin-bottom:.3rem}
+  table.t{width:100%;border-collapse:collapse;margin-top:1.4rem;
+    font-variant-numeric:tabular-nums;
+    border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  table.t th,table.t td{text-align:left;padding:.7rem 1rem;
+    border-bottom:1px solid var(--hairline);font-size:.92rem;color:var(--ink-2);
+    background:var(--bg-elev-2)}
+  table.t th{color:var(--ink-3);font-weight:500;
+    border-bottom:1px solid var(--hairline-strong);
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--bg-elev-1)}
+  table.t tr:last-child td{border-bottom:0}
+  table.t tbody tr{transition:background 300ms var(--ease)}
+  table.t tbody tr:hover td{background:var(--bg-elev-3)}
+  blockquote{margin:1.4rem 0;padding:.4rem 0 .4rem 1.2rem;
+    border-left:2px solid var(--accent);color:var(--ink-2);font-style:normal;
+    font-size:clamp(1.05rem,1.25vw,1.22rem);line-height:1.55}
+  .callout{display:flex;gap:1.2rem;padding:1.1rem 1.3rem;
+    border-radius:10px;border:1px solid var(--hairline);
+    background:var(--bg-elev-2);margin-top:1rem;
+    transition:border-color 300ms var(--ease)}
+  .callout:hover{border-color:var(--accent-ring)}
+  .callout .ico{flex:none;font-family:var(--font-mono);font-weight:500;
+    font-size:.8rem;color:var(--accent);padding-top:.15rem}
+  .callout p{margin:0;color:var(--ink-2)}
+  .callout p+p{margin-top:.3rem}
+  .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    margin-top:1.8rem;position:relative}
+  .timeline::before{content:"";position:absolute;top:5px;left:0;right:0;
+    height:1px;background:var(--hairline)}
+  .timeline .era{padding:0 1rem 0 0;position:relative}
+  .timeline .era::before{content:"";position:absolute;left:0;top:1px;
+    width:9px;height:9px;border-radius:50%;background:var(--bg);
+    border:1.5px solid var(--accent);
+    transition:background 400ms var(--ease),box-shadow 400ms var(--ease)}
+  .slide.active .timeline .era.fragment.visible::before{
+    background:var(--accent);box-shadow:0 0 0 4px var(--accent-glow)}
+  .timeline .era .yr{margin:1.6rem 0 .3rem;
+    font-family:var(--font-mono);font-weight:500;
+    color:var(--ink);font-size:.85rem;letter-spacing:.04em}
+  .timeline .era .lbl{color:var(--ink-3);font-size:.72rem;margin:0 0 .5rem;
+    font-family:var(--font-mono);letter-spacing:.04em}
+  .timeline .era p{font-size:.92rem;color:var(--ink-2);line-height:1.5;margin:0}
+  .timeline .era p strong{color:var(--ink);font-weight:600}
+  .timeline.l8{grid-template-columns:repeat(8,1fr);gap:0}
+  .timeline.l8 .era .yr{font-size:.78rem}
+  .timeline.l8 .era .lbl{font-size:.65rem}
+  .timeline.l8 .era p{font-size:.82rem;line-height:1.4}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.4rem}
+  .chip{padding:.45rem .9rem;border-radius:999px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    font-size:.92rem;color:var(--ink);
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .chip:hover{border-color:var(--accent-ring);background:var(--accent-soft)}
+  .topo{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:10px;padding:1.4rem 2rem;margin-top:1rem;
+    font-family:var(--font-mono);font-size:.92rem;color:var(--ink-2);
+    line-height:1.5;white-space:pre;overflow-x:auto}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.4rem}
+  .compare > div{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.2rem 1.4rem;background:var(--bg-elev-2)}
+  .compare h3{margin:0 0 .6rem;color:var(--ink);font-size:1rem}
+  .compare p{margin:0;color:var(--ink-2);font-size:.92rem;line-height:1.55}
+  .compare3{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:1.4rem}
+  .compare3 > div{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.1rem 1.2rem;background:var(--bg-elev-2)}
+  .compare3 h4{margin:0 0 .4rem;color:var(--ink);font-size:.95rem}
+  .compare3 p{margin:0;color:var(--ink-2);font-size:.85rem;line-height:1.45}
+  .compare4{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:1.4rem}
+  .compare4 > div{border:1px solid var(--hairline);border-radius:10px;
+    padding:1rem 1.1rem;background:var(--bg-elev-2)}
+  .compare4 h4{margin:0 0 .3rem;color:var(--ink);font-size:.92rem}
+  .compare4 p{margin:0;color:var(--ink-2);font-size:.82rem;line-height:1.4}
+  .cs-diagram{display:grid;grid-template-columns:1fr 1.4fr 1fr;
+    align-items:center;gap:1.2rem;margin-top:2rem}
+  .cs-node{padding:1.5rem 1.4rem;border:1px solid var(--hairline);
+    border-radius:10px;text-align:center;background:var(--bg-elev-2);
+    transition:border-color 400ms var(--ease),background 400ms var(--ease)}
+  .cs-node:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .cs-node .lbl{font-family:var(--font-mono);font-size:.68rem;
+    color:var(--ink-3);margin-bottom:.4rem;letter-spacing:.04em;text-transform:uppercase}
+  .cs-node h3{margin:0;font-size:1.3rem;color:var(--ink)}
+  .cs-node .sub{font-family:var(--font-mono);font-size:.78rem;
+    color:var(--ink-mute);margin-top:.4rem}
+  .cs-arrow{text-align:center;color:var(--ink-3);
+    font-family:var(--font-mono);font-size:.78rem;line-height:1.6}
+  .fragment{opacity:0;transform:translateY(22px) scale(.97);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .fragment.visible{opacity:1;transform:translateY(0) scale(1);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.72rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:3px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;
+    overflow:hidden;max-height:calc(100vh - 80px)}
+  .sidebar .nav-dot{width:3px;height:3px;border-radius:50%;
+    background:var(--ink-mute);opacity:.3;
+    transition:opacity 200ms var(--ease),transform 200ms var(--ease),
+      background 200ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 4px var(--accent-ring);transform:scale(1.6)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);
+    letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;
+    font-family:var(--font-mono);letter-spacing:.02em;
+    transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  .help{position:fixed;inset:0;background:rgba(8,8,10,.65);
+    backdrop-filter:blur(8px);display:none;align-items:center;
+    justify-content:center;z-index:40}
+  .help.open{display:flex;animation:helpFade 280ms var(--ease)}
+  @keyframes helpFade{from{opacity:0}to{opacity:1}}
+  .help .panel{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:12px;padding:1.8rem 2.2rem;max-width:520px;min-width:380px;
+    box-shadow:0 24px 80px rgba(0,0,0,.5);animation:helpIn 380ms var(--ease)}
+  @keyframes helpIn{from{opacity:0;transform:translateY(20px) scale(.97)}
+    to{opacity:1;transform:translateY(0) scale(1)}}
+  .help h3{margin-top:0}
+  .help .row{display:flex;justify-content:space-between;
+    padding:.55rem 0;border-bottom:1px solid var(--hairline)}
+  .help .row:last-child{border-bottom:0}
+  .help .row span:last-child{font-family:var(--font-mono);font-size:.82em;color:var(--ink-3)}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.chip,.card,.toolbar button,.progress,.nav-dot,
+    .help,.help .panel{transition-duration:0ms!important}}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+
+  <div class="brand">第 1 章　计算机网络基础知识　<strong>·　Leonard F. Li</strong></div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">41</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide title active">
+      <p class="eyebrow">Chapter 01 · 计算机网络</p>
+      <h1 class="title-h">计算机网络<br><span class="accent">基础知识</span></h1>
+      <p class="lead">从「为什么需要网络」出发，理解网络的定义、组成、分类、性能指标、工作方式与未来趋势。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        Instructor · Leonard F. Li　　·　　Period · 02　　·　　Spring 2026
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">PART 01 · Why Networks</p>
+      <h2>没有网络的年代……</h2>
+      <div class="callout" style="margin-top:2rem">
+        <div class="ico">A</div>
+        <div>
+          <p style="font-size:clamp(1.15rem,1.4vw,1.4rem);color:var(--ink)">「我有工资报表需要打印，<strong>可是</strong>我没有打印机！」</p>
+          <p class="muted" style="margin-top:.4rem;font-size:.92rem">— 只能靠 U 盘在两台电脑之间来回拷贝</p>
+        </div>
+      </div>
+      <p style="margin-top:1.6rem" class="muted">这是一个「单台计算机孤立工作」的时代。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Motivation · 01</p>
+      <h2>单机的三大痛点</h2>
+      <p class="lead">在没有网络的时代，每台计算机都是一座「孤岛」：</p>
+      <ul class="clean" style="margin-top:1.2rem">
+        <li class="fragment"><strong>设备无法共享</strong>　一台机器的打印机只能服务它自己</li>
+        <li class="fragment"><strong>数据无法流动</strong>　文件必须靠 U 盘在机器之间搬运</li>
+        <li class="fragment"><strong>协作无法进行</strong>　多人同时修改同一份文档几乎不可能</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Motivation · 02</p>
+      <h2>把机器连起来之后</h2>
+      <p class="lead">网络让用户之间共享信息更为容易，也更有效率。</p>
+      <ul class="clean" style="margin-top:2rem">
+        <li class="fragment">打印机、文件、数据都可以被多台电脑共同使用</li>
+        <li class="fragment">修改可以实时同步，不再依赖人工搬运</li>
+        <li class="fragment">协同工作变得可能——邮件、即时消息、在线文档</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Motivation · 03</p>
+      <h2>网络给我们带来什么？</h2>
+      <div class="chips">
+        <span class="chip fragment">🎬 网络娱乐</span>
+        <span class="chip fragment">🛒 网络购物</span>
+        <span class="chip fragment">🔍 信息查询</span>
+        <span class="chip fragment">📰 网络媒体</span>
+        <span class="chip fragment">🏠 智能家居</span>
+        <span class="chip fragment">📞 网络会议</span>
+        <span class="chip fragment">📚 在线课堂</span>
+        <span class="chip fragment">📊 大数据</span>
+      </div>
+      <blockquote class="fragment" style="margin-top:3rem">
+        网络已不再是「可选」，而是现代社会的基础设施——和水、电一样不可或缺。
+      </blockquote>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 02 · Definition</p>
+      <h2>什么是计算机网络？</h2>
+      <p class="lead">在给出定义之前，先看看网络能做什么。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Definition</p>
+      <h2>计算机网络的定义</h2>
+      <blockquote>
+        利用通信线路将<strong>具有独立功能</strong>的计算机等设备连接起来而形成的计算机<strong>集合</strong>，
+        计算机间可以借助通信线路传递信息，<strong>共享软件、硬件和数据</strong>等资源。
+      </blockquote>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.95rem">—— 这个定义包含三个关键词：<strong>通信线路</strong>、<strong>独立功能</strong>、<strong>资源共享</strong>。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Definition · 4 Goals</p>
+      <h2>网络的四大功能</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">核心</span>
+          <h3>① 数据通信</h3>
+          <p class="muted">在不同主机之间传输信息——邮件、文件、消息、视频流。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">核心</span>
+          <h3>② 资源共享</h3>
+          <p class="muted">硬件（打印机、存储）、软件（应用程序）、数据（数据库）共享。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">衍生</span>
+          <h3>③ 分布处理</h3>
+          <p class="muted">把一个大任务拆给多台计算机协同完成（如 SETI@home）。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">衍生</span>
+          <h3>④ 提高可靠性</h3>
+          <p class="muted">多机冗余——一台坏了，其它可顶上。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Definition · 3 Elements</p>
+      <h2>从定义中提炼三个要素</h2>
+      <div class="grid-3" style="margin-top:1.6rem">
+        <div class="card fragment">
+          <span class="tag">手段</span>
+          <h3>通信设备 + 通信线路</h3>
+          <p class="muted">交换机、路由器、双绞线、光纤、无线电波——把机器物理地或逻辑地连起来。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">管理</span>
+          <h3>网络软件 + 协议</h3>
+          <p class="muted">统一的「语言」与规则——让异构设备彼此理解。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">目的</span>
+          <h3>资源共享</h3>
+          <p class="muted">数据、软件、硬件可被多台设备共同使用。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 03 · Performance</p>
+      <h2>网络的性能指标</h2>
+      <p class="lead">怎么判断一个网络「快不快、稳不稳」？</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Performance · 4 Metrics</p>
+      <h2>四个核心指标</h2>
+      <div class="grid-4">
+        <div class="card compact fragment">
+          <span class="tag">速度</span>
+          <h3>带宽 Bandwidth</h3>
+          <p>链路每秒能传输的<strong>最大比特数</strong>，单位 bps / Mbps / Gbps。</p>
+        </div>
+        <div class="card compact fragment">
+          <span class="tag">延迟</span>
+          <h3>时延 Latency</h3>
+          <p>一个比特从一端到另一端所需时间，单位 ms。光速是物理下限。</p>
+        </div>
+        <div class="card compact fragment">
+          <span class="tag">吞吐</span>
+          <h3>吞吐量 Throughput</h3>
+          <p>实际<strong>每秒成功传输</strong>的数据量，受瓶颈与拥塞影响。</p>
+        </div>
+        <div class="card compact fragment">
+          <span class="tag">可靠</span>
+          <h3>误码率 BER</h3>
+          <p>传输错误比特数 / 总比特数。光纤 < 10⁻¹²，铜缆 ~ 10⁻⁵。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Performance · Latency</p>
+      <h2>时延的四个组成部分</h2>
+      <p class="lead">数据从源到目的地，总时延 = 各段时延之和：</p>
+      <div class="grid-4">
+        <div class="card compact fragment">
+          <span class="tag">发送</span>
+          <h3>发送时延</h3>
+          <p>数据长度 / 带宽。把 n bit 推上链路所需时间。</p>
+        </div>
+        <div class="card compact fragment">
+          <span class="tag">传播</span>
+          <h3>传播时延</h3>
+          <p>物理距离 / 传播速度。光纤里接近 2×10⁸ m/s。</p>
+        </div>
+        <div class="card compact fragment">
+          <span class="tag">排队</span>
+          <h3>排队时延</h3>
+          <p>在路由器缓冲区等待转发的时间，随网络拥塞波动。</p>
+        </div>
+        <div class="card compact fragment">
+          <span class="tag">处理</span>
+          <h3>处理时延</h3>
+          <p>路由器查表、校验、决定转发出口所需时间。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Performance · Compare</p>
+      <h2>带宽 vs 吞吐量：常被混淆</h2>
+      <div class="compare">
+        <div class="fragment">
+          <h3>带宽 Bandwidth</h3>
+          <p>理论上的<strong>最大速率</strong>——链路的「额定速度」。类比：高速公路的设计车流量。</p>
+          <p class="muted" style="margin-top:.6rem;font-size:.85rem">例：100 Mbps、1 Gbps</p>
+        </div>
+        <div class="fragment">
+          <h3>吞吐量 Throughput</h3>
+          <p><strong>实际</strong>可达的数据传输速率——受协议开销、拥塞、错误重传影响。</p>
+          <p class="muted" style="margin-top:.6rem;font-size:.85rem">例：100 Mbps 链路上 FTP 实际 ~ 11 MB/s（≈ 88 Mbps）</p>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:1.4rem;font-size:.95rem">类比：带宽是水管直径，吞吐量是实际出水量——直径再大，水压不够也出不来。</p>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 04 · Components</p>
+      <h2>网络由什么组成？</h2>
+      <p class="lead">从一台机器的视角，看见整张网络。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Components · Hardware</p>
+      <h2>硬件层面：一台机器看出去</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">终端</span>
+          <h3>计算机 / 终端</h3>
+          <p class="muted">发出请求或提供资源的设备：PC、服务器、手机、IoT 设备。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">连接</span>
+          <h3>网络线缆</h3>
+          <p class="muted">双绞线、光纤、电话线、无线电磁波。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">机柜</span>
+          <h3>集线器 / 交换机 / 路由器</h3>
+          <p class="muted">把多台设备聚合在一起，转发数据。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">接入</span>
+          <h3>ADSL Modem / 光猫</h3>
+          <p class="muted">把局域网接入运营商网络的「桥梁」。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">机房</span>
+          <h3>机柜与配线架</h3>
+          <p class="muted">成百上千条线缆的「中枢神经」。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">末端</span>
+          <h3>网卡 / Wi-Fi</h3>
+          <p class="muted">每台终端接入网络的「最后一步」。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Components · Logical</p>
+      <h2>通信子网 vs 资源子网</h2>
+      <div class="grid-2" style="margin-top:2rem">
+        <div class="card fragment">
+          <span class="tag">通信子网</span>
+          <h3>负责「把比特送到」</h3>
+          <ul class="clean">
+            <li>通信设备：集线器、交换机、路由器、ADSL Modem、程控交换机</li>
+            <li>通信线路：双绞线、电话线、光纤、无线电波</li>
+          </ul>
+        </div>
+        <div class="card fragment">
+          <span class="tag">资源子网</span>
+          <h3>负责「提供与使用资源」</h3>
+          <ul class="clean">
+            <li>提供方：文件共享、Web 服务、打印机共享、应用服务</li>
+            <li>使用方：浏览网页、下载文件、收发邮件</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Components · Software</p>
+      <h2>协议：设备之间的「共同语言」</h2>
+      <blockquote>
+        <strong>协议（Protocol）</strong>是通信双方必须共同遵守的规则集合——
+        语法、语义、时序，回答「说什么、怎么说、什么时候说」三个问题。
+      </blockquote>
+      <ul class="clean" style="margin-top:2rem">
+        <li class="fragment"><strong>语法</strong>　数据的结构与格式（字段如何排列）</li>
+        <li class="fragment"><strong>语义</strong>　每个字段的含义（收到后做什么）</li>
+        <li class="fragment"><strong>时序</strong>　事件发生的先后顺序与速率匹配</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Components · Standards</p>
+      <h2>标准化组织</h2>
+      <p class="lead">协议不是一个人写的——由国际标准组织协调制定。</p>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">ISO</span>
+          <h3>国际标准化组织</h3>
+          <p class="muted">制定 OSI 参考模型。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">IEEE</span>
+          <h3>电气电子工程师学会</h3>
+          <p class="muted">802 系列（以太网、Wi-Fi）。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">IETF</span>
+          <h3>互联网工程任务组</h3>
+          <p class="muted">以 RFC 形式发布互联网标准（TCP/IP、HTTP）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 05 · Transmission</p>
+      <h2>传输介质与方式</h2>
+      <p class="lead">数据在网络中如何「跑」起来？</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Transmission · Media</p>
+      <h2>传输介质的两大类</h2>
+      <div class="compare">
+        <div class="fragment">
+          <h3>有线介质</h3>
+          <p><strong>双绞线</strong>　最常用，5 类 / 超 5 类 / 6 类，100 m 内</p>
+          <p><strong>同轴电缆</strong>　早期以太网（10BASE-2/5）</p>
+          <p><strong>光纤</strong>　单模 / 多模，长距离、抗干扰</p>
+          <p class="muted" style="margin-top:.6rem;font-size:.85rem">稳定、抗干扰、距离长，但布线成本高</p>
+        </div>
+        <div class="fragment">
+          <h3>无线介质</h3>
+          <p><strong>无线电波</strong>　Wi-Fi、ZigBee、LoRa</p>
+          <p><strong>微波</strong>　点对点长距（如基站间）</p>
+          <p><strong>红外 / 激光</strong>　短距遥控、特殊场景</p>
+          <p class="muted" style="margin-top:.6rem;font-size:.85rem">灵活部署，但易受干扰、安全性弱</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Transmission · Mode</p>
+      <h2>三种通信方式</h2>
+      <div class="compare3">
+        <div class="fragment">
+          <h4>单工 Simplex</h4>
+          <p>数据<strong>只能单向</strong>传输。<br>例：广播、电视。</p>
+        </div>
+        <div class="fragment">
+          <h4>半双工 Half-Duplex</h4>
+          <p>双向但<strong>不能同时</strong>。<br>例：对讲机、集线器。</p>
+        </div>
+        <div class="fragment">
+          <h4>全双工 Full-Duplex</h4>
+          <p>双向<strong>同时</strong>进行。<br>例：电话、交换机、网卡。</p>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:1.6rem;font-size:.95rem">现代以太网基本都是全双工——可同时收发，效率翻倍。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Transmission · Switching</p>
+      <h2>三种交换技术</h2>
+      <p class="lead">数据在网络节点之间如何转发？</p>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">① 电路交换</span>
+          <h3>建立专用通路</h3>
+          <p class="muted">传统电话网。占用通路、独占带宽，但建立慢、利用率低。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">② 报文交换</span>
+          <h3>整块转发</h3>
+          <p class="muted">把整条报文存储转发。延迟大、不适合实时。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">③ 分组交换</span>
+          <h3>切成小包</h3>
+          <p class="muted">把数据切成<strong>分组</strong>分别路由——Internet 的基础。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Transmission · Packet Switching</p>
+      <h2>分组交换的两种方式</h2>
+      <div class="compare">
+        <div class="fragment">
+          <h3>虚电路（Virtual Circuit）</h3>
+          <p>先建立一条<strong>逻辑通路</strong>（不独占物理），再传所有分组。</p>
+          <p class="muted" style="margin-top:.6rem;font-size:.85rem">例：ATM、Frame Relay、X.25</p>
+        </div>
+        <div class="fragment">
+          <h3>数据报（Datagram）</h3>
+          <p>每个分组<strong>独立路由</strong>，可能走不同路径到达。</p>
+          <p class="muted" style="margin-top:.6rem;font-size:.85rem">例：IP、UDP。简单、健壮</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 06 · Topology</p>
+      <h2>网络的拓扑结构</h2>
+      <p class="lead">把计算机抽象成「点」、通信线路抽象成「线」——形成的几何图形。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Topology · 5 Types</p>
+      <h2>五种基本拓扑</h2>
+      <div class="compare4">
+        <div class="fragment"><h4>总线型 Bus</h4><p>所有设备挂在<strong>一根主干</strong>上。</p></div>
+        <div class="fragment"><h4>星型 Star</h4><p>所有设备连到<strong>中心节点</strong>。</p></div>
+        <div class="fragment"><h4>环型 Ring</h4><p>设备组成<strong>闭合环路</strong>。</p></div>
+        <div class="fragment"><h4>树型 Tree</h4><p>星型的层次化扩展。</p></div>
+      </div>
+      <p class="muted" style="margin-top:1.2rem;font-size:.9rem;text-align:center">还有「网状 Mesh」——每两个节点间都有路径，Internet 骨干的典型形态。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Topology · Star</p>
+      <h2>星型：现代局域网的事实标准</h2>
+      <div class="topo">            [中心交换机/Hub]
+           /     |      \
+          /      |       \
+        PC1     PC2     PC3
+        ↑        ↑        ↑
+      线缆集中在一个机柜或桌面 Hub</div>
+      <p class="lead" style="margin-top:1.6rem"><strong>优点</strong>：易管理、易扩展、单点故障隔离；<strong>缺点</strong>：对中心节点要求高、布线多。</p>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.95rem">家庭路由器 + Wi-Fi、本公司办公网、校园网机房——全是星型或树型。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Topology · Compare</p>
+      <h2>五种拓扑的优缺点对比</h2>
+      <table class="t">
+        <thead>
+          <tr><th>拓扑</th><th>优点</th><th>缺点</th><th>典型应用</th></tr>
+        </thead>
+        <tbody>
+          <tr class="fragment"><td>总线型</td><td>结构简单、便宜</td><td>故障即全瘫、瓶颈</td><td>早期 10BASE-2</td></tr>
+          <tr class="fragment"><td>星型</td><td>易管理、易扩展</td><td>中心节点要求高</td><td>现代以太网</td></tr>
+          <tr class="fragment"><td>环型</td><td>路径确定</td><td>单点故障全瘫</td><td>令牌环、FDDI</td></tr>
+          <tr class="fragment"><td>树型</td><td>层次化扩展</td><td>根节点关键</td><td>校园网、园区网</td></tr>
+          <tr class="fragment"><td>网状</td><td>可靠性极高</td><td>复杂、成本高</td><td>Internet 骨干</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 07 · History</p>
+      <h2>计算机网络的历史</h2>
+      <p class="lead">从一台机器连到另一台机器，到地球村。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">History · Early</p>
+      <h2>从 50s 到 90s：四个关键年代</h2>
+      <div class="timeline">
+        <div class="era fragment">
+          <div class="yr">50s</div>
+          <div class="lbl">初步形成</div>
+          <p>面向终端的<strong>远程联机系统</strong>，目的就是<strong>共享资源</strong>。</p>
+        </div>
+        <div class="era fragment">
+          <div class="yr">60s</div>
+          <div class="lbl">ARPANET</div>
+          <p>美国国防部组建 ARPANET，<strong>TCP/IP 协议</strong>出现，奠定现代互联网基础。</p>
+        </div>
+        <div class="era fragment">
+          <div class="yr">70s</div>
+          <div class="lbl">局域网兴起</div>
+          <p><strong>以太网</strong>、令牌环等局域网技术成熟，中小企业也能组建自己的网络。</p>
+        </div>
+        <div class="era fragment">
+          <div class="yr">90s</div>
+          <div class="lbl">Internet 时代</div>
+          <p><strong>万维网（WWW）</strong>出现，Internet 飞速发展，形成今天的网络形态。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">History · Modern</p>
+      <h2>21 世纪：移动互联网与云计算</h2>
+      <div class="timeline l8">
+        <div class="era fragment"><div class="yr">2000</div><div class="lbl">宽带普及</div><p>ADSL / Cable Modem 进入家庭。</p></div>
+        <div class="era fragment"><div class="yr">2007</div><div class="lbl">智能手机</div><p>iPhone 发布，移动上网爆发。</p></div>
+        <div class="era fragment"><div class="yr">2010</div><div class="lbl">云计算</div><p>AWS / 阿里云改变企业 IT。</p></div>
+        <div class="era fragment"><div class="yr">2015</div><div class="lbl">4G 普及</div><p>移动互联网成为主流。</p></div>
+        <div class="era fragment"><div class="yr">2019</div><div class="lbl">5G 商用</div><p>高速、低时延、海量连接。</p></div>
+        <div class="era fragment"><div class="yr">2020</div><div class="lbl">远程办公</div><p>疫情催化远程协作常态化。</p></div>
+        <div class="era fragment"><div class="yr">2023</div><div class="lbl">生成式 AI</div><p>大模型重塑人机交互。</p></div>
+        <div class="era fragment"><div class="yr">2026+</div><div class="lbl">万物互联</div><p>5.5G / 6G、卫星互联网。</p></div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 08 · Classification</p>
+      <h2>计算机网络的分类</h2>
+      <p class="lead">按覆盖范围划分的三种基本形态。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Classification · Overview</p>
+      <h2>分类方式不止一种</h2>
+      <p class="lead">可以按<strong>拓扑结构</strong>、按<strong>地理覆盖范围</strong>、按<strong>使用对象</strong>等多种维度划分。</p>
+      <p style="margin-top:1.4rem">本课程采用最常见的划分——按<strong>覆盖范围</strong>分为：</p>
+      <ul class="clean" style="margin-top:1rem">
+        <li class="fragment"><strong>局域网 LAN</strong>　Local Area Network</li>
+        <li class="fragment"><strong>城域网 MAN</strong>　Metropolitan Area Network</li>
+        <li class="fragment"><strong>广域网 WAN</strong>　Wide Area Network</li>
+      </ul>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        三种划分并非绝对，彼此之间存在交叠（如校园网常横跨 LAN 与 MAN）。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Classification · LAN</p>
+      <h2>小范围内的高速私有网络</h2>
+      <p class="lead" style="max-width:48ch">通常覆盖<strong>一间办公室、一栋楼或一个园区</strong>，由单个组织自行建设与维护。</p>
+      <div class="grid-3" style="margin-top:2rem">
+        <div class="card fragment"><span class="tag">覆盖</span><h3>≤ 2 km</h3><p class="muted">同一建筑或同一园区内。</p></div>
+        <div class="card fragment"><span class="tag">设备</span><h3>交换机、Wi-Fi AP</h3><p class="muted">成本低、部署灵活。</p></div>
+        <div class="card fragment"><span class="tag">场景</span><h3>校园网、办公网</h3><p class="muted">最常见的网络形态。</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Classification · MAN</p>
+      <h2>一座城市之内的「中型」网络</h2>
+      <p class="lead">覆盖范围介于 LAN 与 WAN 之间，通常由<strong>电信运营商或市政府</strong>承建。</p>
+      <div class="grid-3" style="margin-top:2rem">
+        <div class="card fragment"><span class="tag">覆盖</span><h3>2 – 10 km</h3><p class="muted">同一座城市之内。</p></div>
+        <div class="card fragment"><span class="tag">技术</span><h3>光纤、Metro Ethernet</h3><p class="muted">承载能力大于 LAN。</p></div>
+        <div class="card fragment"><span class="tag">场景</span><h3>城市政务网、教育城域网</h3><p class="muted">连接多个局域网。</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Classification · WAN</p>
+      <h2>跨越城市、地区甚至全球</h2>
+      <p class="lead">由<strong>运营商</strong>承建，使用长途传输链路，是 Internet 的主干。</p>
+      <div class="grid-3" style="margin-top:2rem">
+        <div class="card fragment"><span class="tag">覆盖</span><h3>≥ 10 km ～ 全球</h3><p class="muted">跨城市、跨国家、跨洲。</p></div>
+        <div class="card fragment"><span class="tag">技术</span><h3>光纤、卫星、海底光缆</h3><p class="muted">传输距离极远，延迟不可忽视。</p></div>
+        <div class="card fragment"><span class="tag">场景</span><h3>Internet、跨国专网</h3><p class="muted">我们日常使用的网络都建立在 WAN 之上。</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Classification · Compare</p>
+      <h2>四类网络的对比</h2>
+      <table class="t">
+        <thead>
+          <tr><th>Type</th><th>Hosts</th><th>Range</th><th>Error rate</th></tr>
+        </thead>
+        <tbody>
+          <tr class="fragment"><td>局域网 <span class="muted">LAN</span></td><td>≤ 200</td><td>≤ 2 km，building / campus</td><td>low</td></tr>
+          <tr class="fragment"><td>城域网 <span class="muted">MAN</span></td><td>medium</td><td>2 – 10 km，metropolitan</td><td>higher</td></tr>
+          <tr class="fragment"><td>广域网 <span class="muted">WAN</span></td><td>many</td><td>> 10 km，cross-region</td><td>higher</td></tr>
+          <tr class="fragment"><td>Internet</td><td>unbounded</td><td>worldwide</td><td>highest</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        <strong style="color:var(--ink)">关键</strong>　传输距离不同 → 采用技术不同 → 性能与成本不同。
+      </p>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 09 · Architecture</p>
+      <h2>对等与主从</h2>
+      <p class="lead">两种工作方式：网络中的「身份」由角色决定，不由机器决定。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Architecture · Compare</p>
+      <h2>对等（P2P） vs 主从（C/S）</h2>
+      <div class="compare">
+        <div class="fragment">
+          <h3>对等 P2P</h3>
+          <p>每台机器<strong>既是客户也是服务器</strong>。</p>
+          <ul class="clean" style="margin-top:.6rem">
+            <li>地位平等</li>
+            <li>提供 / 消费资源</li>
+            <li>家庭多机文件共享</li>
+          </ul>
+        </div>
+        <div class="fragment">
+          <h3>主从 C/S</h3>
+          <p>有<strong>明确的服务器与客户端</strong>角色。</p>
+          <ul class="clean" style="margin-top:.6rem">
+            <li>中心服务器统一管理</li>
+            <li>性能、安全、可扩展</li>
+            <li>企业网、互联网主流</li>
+          </ul>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:1.4rem;font-size:.95rem">主从 ≠ C/S：C/S 描述<em>这一次交互</em>，主从描述<em>网络中的角色分工</em>。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Architecture · Diagram</p>
+      <h2>C/S 服务的提供与请求</h2>
+      <div class="cs-diagram" style="max-width:720px;margin:1.4rem auto">
+        <div class="cs-node client fragment">
+          <div class="lbl">Requester</div>
+          <h3>客户端</h3>
+          <div class="sub">Client</div>
+        </div>
+        <div class="cs-arrow fragment">请求 →<br>← 响应</div>
+        <div class="cs-node server fragment">
+          <div class="lbl">Provider</div>
+          <h3>服务器</h3>
+          <div class="sub">Server</div>
+        </div>
+      </div>
+      <ul class="clean" style="margin-top:1rem">
+        <li class="fragment">客户端<strong>主动发起</strong>请求</li>
+        <li class="fragment">服务器<strong>被动响应</strong>、提供资源或服务</li>
+        <li class="fragment">常见协议：HTTP、FTP、SMTP、POP3</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Recap</p>
+      <h2>今天我们学到了什么</h2>
+      <ol class="steps">
+        <li class="fragment"><strong>为什么需要网络</strong>　单机痛点 → 数据通信 + 资源共享</li>
+        <li class="fragment"><strong>网络的定义</strong>　通信线路 + 独立设备 + 协议 → 资源共享</li>
+        <li class="fragment"><strong>性能指标</strong>　带宽 / 时延 / 吞吐量 / 误码率</li>
+        <li class="fragment"><strong>组成</strong>　硬件 + 软件 + 协议（通信子网 + 资源子网）</li>
+        <li class="fragment"><strong>传输</strong>　介质（有线/无线）+ 方式（单工/半双工/全双工）+ 交换（电路/报文/分组）</li>
+        <li class="fragment"><strong>分类</strong>　LAN / MAN / WAN — 距离决定技术与成本</li>
+        <li class="fragment"><strong>工作方式</strong>　对等 vs 主从，核心是「这一次谁提供服务」</li>
+        <li class="fragment"><strong>历史</strong>　50s 远程联机 → 90s Internet → 5G / 云计算 / AI</li>
+      </ol>
+      <p class="muted fragment" style="margin-top:1.6rem;font-size:.95rem;text-align:center">
+        下次课进入「网络协议与分层」——深入 OSI 七层模型与 TCP/IP 协议栈。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Homework</p>
+      <h2>课后任务</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>查阅资料</strong></p>
+          <p class="muted" style="margin-top:.3rem">简单介绍你所了解的网络及常见的网络设备（不少于 300 字）。</p>
+        </div>
+      </div>
+      <div class="callout fragment" style="margin-top:1rem">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>动手观察</strong></p>
+          <p class="muted" style="margin-top:.3rem">查看自己手机和电脑中与网络相关的设置与参数（IP、DNS、网关、MAC 等），截图记录。</p>
+        </div>
+      </div>
+      <div class="callout fragment" style="margin-top:1rem">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>思考题</strong></p>
+          <p class="muted" style="margin-top:.3rem">为什么「带宽 100 Mbps」时下载文件最快只能 ~11 MB/s？带宽与吞吐量的区别是什么？</p>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /stage -->
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-help" title="键盘帮助 (?)">Help</button>
+    <button id="b-overview" title="总览 (Esc)">Overview</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+
+  <div class="help" id="help">
+    <div class="panel">
+      <h3>Keyboard · Mouse</h3>
+      <div class="row"><span>Next slide</span><span>→ / Space / PageDown</span></div>
+      <div class="row"><span>Prev slide</span><span>← / PageUp</span></div>
+      <div class="row"><span>First / Last</span><span>Home / End</span></div>
+      <div class="row"><span>Overview (click to jump)</span><span>Esc</span></div>
+      <div class="row"><span>Toggle theme</span><span>T</span></div>
+      <div class="row"><span>Fullscreen</span><span>F</span></div>
+      <div class="row"><span>Help</span><span>?</span></div>
+      <p class="muted" style="margin-top:.8rem;font-size:.82rem">
+        Click empty area to advance; press <kbd>?</kbd> to dismiss.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  'use strict';
+  var deck = document.getElementById('deck');
+  var stage = document.getElementById('stage');
+  var slides = Array.prototype.slice.call(stage.querySelectorAll('.slide'));
+  var dots = document.getElementById('nav-dots');
+  var nowEl = document.getElementById('now');
+  var totalEl = document.getElementById('total');
+  var progress = document.getElementById('progress');
+  var help = document.getElementById('help');
+  var i = 0;
+
+  totalEl.textContent = String(slides.length).padStart(2, '0');
+
+  slides.forEach(function(_, k){
+    var d = document.createElement('div');
+    d.className = 'nav-dot';
+    d.title = 'Slide ' + (k+1);
+    d.addEventListener('click', function(){ show(k); });
+    dots.appendChild(d);
+  });
+
+  function setActiveDot(){
+    Array.prototype.forEach.call(dots.children, function(d, k){
+      d.classList.toggle('active', k === i);
+    });
+  }
+
+  // Per-slide fragment cursor — tracks how many fragments are revealed.
+  var fragIdx = 0;
+  function slideFrags(slide){ return slide.querySelectorAll('.fragment'); }
+  function revealFragments(){
+    var frags = slideFrags(slides[i]);
+    // Reveal up to fragIdx. Apply per-fragment stagger delay so cards cascade
+    // in with a slight overlap (each one starts 90ms after the previous).
+    for (var k = 0; k < frags.length; k++) {
+      if (k < fragIdx) {
+        frags[k].classList.add('visible');
+        frags[k].style.setProperty('--frag-stagger', (k * 90) + 'ms');
+      } else {
+        frags[k].classList.remove('visible');
+        frags[k].style.setProperty('--frag-stagger', '0ms');
+      }
+    }
+  }
+
+  function show(n){
+    var nextIdx = Math.max(0, Math.min(slides.length-1, n));
+    if (nextIdx === i) return;
+    var out = slides[i];
+    var inn = slides[nextIdx];
+    out.classList.add('leaving');
+    inn.classList.add('active');
+    setTimeout(function(){
+      out.classList.remove('active', 'leaving');
+    }, 600);
+    i = nextIdx;
+    // Reset fragment cursor on slide change; start at 0 so the user reveals
+    // every fragment with →. Keeps slides quiet on entry.
+    fragIdx = 0;
+    revealFragments();
+    nowEl.textContent = String(i+1).padStart(2, '0');
+    progress.style.width = (((i+1)/slides.length)*100).toFixed(1) + '%';
+    history.replaceState(null, '', '#' + (i+1));
+    setActiveDot();
+  }
+
+  function next(){
+    var frags = slideFrags(slides[i]);
+    if (fragIdx < frags.length) {
+      // Step to next fragment on current slide.
+      fragIdx++;
+      revealFragments();
+    } else if (i < slides.length-1) {
+      show(i+1);
+    }
+  }
+  function prev(){
+    var frags = slideFrags(slides[i]);
+    if (fragIdx > 1) {
+      // Hide the most recently revealed fragment.
+      fragIdx--;
+      revealFragments();
+    } else if (fragIdx === 1) {
+      // Hide the first fragment; stay on slide.
+      fragIdx = 0;
+      revealFragments();
+    } else if (i > 0) {
+      // Move to previous slide and reveal all of its fragments except the last
+      // (so the user can step back through them).
+      i = i - 1;
+      var inn = slides[i];
+      var prevFrags = slideFrags(inn);
+      inn.classList.add('active');
+      var out = slides[i + 1];
+      out.classList.add('leaving');
+      setTimeout(function(){
+        out.classList.remove('active', 'leaving');
+      }, 600);
+      fragIdx = prevFrags.length;  // 0 if no fragments
+      revealFragments();
+      nowEl.textContent = String(i+1).padStart(2, '0');
+      progress.style.width = (((i+1)/slides.length)*100).toFixed(1) + '%';
+      history.replaceState(null, '', '#' + (i+1));
+      setActiveDot();
+    }
+  }
+
+  function toggleOverview(){
+    var on = deck.classList.toggle('overview');
+    if (on) {
+      stage.style.display = 'grid';
+      stage.style.gridTemplateColumns = 'repeat(4, 1fr)';
+      stage.style.gap = '14px';
+      stage.style.padding = '80px 28px 80px 72px';
+      stage.style.overflow = 'auto';
+      slides.forEach(function(s){
+        s.style.display = 'flex';
+        s.style.position = 'relative';
+        s.style.inset = 'auto';
+        s.style.aspectRatio = '16/9';
+        s.style.padding = '1rem';
+        s.style.border = '1px solid var(--hairline)';
+        s.style.borderRadius = '10px';
+        s.style.background = 'var(--bg-elev-1)';
+        s.style.cursor = 'pointer';
+        s.style.overflow = 'hidden';
+        s.style.transform = 'none';
+        s.style.opacity = '1';
+        Array.prototype.forEach.call(s.children, function(c){
+          c.style.transform = 'scale(.18)';
+          c.style.transformOrigin = 'top left';
+        });
+      });
+    } else {
+      stage.style.display = '';
+      slides.forEach(function(s){ s.style.display = ''; });
+      show(i);
+    }
+  }
+  function toggleTheme(){
+    var cur = deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme', cur === 'light' ? 'dark' : 'light');
+  }
+  function toggleHelp(){ help.classList.toggle('open'); }
+
+  document.addEventListener('keydown', function(e){
+    if (help.classList.contains('open')){
+      if (e.key === 'Escape' || e.key === '?') { toggleHelp(); e.preventDefault(); }
+      return;
+    }
+    if (deck.classList.contains('overview')){
+      if (e.key === 'Escape') { toggleOverview(); e.preventDefault(); }
+      return;
+    }
+    switch (e.key){
+      case 'ArrowRight': case 'PageDown': case ' ': case 'Spacebar':
+        next(); e.preventDefault(); break;
+      case 'ArrowLeft': case 'PageUp':
+        prev(); e.preventDefault(); break;
+      case 'Home': show(0); e.preventDefault(); break;
+      case 'End': show(slides.length-1); e.preventDefault(); break;
+      case 'Escape': toggleOverview(); e.preventDefault(); break;
+      case 't': case 'T': toggleTheme(); break;
+      case 'f': case 'F':
+        if (document.fullscreenElement) document.exitFullscreen();
+        else deck.requestFullscreen && deck.requestFullscreen();
+        break;
+      case '?': case '/': toggleHelp(); e.preventDefault(); break;
+    }
+  });
+
+  stage.addEventListener('click', function(e){
+    if (deck.classList.contains('overview')){
+      var s = e.target.closest('.slide');
+      if (!s) return;
+      var idx = slides.indexOf(s);
+      if (idx >= 0) { toggleOverview(); show(idx); }
+    } else {
+      var x = e.clientX / window.innerWidth;
+      if (x > 0.5) next(); else prev();
+    }
+  });
+
+  document.getElementById('b-theme').addEventListener('click', toggleTheme);
+  document.getElementById('b-help').addEventListener('click', toggleHelp);
+  document.getElementById('b-overview').addEventListener('click', toggleOverview);
+  document.getElementById('b-print').addEventListener('click', function(){ window.print(); });
+
+  // Initialize fragment state for the first slide — start hidden so the user
+  // reveals each fragment with →.
+  fragIdx = 0;
+  revealFragments();
+})();
+</script>
+</body>
+</html>

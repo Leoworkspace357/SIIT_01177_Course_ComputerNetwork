@@ -1,0 +1,194 @@
+{
+  "chapter": 17,
+  "title": "WWW 和 DNS 服务",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "period": "17",
+  "term": "Spring 2026",
+  "eyebrow": "Chapter 17 · 计算机网络",
+  "lead": "把 IP 地址变成好记的域名，让用户「输入网址就能上网」——WWW + DNS。",
+  "slides": [
+    {
+      "layout": "callouts",
+      "eyebrow": "Scenario",
+      "title": "任务情境 · 学院网站上线",
+      "items": [
+        {"ico":"人物","title":"小王",
+         "body":"某学院网络中心的一名**网络管理员**。"},
+        {"ico":"需求","title":"发布学院网站",
+         "body":"需要将学院网站**发布出去**，让师生与外界都能访问。"},
+        {"ico":"目标","title":"好记的域名",
+         "body":"通过输入 **www.siit.cn** 这样的**域名**就能访问——而不是一串 IP。"},
+        {"ico":"解决方案","title":"WWW + DNS",
+         "body":"搭建 **WWW（Web）服务** + **DNS（域名解析）服务**。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Goal",
+      "title": "任务目标",
+      "cards": [
+        {"tag":"目标","title":"域名访问",
+         "body":"通过 IE 地址栏输入 `http://www.siit.com` 就能访问网站——**方便记忆**。"},
+        {"tag":"核心","title":"域名 ↔ IP",
+         "body":"把「域名」与「IP 地址」对应起来——靠 **DNS 服务器**完成映射。"},
+        {"tag":"组成","title":"WWW + DNS",
+         "body":"**WWW 服务器**提供网页内容；**DNS 服务器**提供域名解析。"},
+        {"tag":"价值","title":"贴近用户",
+         "body":"这是**应用层**最贴近用户的两大服务——也是网络「可用性」的最后一公里。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Environment",
+      "title": "使用环境",
+      "cards": [
+        {"tag":"服务器","title":"WWW + DNS 一体",
+         "body":"一台 Windows Server 服务器，**同时运行 WWW 与 DNS 服务**。"},
+        {"tag":"服务器 IP","title":"192.168.1.1",
+         "body":"服务器 IP：**192.168.1.1**；网站存放默认 Web 主目录。"},
+        {"tag":"客户机","title":"Windows",
+         "body":"客户机安装 Windows 系统，IP = 192.168.1.2，与服务器**连通**。"},
+        {"tag":"验证","title":"域名访问",
+         "body":"客户机浏览器输入 `http://www.siit.com` 应能打开服务器上的网页。"}
+      ]
+    },
+    {
+      "layout": "section",
+      "eyebrow": "Background",
+      "title": "相关知识",
+      "lead": "层次型命名、因特网域名与 DNS 解析。"
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Naming",
+      "title": "层次型命名机制",
+      "cards": [
+        {"tag":"结构","title":"树状结构",
+         "body":"层次型命名采用**树状结构**——树的每一节点都有相应的**标识符**。"},
+        {"tag":"主机名","title":"路径序列",
+         "body":"**主机名** = 从树叶到树根（或反向）路径上各节点标识符的**有序序列**。"},
+        {"tag":"例子","title":"www.siit.cn",
+         "body":"`www.siit.cn` —— **cn**（根）→ **siit** → **www**（叶子主机）。"},
+        {"tag":"价值","title":"唯一 + 分层",
+         "body":"全球**唯一** + **分层管理**——不同后缀由不同机构管理。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "TLD",
+      "title": "因特网顶级域名",
+      "cards": [
+        {"tag":"组织模式","title":"通用顶级域",
+         "body":".com / .org / .net / .gov / .edu / .mil / .int　按**组织性质**分配。"},
+        {"tag":"地理模式","title":"国家顶级域",
+         "body":".cn / .us / .jp / .uk / .de　按**国家或地区**分配，每个国家独立管理。"},
+        {"tag":"新增","title":"新型顶级域",
+         "body":".app / .io / .dev / .ai / .xyz　近年开放的新型 gTLD。"},
+        {"tag":"管理者","title":"ICANN",
+         "body":"顶级域名由 **ICANN** 统一管理；国家域由各国 NIC 管理。"}
+      ]
+    },
+    {
+      "layout": "table",
+      "eyebrow": "Domains",
+      "title": "中国二级域名示例",
+      "headers": ["类别", "二级域名", "用途"],
+      "rows": [
+        ["类别域名", ".com.cn",  "工商企业"],
+        ["类别域名", ".net.cn",  "网络服务"],
+        ["类别域名", ".gov.cn",  "政府机构"],
+        ["类别域名", ".edu.cn",  "教育机构"],
+        ["类别域名", ".org.cn",  "社会组织"],
+        ["行政区域", ".bj.cn / .sh.cn / .gd.cn", "北京 / 上海 / 广东等"]
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "DNS Intro",
+      "title": "DNS 简介",
+      "cards": [
+        {"tag":"全称","title":"Domain Name System",
+         "body":"**DNS 是域名系统**（Domain Name System）的缩写——一种组织域层次结构的命名系统。"},
+        {"tag":"作用","title":"名字 → 地址",
+         "body":"计算机在网络上使用 **IP 地址**通信；DNS 把用户使用的「名称」映射为「IP 地址」。"},
+        {"tag":"类比","title":"电话簿",
+         "body":"DNS 就是互联网的**「电话簿」**——输入名字就能查到电话号码。"},
+        {"tag":"协议","title":"UDP 53 / TCP 53",
+         "body":"DNS 主要使用 **UDP 53** 端口；区域传送等用 TCP 53。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Resolution",
+      "title": "DNS 解析 · 工作流程",
+      "items": [
+        {"ico":"01","title":"查询请求",
+         "body":"客户端向**本地域名服务器**发起查询——「www.siit.cn 的 IP 是多少？」"},
+        {"ico":"02","title":"递归 / 迭代",
+         "body":"本地域名服务器**递归**询问根服务器、cn 服务器、siit.cn 服务器……"},
+        {"ico":"03","title":"返回结果",
+         "body":"最终把**解析结果**返回给客户端，并**缓存**下来。"},
+        {"ico":"04","title":"访问网站",
+         "body":"客户端拿到 IP，向该 IP 发起 **HTTP 请求**——完成 WWW 访问。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Query Methods",
+      "title": "DNS 查询方式 · 两种",
+      "cards": [
+        {"tag":"递归","title":"Recursive",
+         "body":"**客户端 → 本地 DNS**：要求「必须给我最终答案」，由本 DNS 服务器代为查询。"},
+        {"tag":"迭代","title":"Iterative",
+         "body":"**本地 DNS → 根 / 顶级 / 权威 DNS**：每次返回「下一级去找谁」，本地 DNS 自行迭代查询。"},
+        {"tag":"结合","title":"递归 + 迭代",
+         "body":"实际是**递归查询 + 迭代查询**的组合：客户端递归，本地 DNS 迭代。"},
+        {"tag":"缓存","title":"Cache",
+         "body":"各级 DNS 都会**缓存**结果——TTL 时间内再次访问无需重新查询。"}
+      ]
+    },
+    {
+      "layout": "table",
+      "eyebrow": "Terms",
+      "title": "DNS 中的常见名词",
+      "headers": ["术语", "含义"],
+      "rows": [
+        ["**正向查找区域**",  "**FQDN → IP**　把域名解析为 IP 地址"],
+        ["**反向查找区域**",  "**IP → FQDN**　把 IP 反查为主机名"],
+        ["**主要区域**",      "包含相应 DNS 命名空间所有的**资源记录**"],
+        ["**存根区域**",      "仅包含**权威 DNS 服务器**的记录，用于委派解析"],
+        ["**资源记录（RR）**","A / AAAA / CNAME / MX / NS / SOA / PTR / TXT 等"],
+        ["**TTL**",           "**Time To Live**　缓存记录的存活时间"]
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Wrap-up",
+      "title": "本章总结 · WWW 与 DNS",
+      "items": [
+        {"ico":"WWW","title":"Web 服务",
+         "body":"**HTTP / HTTPS** 提供网页内容——把服务器上的文件**返回给浏览器**渲染。"},
+        {"ico":"DNS","title":"域名解析",
+         "body":"把**域名**翻译为**IP 地址**——互联网的「地址簿」。"},
+        {"ico":"协作","title":"完整流程",
+         "body":"输入域名 → **DNS 解析**拿到 IP → 浏览器向该 IP 发 HTTP 请求 → 服务器返回网页。"},
+        {"ico":"进阶","title":"延伸",
+         "body":"负载均衡、CDN、Anycast DNS 等都是基于 DNS 与 WWW 的工程演进。"}
+      ]
+    },
+    {
+      "layout": "objectives",
+      "eyebrow": "Recap",
+      "title": "本章小结",
+      "items": [
+        "**WWW**　万维网服务，通过 HTTP 把网页内容送达浏览器",
+        "**DNS**　把域名解析为 IP 地址，支撑「好记的网址」",
+        "**层次型命名**　树状结构，从根到叶子逐级定位",
+        "**查询方式**　递归查询 + 迭代查询 + 缓存",
+        "**记录类型**　A / AAAA / CNAME / MX / NS / SOA / PTR / TXT",
+        "**课程小结**　17 章覆盖 LAN / WAN / VLAN / 路由 / 应用服务——完成整个「计算机网络」入门闭环"
+      ]
+    }
+  ]
+}

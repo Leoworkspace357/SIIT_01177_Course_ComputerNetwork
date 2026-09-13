@@ -1,0 +1,192 @@
+{
+  "chapter": 12,
+  "title": "DHCP 服务器的配置",
+  "questions": [
+    {
+      "type": "single",
+      "q": "「DHCP」是哪种类型的服务？",
+      "options": {"A": "域名解析", "B": "动态主机配置", "C": "Web 服务", "D": "邮件服务"},
+      "answer": "B",
+      "explain": "DHCP = Dynamic Host Configuration Protocol 动态主机配置协议。"
+    },
+    {
+      "type": "single",
+      "q": "DHCP 客户端首次启动时，第一个发出的报文是：",
+      "options": {"A": "DHCP Offer", "B": "DHCP Request", "C": "DHCP Discover", "D": "DHCP ACK"},
+      "answer": "C",
+      "explain": "客户端首包广播 DHCP Discover 寻找服务器。"
+    },
+    {
+      "type": "single",
+      "q": "DHCP 服务器回应客户端的报文是：",
+      "options": {"A": "Discover", "B": "Offer", "C": "Request", "D": "ACK"},
+      "answer": "B",
+      "explain": "服务器回应 DHCP Offer（含 IP 地址等）。"
+    },
+    {
+      "type": "single",
+      "q": "客户端选定一个 DHCP Offer 后会发送：",
+      "options": {"A": "Discover", "B": "Offer", "C": "Request", "D": "ACK"},
+      "answer": "C",
+      "explain": "客户端广播 DHCP Request 告知所有服务器：我选了这一份。"
+    },
+    {
+      "type": "single",
+      "q": "DHCP 服务器确认租约的报文是：",
+      "options": {"A": "Discover", "B": "Offer", "C": "Request", "D": "ACK"},
+      "answer": "D",
+      "explain": "服务器最后广播 DHCP ACK，确认租约正式生效。"
+    },
+    {
+      "type": "single",
+      "q": "「DHCP 租期」到期前多久，客户端会**主动**续租？",
+      "options": {"A": "到期后", "B": "租期过半时", "C": "租期 1/4 时", "D": "租期 3/4 时"},
+      "answer": "B",
+      "explain": "租期过半时客户端发 Request 续租；过期则归还 IP。"
+    },
+    {
+      "type": "single",
+      "q": "DHCP 客户机应设置为：",
+      "options": {"A": "手动指定 IP", "B": "自动获得 IP / DNS", "C": "使用 127.0.0.1", "D": "不配置"},
+      "answer": "B",
+      "explain": "DHCP 客户机 IPv4 属性应设为「自动获得 IP 地址 / DNS 服务器地址」。"
+    },
+    {
+      "type": "single",
+      "q": "DHCP 服务器给客户机分配的**典型**信息**不**包括：",
+      "options": {"A": "IP 地址", "B": "子网掩码", "C": "默认网关", "D": "MAC 地址"},
+      "answer": "D",
+      "explain": "DHCP 分配 IP/掩码/网关/DNS；MAC 是客户机自身的，DHCP 不会分配。"
+    },
+    {
+      "type": "single",
+      "q": "在 Windows Server 上启用 DHCP 的步骤，第一步是：",
+      "options": {"A": "添加角色和功能 → DHCP 服务器", "B": "配置作用域", "C": "配置客户端", "D": "重启服务器"},
+      "answer": "A",
+      "explain": "Windows Server DHCP 第一步：添加角色和功能 → 选 DHCP 服务器。"
+    },
+    {
+      "type": "single",
+      "q": "「DHCP 作用域」是：",
+      "options": {"A": "可分配的 IP 地址范围", "B": "DHCP 服务器名称", "C": "路由器接口", "D": "DNS 区域"},
+      "answer": "A",
+      "explain": "作用域（Scope）= DHCP 服务器可分配的 IP 地址范围。"
+    },
+    {
+      "type": "single",
+      "q": "客户端收到 DHCP ACK 后发现 IP 被占用，会发送：",
+      "options": {"A": "DHCPDISCOVER", "B": "DHCPOFFER", "C": "DHCPDECLINE", "D": "DHCPRELEASE"},
+      "answer": "C",
+      "explain": "DHCPDECLINE 拒绝该 IP；客户端重新发起请求。"
+    },
+    {
+      "type": "single",
+      "q": "DHCP 默认租期通常是：",
+      "options": {"A": "1 小时", "B": "8 天", "C": "30 天", "D": "1 年"},
+      "answer": "B",
+      "explain": "DHCP 默认租期 8 天；按需可调短（如教室环境可设 1 小时）。"
+    },
+    {
+      "type": "multi",
+      "q": "「DHCP 的作用」包括：",
+      "options": {"A": "减少管理员负担", "B": "避免 IP 冲突", "C": "方便移动用户", "D": "提高地址利用率"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "DHCP 四大作用：减负、可靠、移动友好、地址复用。"
+    },
+    {
+      "type": "multi",
+      "q": "DHCP 工作过程的正确顺序：",
+      "options": {"A": "Discover", "B": "Offer", "C": "Request", "D": "ACK"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "DORA：Discover → Offer → Request → ACK。"
+    },
+    {
+      "type": "multi",
+      "q": "「DHCP 服务器」可分配的信息包括：",
+      "options": {"A": "IP 地址", "B": "子网掩码", "C": "默认网关", "D": "DNS 服务器"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "四项都是 DHCP 分配的内容；统称 TCP/IP 配置。"
+    },
+    {
+      "type": "multi",
+      "q": "「配置 Windows Server DHCP」需要的步骤：",
+      "options": {"A": "添加 DHCP 服务器角色", "B": "创建并激活作用域", "C": "配置作用域选项（网关、DNS）", "D": "客户端启用自动获取"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "A/B/C 服务器侧；D 客户端侧——缺一不可。"
+    },
+    {
+      "type": "multi",
+      "q": "「客户端确认 IP 后」会发生：",
+      "options": {"A": "ARP 检测该 IP 是否被占用", "B": "被占用 → 发 DHCPDECLINE 重新申请", "C": "未被占用 → 使用该 IP", "D": "立即停止所有通信"},
+      "answer": ["A", "B", "C"],
+      "explain": "客户端会做 ARP 探测；冲突则 DECLINE 重发；否则正常使用。"
+    },
+    {
+      "type": "multi",
+      "q": "「DHCP」与「静态 IP」相比，**优点**是：",
+      "options": {"A": "配置自动化", "B": "集中管理", "C": "避免地址冲突", "D": "比静态快"},
+      "answer": ["A", "B", "C"],
+      "explain": "DHCP 自动、中心化、防冲突；速度与静态 IP 没有本质差别。"
+    },
+    {
+      "type": "fill",
+      "text": "DHCP 工作四步：Discover → {{1}} → Request → {{2}}。",
+      "answer": ["Offer", "ACK"],
+      "explain": "DORA：Discover → Offer → Request → ACK。"
+    },
+    {
+      "type": "fill",
+      "text": "DHCP 客户端 IPv4 属性应设为「{{1}} IP 地址」「{{2}} DNS 服务器地址」。",
+      "answer": ["自动获得", "自动获得"],
+      "explain": "客户端要选「自动获得 IP / 自动获得 DNS」。"
+    },
+    {
+      "type": "fill",
+      "text": "DHCP 服务器分配的 IP 范围称为「{{1}}」；租约期限默认是 {{2}} 天。",
+      "answer": ["作用域", "8"],
+      "explain": "作用域 = 分配 IP 范围；默认租期 8 天。"
+    },
+    {
+      "type": "fill",
+      "text": "DHCP = {{1}} Host Configuration Protocol。",
+      "answer": ["Dynamic"],
+      "explain": "DHCP = Dynamic Host Configuration Protocol。"
+    },
+    {
+      "type": "fill",
+      "text": "DHCP 客户机首次启动会广播发出 {{1}} 报文寻找服务器。",
+      "answer": ["DHCP Discover"],
+      "explain": "客户端广播 DHCP Discover。"
+    },
+    {
+      "type": "fill",
+      "text": "DHCP 服务器回应 {{1}} 报文（包含 IP、掩码、网关、DNS）。",
+      "answer": ["DHCP Offer"],
+      "explain": "服务器回应 DHCP Offer。"
+    },
+    {
+      "type": "fill",
+      "text": "租期过半时客户端会主动发起 {{1}}；到期未续则{{2}} IP。",
+      "answer": ["续租请求（Request）", "归还"],
+      "explain": "过半续租；过期归还。"
+    },
+    {
+      "type": "fill",
+      "text": "客户端收到 ACK 后做 ARP 探测：若 IP 已被占用则发 {{1}} 重新申请。",
+      "answer": ["DHCPDECLINE"],
+      "explain": "ARP 冲突 → 发 DHCPDECLINE 拒绝该 IP。"
+    },
+    {
+      "type": "fill",
+      "text": "「DHCP」工作**不**经过 {{1}} 层；它是工作在 {{2}} 层的服务。",
+      "answer": ["传输（TCP/UDP 的服务端口 67/68 用 UDP，但 DHCP 是应用层服务）", "应用"],
+      "explain": "DHCP 是应用层服务，使用 UDP 67/68。"
+    },
+    {
+      "type": "fill",
+      "text": "DHCP 服务器端口是 UDP {{1}}；客户端是 UDP {{2}}。",
+      "answer": ["67", "68"],
+      "explain": "DHCP 服务器 UDP 67；客户端 UDP 68。"
+    }
+  ]
+}

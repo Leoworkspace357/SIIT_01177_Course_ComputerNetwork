@@ -1,0 +1,198 @@
+{
+  "chapter": 8,
+  "title": "认识局域网",
+  "questions": [
+    {
+      "type": "single",
+      "q": "「局域网 LAN」的典型覆盖范围是：",
+      "options": {"A": "≤ 2 km", "B": "2–10 km", "C": "10–100 km", "D": "全球"},
+      "answer": "A",
+      "explain": "LAN 通常覆盖一间办公室、一栋楼或一个园区（≤ 2 km）。"
+    },
+    {
+      "type": "single",
+      "q": "「城域网 MAN」覆盖范围是：",
+      "options": {"A": "≤ 2 km", "B": "2–10 km", "C": "10–100 km", "D": "全球"},
+      "answer": "B",
+      "explain": "MAN 覆盖一座城市（约 2–10 km）。"
+    },
+    {
+      "type": "single",
+      "q": "「广域网 WAN」是指：",
+      "options": {"A": "覆盖大型建筑", "B": "覆盖一座城市", "C": "跨城市、地区甚至全球", "D": "覆盖一个园区"},
+      "answer": "C",
+      "explain": "WAN 跨城市、地区甚至全球，是 Internet 的主干。"
+    },
+    {
+      "type": "single",
+      "q": "「Internet」属于：",
+      "options": {"A": "LAN", "B": "MAN", "C": "WAN", "D": "PAN"},
+      "answer": "C",
+      "explain": "Internet 是全球最大的 WAN。"
+    },
+    {
+      "type": "single",
+      "q": "「集线器（Hub）」主要工作在：",
+      "options": {"A": "物理层", "B": "数据链路层", "C": "网络层", "D": "传输层"},
+      "answer": "A",
+      "explain": "Hub 工作在物理层（仅做信号复制）。"
+    },
+    {
+      "type": "single",
+      "q": "「共享式局域网」的核心设备是：",
+      "options": {"A": "交换机", "B": "集线器", "C": "路由器", "D": "防火墙"},
+      "answer": "B",
+      "explain": "以集线器（HUB）为核心组建的网络称为共享式局域网。"
+    },
+    {
+      "type": "single",
+      "q": "「CSMA/CD」属于哪种介质访问控制方法？",
+      "options": {"A": "令牌环", "B": "令牌总线", "C": "带冲突检测的载波侦听", "D": "时分复用"},
+      "answer": "C",
+      "explain": "CSMA/CD = Carrier Sense Multiple Access with Collision Detection。"
+    },
+    {
+      "type": "single",
+      "q": "「令牌环（Token Ring）」介质访问控制的特点是：",
+      "options": {"A": "自由争用", "B": "通过令牌控制发送权", "C": "时分复用", "D": "轮询"},
+      "answer": "B",
+      "explain": "令牌环：只有拿到令牌的站点才能发送——避免冲突。"
+    },
+    {
+      "type": "single",
+      "q": "「FDDI」采用的网络拓扑是：",
+      "options": {"A": "总线", "B": "星型", "C": "环形（双环）", "D": "树型"},
+      "answer": "C",
+      "explain": "FDDI = 光纤分布式数据接口，双环结构。"
+    },
+    {
+      "type": "single",
+      "q": "「总线型拓扑」的主要缺点是：",
+      "options": {"A": "成本高", "B": "故障影响整个网络", "C": "布线复杂", "D": "速度慢（带宽不足）"},
+      "answer": "B",
+      "explain": "总线任一处故障 = 全网瘫痪；故障诊断困难。"
+    },
+    {
+      "type": "single",
+      "q": "「星型拓扑」在现代以太网中**几乎全部**采用，主要原因是：",
+      "options": {"A": "成本最低", "B": "易管理、易扩展、单点故障隔离", "C": "带宽最大", "D": "覆盖最广"},
+      "answer": "B",
+      "explain": "星型结构清晰、易扩展，单点故障只影响一台主机——主流。"
+    },
+    {
+      "type": "single",
+      "q": "「10BASE-T」中的「T」表示：",
+      "options": {"A": "Thin 同轴", "B": "Thick 同轴", "C": "Twisted Pair 双绞线", "D": "光纤"},
+      "answer": "C",
+      "explain": "T = Twisted Pair；F = Fiber；2/5 = 同轴。"
+    },
+    {
+      "type": "multi",
+      "q": "下列哪些**属于**常见的局域网拓扑？",
+      "options": {"A": "总线型", "B": "星型", "C": "环形", "D": "树型"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "5 种基本拓扑：总线、星、环、树、网状——LAN 常用前四种。"
+    },
+    {
+      "type": "multi",
+      "q": "「交换式局域网」相对于「共享式」的优点：",
+      "options": {"A": "独享带宽", "B": "全双工", "C": "冲突域隔离", "D": "无需任何设备"},
+      "answer": ["A", "B", "C"],
+      "explain": "交换式：独享带宽、全双工、隔离冲突域；仍需要交换机。"
+    },
+    {
+      "type": "multi",
+      "q": "「CSMA/CD」的工作步骤包括：",
+      "options": {"A": "先听后发", "B": "边听边发", "C": "冲突停止", "D": "延迟重发"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "CSMA/CD 十六字口诀：先听后发、边听边发、冲突停止、延迟重发。"
+    },
+    {
+      "type": "multi",
+      "q": "「FDDI」的特点包括：",
+      "options": {"A": "光纤介质", "B": "100 Mbps", "C": "双环拓扑", "D": "令牌环 MAC"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "FDDI = 光纤 + 100 Mbps + 双环 + 令牌环。"
+    },
+    {
+      "type": "multi",
+      "q": "「多集线器级联」的注意事项包括：",
+      "options": {"A": "10M 与 100M HUB 不能级联", "B": "网络中不能出现环路", "C": "两 HUB 间距离 ≤ 100m", "D": "任意拓扑都可"},
+      "answer": ["A", "B"],
+      "explain": "10M/100M HUB 不能混级联；共享式 LAN 严禁环路。"
+    },
+    {
+      "type": "multi",
+      "q": "「令牌环」中可能出现的角色：",
+      "options": {"A": "发送站点", "B": "接收站点", "C": "中间站点", "D": "空闲站点"},
+      "answer": ["A", "B", "C"],
+      "explain": "令牌环中每站轮流持有令牌；空闲时无发送站。"
+    },
+    {
+      "type": "fill",
+      "text": "LAN 的覆盖范围通常 ≤ {{1}} km；MAN 是 {{2}} km；WAN ≥ 10 km。",
+      "answer": ["2", "2–10"],
+      "explain": "LAN ≤ 2 km；MAN 2–10 km；WAN ≥ 10 km（直到全球）。"
+    },
+    {
+      "type": "fill",
+      "text": "「共享式局域网」使用 {{1}} 作为核心设备；「交换式局域网」使用 {{2}}。",
+      "answer": ["集线器（HUB）", "交换机"],
+      "explain": "共享式 LAN = HUB；交换式 LAN = 交换机。"
+    },
+    {
+      "type": "fill",
+      "text": "CSMA/CD 中文是「带冲突检测的 {{1}} 多路访问」方法。",
+      "answer": ["载波侦听"],
+      "explain": "CS = 载波侦听；MA = 多路访问；CD = 冲突检测。"
+    },
+    {
+      "type": "fill",
+      "text": "令牌环介质访问控制中，只有获得 {{1}} 的站点才能发送数据。",
+      "answer": ["令牌"],
+      "explain": "令牌（Token）是发送权限；持有令牌才可发送，避免冲突。"
+    },
+    {
+      "type": "fill",
+      "text": "FDDI 中文名为「光纤分布式 {{1}} 接口」，速率 {{2}} Mbps。",
+      "answer": ["数据", "100"],
+      "explain": "FDDI = Fiber Distributed Data Interface，100 Mbps。"
+    },
+    {
+      "type": "fill",
+      "text": "FDDI 采用 {{1}} 环拓扑，正常时仅使用一个环；第一环失效时{{2}}环工作。",
+      "answer": ["双", "第二"],
+      "explain": "双环结构提供冗余；故障时第二环接替工作。"
+    },
+    {
+      "type": "fill",
+      "text": "以太网 100BASE-TX 标准使用 {{1}} 类 UTP，每段最长 {{2}} 米。",
+      "answer": ["5", "100"],
+      "explain": "100BASE-TX = 5 类双绞线 + ≤ 100 米。"
+    },
+    {
+      "type": "fill",
+      "text": "10 Mb/s HUB 级联时，任意两节点间最多经过 {{1}} 个 HUB、最多 5 个网段。",
+      "answer": ["4"],
+      "explain": "10M HUB 级联 5-4-3 规则：4 个 HUB、5 个网段、3 个有节点。"
+    },
+    {
+      "type": "fill",
+      "text": "「{{1}}」是「共享式以太网」的核心，所有连入的主机处于同一冲突域。",
+      "answer": ["集线器"],
+      "explain": "共享式 LAN 的核心是 HUB，所有主机共享总线、共享冲突域。"
+    },
+    {
+      "type": "fill",
+      "text": "「{{1}}」是「交换式以太网」的核心，每个端口独立冲突域。",
+      "answer": ["交换机"],
+      "explain": "交换机隔离冲突域；每端口独享带宽。"
+    },
+    {
+      "type": "fill",
+      "text": "「{{1}}」解决了 FDDI 单环断裂全网瘫痪的问题。",
+      "answer": ["双环结构"],
+      "explain": "FDDI 用双环（逆向旋转）提供冗余；故障时逻辑环回。"
+    }
+  ]
+}

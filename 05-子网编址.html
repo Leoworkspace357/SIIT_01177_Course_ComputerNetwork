@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 5 章  子网编址</title>
+<style>
+/* =====================================================================
+     LINEAR DARK · design tokens
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --status-good:#4cb782; --status-warning:#f2c94c;
+    --status-serious:#eb8c4a; --status-critical:#e34948;
+    --ease:cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-out:cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-soft:cubic-bezier(0.45, 0, 0.15, 1);
+    --dur-slide:900ms; --dur-frag:720ms;
+    --stagger:90ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{
+    --bg:#08080a; --bg-elev-1:#0d0d10; --bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f; --ink:#f7f8f8; --ink-2:#b4b8c0;
+    --ink-3:#8a8f98; --ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;
+  }
+  .deck[data-theme="light"]{
+    --bg:#fbfbfc; --bg-elev-1:#fff; --bg-elev-2:#f4f4f7;
+    --bg-elev-3:#ebebef; --ink:#0a0a0c; --ink-2:#4a4d57;
+    --ink-3:#6f727a; --ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:6vh 7vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(36px) scale(.985);
+    transition:opacity var(--dur-slide) var(--ease-soft),
+      transform var(--dur-slide) var(--ease-soft);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px) scale(.985);
+    transition:opacity 540ms var(--ease-soft),transform 540ms var(--ease-soft)}
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2);transition:border-color 400ms var(--ease)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6vw,5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h3{font-size:1.05rem;margin:1rem 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(.95rem,1.05vw,1.1rem);line-height:1.55;color:var(--ink-2)}
+  .lead{font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--ink-2);
+    max-width:60ch;margin-top:.3rem;line-height:1.5;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--accent)}
+  code,kbd{font-family:var(--font-mono);font-size:.86em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+  ul.clean{list-style:none;padding:0;margin:1.4rem 0 0;max-width:64ch}
+  ul.clean>li{padding:.9rem 0 .9rem 1.6rem;position:relative;
+    border-bottom:1px solid var(--hairline);
+    transition:border-color 300ms var(--ease)}
+  ul.clean>li:last-child{border-bottom:0}
+  ul.clean>li::before{content:"";position:absolute;left:0;top:1.4rem;
+    width:6px;height:6px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--accent-ring)}
+  ol.steps{counter-reset:step;list-style:none;padding:0;
+    margin:1.6rem 0 0;max-width:64ch}
+  ol.steps>li{counter-increment:step;padding:1.4rem 0 1.4rem 4rem;
+    position:relative;border-top:1px solid var(--hairline)}
+  ol.steps>li:last-child{border-bottom:1px solid var(--hairline)}
+  ol.steps>li::before{content:counter(step,decimal-leading-zero);
+    position:absolute;left:0;top:1.45rem;font-family:var(--font-mono);
+    font-size:.82rem;color:var(--accent);font-weight:500;letter-spacing:.04em}
+  .grid-2{display:grid;grid-template-columns:1.15fr 1fr;gap:2rem;
+    align-items:start;margin-top:1.4rem}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.4rem}
+  .card{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.4rem 1.5rem;background:var(--bg-elev-2);
+    transition:border-color 400ms var(--ease),transform 400ms var(--ease),
+      background 400ms var(--ease)}
+  .card:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .card.compact{padding:1rem 1.2rem}
+  .card h3{margin-top:.3rem}
+  .card .tag{display:inline-flex;align-items:center;gap:.35rem;
+    font-family:var(--font-mono);font-size:.68rem;letter-spacing:.04em;
+    color:var(--accent);margin-bottom:.6rem;font-weight:500}
+  .card .tag::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--accent)}
+  table.t{width:100%;border-collapse:collapse;margin-top:1.4rem;
+    font-variant-numeric:tabular-nums;
+    border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  table.t th,table.t td{text-align:left;padding:.85rem 1rem;
+    border-bottom:1px solid var(--hairline);font-size:.95rem;color:var(--ink-2);
+    background:var(--bg-elev-2)}
+  table.t th{color:var(--ink-3);font-weight:500;
+    border-bottom:1px solid var(--hairline-strong);
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--bg-elev-1)}
+  table.t tr:last-child td{border-bottom:0}
+  table.t tbody tr{transition:background 300ms var(--ease)}
+  table.t tbody tr:hover td{background:var(--bg-elev-3)}
+  blockquote{margin:1.4rem 0;padding:.4rem 0 .4rem 1.2rem;
+    border-left:2px solid var(--accent);color:var(--ink-2);font-style:normal;
+    font-size:clamp(1.05rem,1.25vw,1.22rem);line-height:1.55}
+  .callout{display:flex;gap:1.2rem;padding:1.1rem 1.3rem;border-radius:10px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    margin-top:1rem;transition:border-color 300ms var(--ease)}
+  .callout:hover{border-color:var(--accent-ring)}
+  .callout .ico{flex:none;font-family:var(--font-mono);font-weight:500;
+    font-size:.8rem;color:var(--accent);padding-top:.15rem}
+  .callout p{margin:0;color:var(--ink-2)}
+  .callout p+p{margin-top:.3rem}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.4rem}
+  .chip{padding:.45rem .9rem;border-radius:999px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    font-size:.92rem;color:var(--ink);
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .chip:hover{border-color:var(--accent-ring);background:var(--accent-soft)}
+  /* ============ IP bytes visual ============ */
+  .ip-bytes{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;
+    margin-top:1.4rem;max-width:680px}
+  .ip-byte{border:1px solid var(--hairline);border-radius:10px;
+    background:var(--bg-elev-2);padding:.9rem .7rem;text-align:center;
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .ip-byte:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .ip-byte .binary{font-family:var(--font-mono);font-size:.74rem;
+    color:var(--ink-3);letter-spacing:.04em;margin-bottom:.35rem;
+    word-break:break-all;line-height:1.4}
+  .ip-byte .decimal{font-family:var(--font-mono);font-size:1.3rem;
+    color:var(--ink);font-weight:600;letter-spacing:.02em}
+  .ip-byte .label{font-family:var(--font-mono);font-size:.62rem;
+    color:var(--accent);margin-top:.35rem;letter-spacing:.04em}
+  /* ============ bit role visual ============ */
+  .bit-role{display:grid;grid-template-columns:repeat(32,1fr);gap:0;
+    margin-top:1.4rem;max-width:760px}
+  .bit-role span{padding:.5rem 0;text-align:center;
+    font-family:var(--font-mono);font-size:.72rem;
+    color:var(--ink-2);border:1px solid var(--hairline);
+    transition:background 300ms var(--ease),color 300ms var(--ease)}
+  .bit-role span.net{background:var(--accent-soft);color:var(--accent)}
+  .bit-role span.host{background:rgba(76,183,130,.08);color:var(--status-good)}
+  .bit-role span.subnet{background:rgba(235,140,74,.10);color:var(--status-serious)}
+  .bit-legend{display:flex;gap:1.6rem;margin-top:1rem;font-size:.85rem;
+    color:var(--ink-3);font-family:var(--font-mono);letter-spacing:.02em}
+  .bit-legend .dot{display:inline-block;width:9px;height:9px;
+    border-radius:50%;margin-right:.4rem;vertical-align:middle}
+  /* ============ Case box ============ */
+  .case-box{border:1px solid var(--accent-ring);border-radius:10px;
+    padding:1.2rem 1.4rem;background:var(--bg-elev-2);
+    margin-top:1.4rem;transition:border-color 300ms var(--ease)}
+  .case-box .case-title{font-family:var(--font-mono);font-size:.7rem;
+    color:var(--accent);margin-bottom:.6rem;letter-spacing:.04em}
+  .case-box p{margin:.4rem 0;color:var(--ink-2);font-size:.98rem}
+  /* ============ Subnet diagram ============ */
+  .subnet-grid{display:grid;gap:.8rem;margin-top:1.6rem;max-width:760px}
+  .subnet-row{border:1px solid var(--hairline);border-radius:8px;
+    padding:.7rem .9rem;background:var(--bg-elev-2);
+    display:grid;grid-template-columns:60px 1.4fr 1.4fr 1fr;gap:.9rem;
+    align-items:center;font-family:var(--font-mono);font-size:.82rem;
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .subnet-row:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .subnet-row .label{color:var(--accent);font-weight:600}
+  .subnet-row .net-addr{color:var(--ink)}
+  .subnet-row .range{color:var(--status-good)}
+  .subnet-row .hosts{color:var(--ink-3);text-align:right;font-size:.7rem;
+    letter-spacing:.04em}
+  /* ============ AND operation visual ============ */
+  .and-row{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.8rem;
+    align-items:center;margin-top:1.2rem;font-family:var(--font-mono);
+    font-size:.92rem}
+  .and-row .col{border:1px solid var(--hairline);border-radius:8px;
+    padding:.6rem .8rem;background:var(--bg-elev-2);text-align:center;
+    transition:border-color 300ms var(--ease)}
+  .and-row .col:hover{border-color:var(--accent-ring)}
+  .and-row .col .lbl{color:var(--ink-3);font-size:.66rem;margin-bottom:.3rem;
+    letter-spacing:.04em}
+  .and-row .col .val{color:var(--ink);font-weight:600}
+  .and-row .op{color:var(--accent);font-size:1.3rem;font-weight:600}
+  /* ============ Binary 32-bit grid ============ */
+  .b32{display:grid;grid-template-columns:repeat(32,1fr);gap:2px;
+    max-width:760px;margin-top:1.2rem}
+  .b32 span{padding:.4rem 0;text-align:center;
+    font-family:var(--font-mono);font-size:.7rem;
+    color:var(--ink-2);background:var(--bg-elev-2);
+    border-radius:3px;transition:background 300ms var(--ease),color 300ms var(--ease)}
+  .b32 span.net{background:var(--accent-soft);color:var(--accent)}
+  .b32 span.host{background:rgba(76,183,130,.08);color:var(--status-good)}
+  .b32 span.subnet{background:rgba(235,140,74,.10);color:var(--status-serious)}
+  .fragment{opacity:0;transform:translateY(22px) scale(.97);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .fragment.visible{opacity:1;transform:translateY(0) scale(1);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.72rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:3px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;overflow-y:auto}
+  .sidebar .nav-dot{width:3px;height:3px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;flex:none;
+    transition:opacity 300ms var(--ease),transform 300ms var(--ease),
+      background 300ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 6px var(--accent-ring);transform:scale(1.4)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
+    letter-spacing:.02em;transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  .deck.overview .stage{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+    padding:80px 28px 80px 72px;overflow:auto;height:100vh;inset:0}
+  .deck.overview .slide{position:relative;inset:auto;aspect-ratio:16/9;
+    padding:1rem;border:1px solid var(--hairline);border-radius:10px;
+    background:var(--bg-elev-1);cursor:pointer;overflow:hidden;
+    transform:none!important;opacity:1!important}
+  .deck.overview .slide.active{border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent),0 0 16px var(--accent-glow)}
+  .deck.overview .slide>*{transform:scale(.18);transform-origin:top left}
+  .help{position:fixed;inset:0;background:rgba(8,8,10,.65);
+    backdrop-filter:blur(8px);display:none;align-items:center;
+    justify-content:center;z-index:40}
+  .help.open{display:flex;animation:helpFade 280ms var(--ease)}
+  @keyframes helpFade{from{opacity:0}to{opacity:1}}
+  .help .panel{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:12px;padding:1.8rem 2.2rem;max-width:520px;min-width:380px;
+    box-shadow:0 24px 80px rgba(0,0,0,.5);animation:helpIn 380ms var(--ease)}
+  @keyframes helpIn{from{opacity:0;transform:translateY(20px) scale(.97)}
+    to{opacity:1;transform:translateY(0) scale(1)}}
+  .help h3{margin-top:0}
+  .help .row{display:flex;justify-content:space-between;
+    padding:.55rem 0;border-bottom:1px solid var(--hairline)}
+  .help .row:last-child{border-bottom:0}
+  .help .row span:last-child{font-family:var(--font-mono);font-size:.82em;color:var(--ink-3)}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.chip,.card,.toolbar button,
+    .help,.help .panel,.progress,.nav-dot{transition-duration:0ms!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">第 5 章  子网编址  <strong>|  Leonard F. Li</strong></div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">31</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide title active">
+      <p class="eyebrow">Chapter 05  |  Subnetting</p>
+      <h1 class="title-h">子网编址<br><span class="accent">Subnetting</span></h1>
+      <p class="lead">把一个大网络切成<strong>多个小子网</strong>——节省 IP、提高效率、隔离广播域。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        Instructor · Leonard F. Li　　·　　Period · 05　　·　　Spring 2026
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Objectives</p>
+      <h2>通过本次课，你将能够：</h2>
+      <ol class="steps">
+        <li class="fragment">解释<strong>为什么要划分子网</strong>——A/B/C 类的浪费</li>
+        <li class="fragment">用<strong>二进制</strong>理解子网号的「借位」过程</li>
+        <li class="fragment">说出<strong>子网掩码</strong>的结构与作用</li>
+        <li class="fragment">用 IP 与掩码做<strong>按位 AND 求网络地址</strong></li>
+        <li class="fragment">算出一个子网的<strong>主机范围与广播地址</strong></li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Agenda</p>
+      <h2>本章结构</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>任务一　认识子网</strong>　——借位划分子网号</li>
+        <li class="fragment"><strong>任务二　认识子网掩码</strong>　——按位 AND 求网络地址</li>
+        <li class="fragment"><strong>案例　动手算一算</strong>　——B 类借 8 位、借 4 位</li>
+        <li class="fragment"><strong>实战　子网掩码计算</strong>　——主机范围</li>
+      </ul>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 01</p>
+      <h2>任务一 · 认识子网</h2>
+      <p class="lead">为什么分类 IP 不够用？怎么划分子网？</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Why Subnets</p>
+      <h2>为什么要划分子网？</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">问题</span>
+          <h3>C 类也浪费</h3>
+          <p class="muted">随着个人电脑普及，中小型网络越来越多；即使是 <strong>C 类地址</strong>，大多数情况下也会浪费大部分地址。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">根源</span>
+          <h3>分类太死板</h3>
+          <p class="muted">A 类给 1677 万台不够分配，B 类给 6.5 万台又太多——<em>「一个网段只能是一个 size」</em>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">方案</span>
+          <h3>划分子网</h3>
+          <p class="muted">从<strong>主机号部分借位</strong>当作子网号——一个 C 类可分成多个小子网。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">好处</span>
+          <h3>提高利用率</h3>
+          <p class="muted">每个子网大小<strong>正合适</strong>，减少浪费；同时隔离<em>广播域</em>，提升性能。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">How</p>
+      <h2>怎么划分子网？</h2>
+      <ol class="steps">
+        <li class="fragment">将 IP 地址的<strong>主机号部分</strong>进一步划分为 <strong>子网号 + 主机号</strong></li>
+        <li class="fragment">从主机号部分<strong>「借」</strong> k 位，指定为子网号</li>
+        <li class="fragment">子网号所占位数<strong>越多</strong>，每个子网可容纳的主机<strong>越少</strong></li>
+        <li class="fragment"><strong>至少借 2 位</strong>　避免全 0 / 全 1 的无效子网号</li>
+        <li class="fragment"><strong>主机号至少留 2 位</strong>　每个子网至少 2 台可用主机</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Visual</p>
+      <h2>「借位」的过程 · C 类 /26</h2>
+      <p class="muted">以 C 类 <code>192.168.1.0</code> 借 2 位为例——32 位二进制：</p>
+      <div class="b32 fragment" style="margin-top:1.4rem">
+        <span class="net">1</span><span class="net">1</span><span class="net">0</span><span class="net">0</span><span class="net">0</span><span class="net">0</span><span class="net">0</span><span class="net">0</span>
+        <span class="net">1</span><span class="net">0</span><span class="net">1</span><span class="net">0</span><span class="net">1</span><span class="net">0</span><span class="net">0</span><span class="net">0</span>
+        <span class="net">0</span><span class="net">0</span><span class="net">0</span><span class="net">0</span><span class="net">0</span><span class="net">0</span><span class="net">0</span><span class="net">0</span>
+        <span class="subnet">S</span><span class="subnet">S</span><span class="host">H</span><span class="host">H</span><span class="host">H</span><span class="host">H</span><span class="host">H</span><span class="host">H</span>
+      </div>
+      <div class="bit-legend fragment">
+        <span><span class="dot" style="background:var(--accent)"></span>网络号 (24 位)</span>
+        <span><span class="dot" style="background:var(--status-serious)"></span>子网号 (借 2 位)</span>
+        <span><span class="dot" style="background:var(--status-good)"></span>主机号 (剩 6 位)</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        子网掩码 = <code>11111111.11111111.11111111.<strong>11</strong>000000</code> = <code>255.255.255.192</code>　·　每个子网 64 个地址，2 个子网
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Borrow Range</p>
+      <h2>可借用位数一览</h2>
+      <table class="t">
+        <thead><tr><th>类别</th><th>原始主机位</th><th>可借位数 k</th><th>子网数 2ᵏ−2</th><th>每子网主机数 2^(24−k)−2</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>A 类</td><td>24</td><td>2 – 22</td><td>2 – 4 194 302</td><td>4 194 302 – 2</td></tr>
+          <tr class="fragment"><td>B 类</td><td>16</td><td>2 – 14</td><td>2 – 16 382</td><td>16 382 – 2</td></tr>
+          <tr class="fragment"><td>C 类</td><td>8</td><td>2 – 6</td><td>2 – 62</td><td>62 – 2</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        规律：要求主机位 ≥ 2，所以 C 类最多借 6 位——留 2 位主机（每子网最多 2 台）。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Reserved</p>
+      <h2>子网中的特殊地址</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">规则</span>
+          <h3>子网号全 0 / 全 1</h3>
+          <p class="muted">二进制全「0」或全「1」的子网号<strong>不能分配</strong>给任何子网。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">子网地址</span>
+          <h3>主机号全 0</h3>
+          <p class="muted">以主机号二进制全「0」结尾——代表<em>「这一个子网」</em>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">子网广播</span>
+          <h3>主机号全 1</h3>
+          <p class="muted">以主机号二进制全「1」结尾——向该子网<em>所有主机</em>广播。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">有限广播</span>
+          <h3>32 位全 1</h3>
+          <p class="muted"><code>255.255.255.255</code>　广播被限制在<strong>本地物理网络</strong>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Example · B Class /24</p>
+      <h2>例：B 类网络 130.66.0.0，借 8 位</h2>
+      <div class="callout fragment">
+        <div class="ico">输入</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>原始网络 130.66.0.0</strong></p>
+          <p class="muted" style="margin-top:.3rem">B 类地址，主机位共 16 位。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">划分</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>借 8 位作子网号</strong></p>
+          <p class="muted" style="margin-top:.3rem">主机号分为「8 位子网号 + 8 位主机号」。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">结果</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>254 个子网 × 254 台主机</strong></p>
+          <p class="muted" style="margin-top:.3rem">子网号范围 00000001 – 11111110；主机号范围 00000001 – 11111110。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Example · B Class /20</p>
+      <h2>例：B 类地址 172.17.18.1，借 4 位</h2>
+      <div class="callout fragment">
+        <div class="ico">IP</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>172.17.18.1</strong></p>
+          <p class="muted" style="margin-top:.3rem">二进制：10101100 00010001 0001<span style="color:var(--status-serious)">0010</span> 00000001（第三字节前 4 位是子网号）</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">划分</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>借 4 位作子网号</strong></p>
+          <p class="muted" style="margin-top:.3rem">子网值 = <code>0001</code>（第三字节高 4 位）。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">子网</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>172.17.16.0</strong></p>
+          <p class="muted" style="margin-top:.3rem">第三字节 = <code>00010000</code> ⇒ 16，本子网就是 <strong>172.17.16.0</strong>。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">范围</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>172.17.16.0 – 172.17.31.255</strong></p>
+          <p class="muted" style="margin-top:.3rem">借 4 位后子网跨度 = 16（2⁴）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">C Class · Subnets</p>
+      <h2>C 类网络的子网划分速查表</h2>
+      <table class="t">
+        <thead><tr><th>借位数 k</th><th>子网掩码</th><th>/N</th><th>子网数 2ᵏ−2</th><th>每子网主机数</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>2</td><td>255.255.255.192</td><td>/26</td><td>2</td><td>62</td></tr>
+          <tr class="fragment"><td>3</td><td>255.255.255.224</td><td>/27</td><td>6</td><td>30</td></tr>
+          <tr class="fragment"><td>4</td><td>255.255.255.240</td><td>/28</td><td>14</td><td>14</td></tr>
+          <tr class="fragment"><td>5</td><td>255.255.255.248</td><td>/29</td><td>30</td><td>6</td></tr>
+          <tr class="fragment"><td>6</td><td>255.255.255.252</td><td>/30</td><td>62</td><td>2</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        C 类原始主机位 8 位，借走 k 位后剩余 8−k 位；要求 ≥ 2 ⇒ k ≤ 6。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Subnet Map</p>
+      <h2>C 类 192.168.1.0 /28 · 14 个子网</h2>
+      <div class="subnet-grid">
+        <div class="subnet-row fragment"><span class="label">#01</span><span class="net-addr">192.168.1.0</span><span class="range">.1 – .14</span><span class="hosts">14 hosts</span></div>
+        <div class="subnet-row fragment"><span class="label">#02</span><span class="net-addr">192.168.1.16</span><span class="range">.17 – .30</span><span class="hosts">14 hosts</span></div>
+        <div class="subnet-row fragment"><span class="label">#03</span><span class="net-addr">192.168.1.32</span><span class="range">.33 – .46</span><span class="hosts">14 hosts</span></div>
+        <div class="subnet-row fragment"><span class="label">#04</span><span class="net-addr">192.168.1.48</span><span class="range">.49 – .62</span><span class="hosts">14 hosts</span></div>
+        <div class="subnet-row fragment"><span class="label">#05</span><span class="net-addr">192.168.1.64</span><span class="range">.65 – .78</span><span class="hosts">14 hosts</span></div>
+        <div class="subnet-row fragment"><span class="label">...</span><span class="net-addr">...</span><span class="range">...</span><span class="hosts">...</span></div>
+        <div class="subnet-row fragment"><span class="label">#14</span><span class="net-addr">192.168.1.224</span><span class="range">.225 – .238</span><span class="hosts">14 hosts</span></div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
+        步长 = 16（2⁴）。每 16 个 IP 一个子网，共 14 个可用子网、每子网 14 台可用主机。
+      </p>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 02</p>
+      <h2>任务二 · 子网掩码</h2>
+      <p class="lead">怎么从 IP 还原出网络地址？答案——「<strong>按位 AND</strong>」。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Mask</p>
+      <h2>什么是子网掩码？</h2>
+      <ul class="clean">
+        <li class="fragment">子网掩码采用<strong>32 位二进制</strong>　与 IP 一一对应</li>
+        <li class="fragment">与 IP 的<strong>网络号 + 子网号</strong>对应的位用 <strong>「1」</strong></li>
+        <li class="fragment">与 IP 的<strong>主机号</strong>对应的位用 <strong>「0」</strong></li>
+        <li class="fragment">结合 IP + 掩码 → 判断<em>网络号、子网号、主机号</em></li>
+        <li class="fragment">把 IP 与掩码<strong>按位 AND</strong>，得到的就是<em>网络地址</em></li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Default Masks</p>
+      <h2>标准 IP 地址的子网掩码</h2>
+      <table class="t">
+        <thead><tr><th>地址类型</th><th>点分十进制</th><th>二进制位数</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>A 类</td><td>255.0.0.0</td><td><code>11111111 00000000 00000000 00000000</code></td></tr>
+          <tr class="fragment"><td>B 类</td><td>255.255.0.0</td><td><code>11111111 11111111 00000000 00000000</code></td></tr>
+          <tr class="fragment"><td>C 类</td><td>255.255.255.0</td><td><code>11111111 11111111 11111111 00000000</code></td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        未划分子网时，三类 IP 的<strong>默认</strong>子网掩码如上。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">AND</p>
+      <h2>按位 AND · 求网络地址</h2>
+      <p class="muted">规则：<strong>1 AND 1 = 1</strong>；<strong>1 AND 0 = 0</strong>；<strong>0 AND 0 = 0</strong>。</p>
+      <div class="and-row fragment" style="margin-top:1.6rem">
+        <div class="col"><div class="lbl">IP 地址</div><div class="val">172.25.17.51</div></div>
+        <div class="op">AND</div>
+        <div class="col"><div class="lbl">子网掩码</div><div class="val">255.255.0.0</div></div>
+        <div class="op">=</div>
+        <div class="col"><div class="lbl">网络地址</div><div class="val">172.25.0.0</div></div>
+      </div>
+      <div class="and-row fragment">
+        <div class="col"><div class="lbl">IP 地址</div><div class="val">172.25.17.51</div></div>
+        <div class="op">AND</div>
+        <div class="col"><div class="lbl">子网掩码</div><div class="val">255.255.255.0</div></div>
+        <div class="op">=</div>
+        <div class="col"><div class="lbl">网络地址</div><div class="val">172.25.17.0</div></div>
+      </div>
+      <div class="and-row fragment">
+        <div class="col"><div class="lbl">IP 地址</div><div class="val">172.25.17.51</div></div>
+        <div class="op">AND</div>
+        <div class="col"><div class="lbl">子网掩码</div><div class="val">255.255.240.0</div></div>
+        <div class="op">=</div>
+        <div class="col"><div class="lbl">网络地址</div><div class="val">172.25.16.0</div></div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
+        同一 IP + 不同掩码 → 不同网络——<em>「掩码决定你是哪一栋楼」</em>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Example · B /24</p>
+      <h2>按位 AND · 完整 32 位展示</h2>
+      <p class="muted">172.25.17.51 AND 255.255.255.0 = ?</p>
+      <table class="t" style="margin-top:1.4rem">
+        <thead><tr><th>段</th><th>位 1</th><th>位 2</th><th>位 3</th><th>位 4</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>IP 地址</td><td>172</td><td>25</td><td>17</td><td>51</td></tr>
+          <tr class="fragment"><td>二进制</td><td><code>10101100</code></td><td><code>00011001</code></td><td><code>00010001</code></td><td><code>00110011</code></td></tr>
+          <tr class="fragment"><td>掩码</td><td><code>11111111</code></td><td><code>11111111</code></td><td><code>11111111</code></td><td><code>00000000</code></td></tr>
+          <tr class="fragment"><td>按位 AND</td><td><code>10101100</code></td><td><code>00011001</code></td><td><code>00010001</code></td><td><code>00000000</code></td></tr>
+          <tr class="fragment"><td>网络地址</td><td>172</td><td>25</td><td>17</td><td>0</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 03</p>
+      <h2>案例 · 动手算子网</h2>
+      <p class="lead">从「给出 IP + 掩码」到「算出子网范围」的完整过程。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 01</p>
+      <h2>案例 1 · B 类 /24 借 8 位</h2>
+      <div class="case-box">
+        <div class="case-title">题目</div>
+        <p>已知 IP = <code>172.25.17.51</code>，子网掩码 = <code>255.255.255.0</code>。求该主机所在的<strong>子网</strong>、<strong>主机范围</strong>与<strong>广播地址</strong>。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 1 · 求网络地址</div>
+        <p>IP AND 掩码 → <code>172.25.17.0</code>　·　子网号 = 17</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 2 · 求主机范围</div>
+        <p>网络地址 + 1 到广播地址 − 1 → <strong>172.25.17.1 – 172.25.17.254</strong></p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 3 · 求广播地址</div>
+        <p>网络地址 + 主机位全 1 → <strong>172.25.17.255</strong></p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-good)">
+        <div class="case-title" style="color:var(--status-good)">结论</div>
+        <p>✅ 子网 <code>172.25.17.0/24</code>　·　可用主机 254 台　·　广播 <code>172.25.17.255</code></p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 02</p>
+      <h2>案例 2 · B 类 /20 借 4 位</h2>
+      <div class="case-box">
+        <div class="case-title">题目</div>
+        <p>已知 IP = <code>172.25.17.51</code>，子网掩码 = <code>255.255.240.0</code>。求子网、范围、广播。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 1 · 分析借位</div>
+        <p>B 类原始 /16，借 4 位 → /20。第 3 字节高 4 位为子网号，低 4 位为主机号。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 2 · 求网络地址</div>
+        <p>第 3 字节 17 = <code>0001 0001</code>，AND 掩码 <code>1111 0000</code> → <code>0001 0000</code> = 16　·　网络地址 = <code>172.25.16.0</code></p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 3 · 求主机范围</div>
+        <p>第 3 字节剩余 4 位 = 0–15 (12 跳过) → <strong>172.25.16.1 – 172.25.31.254</strong>　·　可用主机 4094 台</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 4 · 求广播地址</div>
+        <p>主机位全 1 → 第 3 字节 = <code>0001 1111</code> = 31　·　广播 = <code>172.25.31.255</code></p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-good)">
+        <div class="case-title" style="color:var(--status-good)">结论</div>
+        <p>✅ 子网 <code>172.25.16.0/20</code>　·　可用主机 4094 台　·　广播 <code>172.25.31.255</code></p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 03</p>
+      <h2>案例 3 · C 类 /29 借 5 位</h2>
+      <div class="case-box">
+        <div class="case-title">题目</div>
+        <p>已知 IP = <code>192.168.5.121</code>，子网掩码 = <code>255.255.255.248</code>。求子网、范围、广播。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 1 · 分析借位</div>
+        <p>C 类原始 /24，借 5 位 → /29。第 4 字节高 5 位为子网号，低 3 位为主机号。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 2 · 求网络地址</div>
+        <p>第 4 字节 121 = <code>111 1001</code>，AND 掩码 <code>11111 000</code> → <code>111 1000</code> = 120　·　网络地址 = <code>192.168.5.120</code></p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 3 · 求范围与广播</div>
+        <p>主机位 3 位 → 8 个地址（去掉全 0、全 1 = 6 台）　·　范围 <strong>192.168.5.121 – 192.168.5.126</strong>　·　广播 <code>192.168.5.127</code></p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-good)">
+        <div class="case-title" style="color:var(--status-good)">结论</div>
+        <p>✅ 子网 <code>192.168.5.120/29</code>　·　可用主机 6 台　·　广播 <code>192.168.5.127</code></p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 04</p>
+      <h2>案例 4 · 同 IP 不同掩码</h2>
+      <div class="case-box">
+        <div class="case-title">题目</div>
+        <p>主机 A 配置 <code>192.168.1.1/30</code>，主机 B 也配 <code>192.168.1.1/24</code>。它们能直接通信吗？</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">分析 · 主机 A</div>
+        <p><code>192.168.1.1</code> AND <code>255.255.255.252</code> = <strong>192.168.1.0/30</strong>　·　可用主机 2 台</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">分析 · 主机 B</div>
+        <p><code>192.168.1.1</code> AND <code>255.255.255.0</code> = <strong>192.168.1.0/24</strong>　·　可用主机 254 台</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">解读</div>
+        <p>主机 A 认为自己属于 <code>192.168.1.0/30</code>　·　主机 B 认为自己属于 <code>192.168.1.0/24</code></p>
+        <p>实际两个子网在<strong>逻辑上不同</strong>（A 范围 0–3，B 范围 0–255）——会失败</p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-critical)">
+        <div class="case-title" style="color:var(--status-critical)">结论</div>
+        <p>❌ <strong>无法直接通信</strong>——即使 IP 相同，掩码不同就视为不同子网。两端必须<strong>使用相同掩码</strong>。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Compute Range</p>
+      <h2>B 类 /19 借 3 位 · 全部 6 个子网</h2>
+      <table class="t">
+        <thead><tr><th>子网</th><th>网络地址</th><th>主机范围</th><th>可用主机数</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>子网一</td><td>172.25.0.0</td><td>172.25.0.1 – 172.25.31.254</td><td>8190</td></tr>
+          <tr class="fragment"><td>子网二</td><td>172.25.32.0</td><td>172.25.32.1 – 172.25.63.254</td><td>8190</td></tr>
+          <tr class="fragment"><td>子网三</td><td>172.25.64.0</td><td>172.25.64.1 – 172.25.95.254</td><td>8190</td></tr>
+          <tr class="fragment"><td>子网四</td><td>172.25.96.0</td><td>172.25.96.1 – 172.25.127.254</td><td>8190</td></tr>
+          <tr class="fragment"><td>子网五</td><td>172.25.128.0</td><td>172.25.128.1 – 172.25.159.254</td><td>8190</td></tr>
+          <tr class="fragment"><td>子网六</td><td>172.25.160.0</td><td>172.25.160.1 – 172.25.191.254</td><td>8190</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        步长 = 32（2⁵）。B 类 172.25.0.0，借 3 位 → 6 个可用子网，每子网 8190 台主机。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Practice</p>
+      <h2>动手算 · 三个例题</h2>
+      <div class="callout fragment">
+        <div class="ico">Q1</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>Q1</strong></p>
+          <p class="muted" style="margin-top:.3rem">IP <code>172.16.101.20</code>，掩码 <code>255.255.255.0</code>——网络地址占前几位？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">Q2</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>Q2</strong></p>
+          <p class="muted" style="margin-top:.3rem">IP <code>192.168.5.121</code>，掩码 <code>255.255.255.248</code>——网络号？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">Q3</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>Q3</strong></p>
+          <p class="muted" style="margin-top:.3rem">两台机器都配 <code>192.168.1.1</code>，一台掩码 /30，另一台 /24——能直接通信吗？</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Answers</p>
+      <h2>参考答案</h2>
+      <div class="callout fragment">
+        <div class="ico">A1</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>Q1 答案：24 位</strong></p>
+          <p class="muted" style="margin-top:.3rem">B 类 16 + 子网借 8 = 24 位　·　网络地址 <code>172.16.101.0</code>　·　主机范围 <code>.1 – .254</code></p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">A2</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>Q2 答案：192.168.5.120</strong></p>
+          <p class="muted" style="margin-top:.3rem">第 4 字节 121 = <code>111 1001</code> AND 掩码 <code>11111 000</code> = <code>111 1000</code> = 120　·　子网 <code>192.168.5.120/29</code></p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">A3</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>Q3 答案：不能</strong></p>
+          <p class="muted" style="margin-top:.3rem">掩码不同 → 网络地址不同 → 视为不同子网　·　必须两端用<strong>相同掩码</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 04</p>
+      <h2>回顾与展望</h2>
+      <p class="lead">子网编址解决了「分类浪费」的问题，但 B 类借位、C 类子网表——<em>「繁琐」</em>催生了 CIDR。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Pros & Cons</p>
+      <h2>子网编址的优缺点</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">优点</span>
+          <h3>提高利用率</h3>
+          <p class="muted">不再受分类限制——<strong>按需分配</strong>子网大小，减少 IP 浪费。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">优点</span>
+          <h3>隔离广播</h3>
+          <p class="muted">每个子网是独立<strong>广播域</strong>，减少网络风暴。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">优点</span>
+          <h3>便于管理</h3>
+          <p class="muted">可按部门 / 楼层 / 业务划分——<em>「结构化」</em>清晰。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">缺点</span>
+          <h3>仍繁琐</h3>
+          <p class="muted">仍要算二进制、记表格——下一章 <strong>CIDR</strong> 会大幅简化。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Recap</p>
+      <h2>本章小结</h2>
+      <ol class="steps">
+        <li class="fragment">子网编址：<strong>主机号部分借位</strong>作子网号</li>
+        <li class="fragment">借位规则：<strong>k ≥ 2</strong>（避免全 0/全 1），<strong>主机 ≥ 2 位</strong></li>
+        <li class="fragment">C 类最多借 6 位 → 62 个子网；B 类最多借 14 位 → 16382 个子网</li>
+        <li class="fragment">子网掩码：网络/子网位为 <strong>1</strong>，主机位为 <strong>0</strong></li>
+        <li class="fragment"><strong>按位 AND</strong>：IP AND 掩码 = 网络地址</li>
+        <li class="fragment">同一子网判定：网络号<strong>必须相同</strong></li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Homework</p>
+      <h2>练习</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>填空</strong></p>
+          <p class="muted" style="margin-top:.3rem">划分子网后，「网络号 + 子网号」合起来称为什么？它们在 IP 包转发中起到什么作用？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>计算</strong></p>
+          <p class="muted" style="margin-top:.3rem">C 类 <code>192.168.10.0</code> 借 4 位 → 列出所有 14 个子网的网络地址。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>实战</strong></p>
+          <p class="muted" style="margin-top:.3rem">公司申请到 B 类 <code>172.20.0.0</code>，需划分 4 个部门（每个 ≥ 1000 台主机）——选哪种借位方案？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">04</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>分析</strong></p>
+          <p class="muted" style="margin-top:.3rem">用 Packet Tracer 搭建一个小型 LAN：3 个子网，每子网 4 台 PC，使用不同的子网掩码；验证跨子网通信需经路由器。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide title">
+      <p class="eyebrow">End of Chapter 05</p>
+      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">网络协议与命令</span></h1>
+      <p class="lead" style="margin-top:1.4rem">掌握子网之后——实际工作中我们用哪些协议、敲哪些命令？</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        End · 32 slides · Chapter 05
+      </p>
+    </section>
+
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-help" title="键盘帮助 (?)">Help</button>
+    <button id="b-overview" title="总览 (Esc)">Overview</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+
+  <div class="help" id="help">
+    <div class="panel">
+      <h3>Keyboard | Mouse</h3>
+      <div class="row"><span>Next slide</span><span>→ / Space / PageDown</span></div>
+      <div class="row"><span>Prev slide</span><span>← / PageUp</span></div>
+      <div class="row"><span>First / Last</span><span>Home / End</span></div>
+      <div class="row"><span>Overview (click to jump)</span><span>Esc</span></div>
+      <div class="row"><span>Toggle theme</span><span>T</span></div>
+      <div class="row"><span>Fullscreen</span><span>F</span></div>
+      <div class="row"><span>Help</span><span>?</span></div>
+      <p class="muted" style="margin-top:.8rem;font-size:.82rem">
+        Click empty area to advance; press <kbd>?</kbd> to dismiss.
+      </p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  const help=document.getElementById('help');
+  let i=0;
+  let fragIdx=0;
+  function slideFrags(slide){ return slide.querySelectorAll('.fragment'); }
+  function revealFragments(){
+    const frags=slideFrags(slides[i]);
+    for(let k=0;k<frags.length;k++){
+      if(k<fragIdx){
+        frags[k].classList.add('visible');
+        frags[k].style.setProperty('--frag-stagger',(k*90)+'ms');
+      } else {
+        frags[k].classList.remove('visible');
+        frags[k].style.setProperty('--frag-stagger','0ms');
+      }
+    }
+  }
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>d.classList.toggle('active',k===i))}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    if(next===i)return;
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    setTimeout(()=>{out.classList.remove('active','leaving')},600);
+    i=next;
+    fragIdx=0;
+    revealFragments();
+    now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot()}
+  function next(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx<frags.length){
+      fragIdx++;revealFragments();
+    } else if(i<slides.length-1){
+      show(i+1);
+    }
+  }
+  function prev(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx>1){
+      fragIdx--;revealFragments();
+    } else if(fragIdx===1){
+      fragIdx=0;revealFragments();
+    } else if(i>0){
+      const prevIdx=i-1;
+      const inn=slides[prevIdx];
+      const prevFrags=slideFrags(inn);
+      inn.classList.add('active');
+      const out=slides[i];
+      out.classList.add('leaving');
+      setTimeout(()=>{out.classList.remove('active','leaving')},600);
+      i=prevIdx;
+      fragIdx=prevFrags.length;
+      revealFragments();
+      now.textContent=String(i+1).padStart(2,'0');
+      progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+      history.replaceState(null,'','#'+(i+1));setActiveDot();
+    }
+  }
+  function toggleOverview(){
+    const on=deck.classList.toggle('overview');
+    if(on){
+      stage.style.display='grid';
+      stage.style.gridTemplateColumns='repeat(4, 1fr)';
+      stage.style.gap='14px';
+      stage.style.padding='80px 28px 80px 72px';
+      stage.style.overflow='auto';
+      slides.forEach((s)=>{
+        s.style.display='flex';
+        s.style.position='relative';
+        s.style.inset='auto';
+        s.style.aspectRatio='16/9';
+        s.style.padding='1rem';
+        s.style.border='1px solid var(--hairline)';
+        s.style.borderRadius='10px';
+        s.style.background='var(--bg-elev-1)';
+        s.style.cursor='pointer';
+        s.style.overflow='hidden';
+        s.style.transform='none';
+        s.style.opacity='1';
+        Array.from(s.children).forEach((c)=>{
+          c.style.transform='scale(.18)';
+          c.style.transformOrigin='top left';
+        });
+      });
+    } else {
+      stage.style.display='';
+      slides.forEach((s)=>{s.style.display='';});
+      show(i);
+    }
+  }
+  function toggleTheme(){
+    const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light');
+  }
+  function toggleHelp(){help.classList.toggle('open')}
+  document.addEventListener('keydown',(e)=>{
+    if(help.classList.contains('open')){
+      if(e.key==='Escape'||e.key==='?'){toggleHelp();e.preventDefault()}
+      return;
+    }
+    if(deck.classList.contains('overview')){
+      if(e.key==='Escape'){toggleOverview();e.preventDefault()}
+      return;
+    }
+    switch(e.key){
+      case'ArrowRight':case'PageDown':case' ':case'Spacebar':
+        next();e.preventDefault();break;
+      case'ArrowLeft':case'PageUp':prev();e.preventDefault();break;
+      case'Home':show(0);e.preventDefault();break;
+      case'End':show(slides.length-1);e.preventDefault();break;
+      case'Escape':toggleOverview();e.preventDefault();break;
+      case't':case'T':toggleTheme();break;
+      case'f':case'F':if(document.fullscreenElement)document.exitFullscreen();
+        else deck.requestFullscreen&&deck.requestFullscreen();break;
+      case'?':case'/':toggleHelp();e.preventDefault();break;
+    }
+  });
+  stage.addEventListener('click',(e)=>{
+    if(deck.classList.contains('overview')){
+      const s=e.target.closest('.slide');
+      if(!s)return;
+      const idx=slides.indexOf(s);
+      if(idx>=0){toggleOverview();show(idx)}
+    } else {
+      const x=e.clientX/window.innerWidth;
+      if(x>0.5)next();else prev();
+    }
+  });
+  document.getElementById('b-theme').addEventListener('click',toggleTheme);
+  document.getElementById('b-help').addEventListener('click',toggleHelp);
+  document.getElementById('b-overview').addEventListener('click',toggleOverview);
+  document.getElementById('b-print').addEventListener('click',()=>window.print());
+
+  fragIdx=0;
+  revealFragments();
+})();
+</script>
+</body>
+</html>

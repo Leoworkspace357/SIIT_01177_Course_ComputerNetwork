@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 14 章 测验  ·  使用静态路由实现网络互通</title>
+<style>
+/* =====================================================================
+     LINEAR DARK · quiz theme
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --correct:#4cb782; --correct-soft:rgba(76,183,130,.10);
+    --wrong:#e66767;  --wrong-soft:rgba(230,103,103,.10);
+    --ease:cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out:cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-slide:720ms; --dur-frag:520ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{--bg:#08080a;--bg-elev-1:#0d0d10;--bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f;--ink:#f7f8f8;--ink-2:#b4b8c0;
+    --ink-3:#8a8f98;--ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;}
+  .deck[data-theme="light"]{--bg:#fbfbfc;--bg-elev-1:#fff;
+    --bg-elev-2:#f4f4f7;--bg-elev-3:#ebebef;--ink:#0a0a0c;
+    --ink-2:#4a4d57;--ink-3:#6f727a;--ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:6vh 7vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(48px);
+    transition:opacity var(--dur-slide) var(--ease),
+      transform var(--dur-slide) var(--ease);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px);
+    transition:opacity 380ms var(--ease),transform 380ms var(--ease)}
+  /* section / title variants (same as PPT) */
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+
+  /* quiz-specific */
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6.4vw,5.5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.5rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink);
+    max-width:90%}
+  h3{font-size:1rem;margin:0 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(1rem,1.15vw,1.18rem);line-height:1.6;color:var(--ink-2)}
+  .lead{font-size:clamp(1.15rem,1.45vw,1.45rem);color:var(--ink-2);
+    max-width:56ch;margin-top:.4rem;line-height:1.55;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  code,kbd{font-family:var(--font-mono);font-size:.88em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+
+  /* question card */
+  .q-card{max-width:920px;margin:0 auto;width:100%}
+  .q-head{display:flex;align-items:center;gap:.8rem;
+    margin-bottom:1.4rem;flex-wrap:wrap}
+  .q-tag{font-family:var(--font-mono);font-size:.7rem;
+    padding:.25rem .65rem;border-radius:6px;
+    background:var(--bg-elev-2);border:1px solid var(--hairline);
+    color:var(--ink-2);letter-spacing:.04em;font-weight:500}
+  .q-tag.single{color:var(--accent);border-color:var(--accent-ring)}
+  .q-tag.multi{color:var(--status-warning,#f2c94c);border-color:rgba(242,201,76,.3)}
+  .q-tag.fill{color:var(--correct);border-color:rgba(76,183,130,.3)}
+  .q-progress{margin-left:auto;font-family:var(--font-mono);
+    font-size:.72rem;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  .q-text{font-size:clamp(1.1rem,1.45vw,1.45rem);line-height:1.45;
+    color:var(--ink);font-weight:500;margin:0 0 1.6rem;
+    letter-spacing:-.01em}
+  .q-text .blank{display:inline-block;min-width:2.5em;
+    border-bottom:2px solid var(--accent);margin:0 .15em;
+    text-align:center;padding:0 .4em;color:var(--ink-2);
+    font-family:var(--font-mono)}
+  /* options */
+  .opts{display:flex;flex-direction:column;gap:.6rem;
+    margin:0 0 1.6rem;max-width:780px}
+  .opt{display:flex;align-items:flex-start;gap:.9rem;
+    padding:.85rem 1.1rem;border:1px solid var(--hairline);
+    border-radius:10px;background:var(--bg-elev-2);
+    cursor:pointer;transition:all 300ms var(--ease);
+    font-size:clamp(.98rem,1.1vw,1.12rem);color:var(--ink-2);
+    user-select:none}
+  .opt:hover{border-color:var(--accent-ring);
+    background:var(--bg-elev-3);color:var(--ink)}
+  .opt .lbl{flex:none;width:1.8rem;height:1.8rem;border-radius:50%;
+    border:1px solid var(--hairline-strong);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-mono);font-size:.78rem;color:var(--ink-2);
+    background:var(--bg-elev-1)}
+  /* reveal states */
+  .opt.correct{border-color:var(--correct);background:var(--correct-soft)}
+  .opt.correct .lbl{background:var(--correct);color:#fff;border-color:var(--correct)}
+  .opt.wrong-reveal{border-color:var(--wrong);background:var(--wrong-soft);
+    opacity:.55}
+  .opt.wrong-reveal .lbl{background:var(--wrong);color:#fff;border-color:var(--wrong)}
+  /* fill-blank reveal */
+  .q-text .blank.reveal{border-bottom-color:var(--correct);
+    color:var(--ink);background:var(--correct-soft);border-radius:4px}
+  /* answer/explain panel */
+  .ans{display:none;margin-top:.4rem;padding:1rem 1.2rem;
+    border:1px solid var(--correct);border-radius:10px;
+    background:var(--correct-soft)}
+  .slide.revealed .ans{display:block;animation:ansFade 360ms var(--ease)}
+  @keyframes ansFade{from{opacity:0;transform:translateY(8px)}
+    to{opacity:1;transform:translateY(0)}}
+  .ans-label{font-family:var(--font-mono);font-size:.7rem;
+    color:var(--correct);letter-spacing:.08em;
+    text-transform:uppercase;font-weight:600;margin:0 0 .3rem}
+  .ans-body{font-size:clamp(.95rem,1.1vw,1.1rem);color:var(--ink);
+    line-height:1.55}
+  .explain{margin-top:.6rem;font-size:clamp(.9rem,1vw,1.02rem);
+    color:var(--ink-2);line-height:1.55;font-style:italic}
+  .explain .lbl{color:var(--ink-3);font-style:normal;font-weight:500;
+    margin-right:.4em}
+  /* hint to click */
+  .hint{margin-top:.4rem;font-family:var(--font-mono);font-size:.7rem;
+    color:var(--ink-mute);letter-spacing:.04em;
+    display:flex;align-items:center;gap:.4rem;
+    transition:opacity 300ms var(--ease)}
+  .slide.revealed .hint{opacity:0}
+  .hint::before{content:"◎";color:var(--accent);
+    font-size:.9rem}
+
+  /* chrome */
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.68rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:4px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;
+    overflow:hidden;max-height:calc(100vh - 80px)}
+  .sidebar .nav-dot{width:4px;height:4px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;
+    transition:opacity 200ms var(--ease),transform 200ms var(--ease),
+      background 200ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 4px var(--accent-ring);transform:scale(1.6)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);
+    letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
+    letter-spacing:.02em;transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  /* end screen */
+  .end-card{max-width:560px;margin:0 auto;text-align:center}
+  .end-stat{display:inline-flex;align-items:baseline;gap:.4rem;
+    padding:.8rem 1.4rem;border:1px solid var(--hairline);
+    border-radius:12px;background:var(--bg-elev-2);margin:.4rem}
+  .end-stat .v{font-size:2rem;font-weight:600;color:var(--accent);
+    font-family:var(--font-mono)}
+  .end-stat .k{font-size:.78rem;color:var(--ink-3);
+    font-family:var(--font-mono);letter-spacing:.04em}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.opt,.ans,.toolbar button,.progress,.nav-dot,
+    .slide,.help,.help .panel{transition-duration:0ms!important}}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">第 14 章 测验  <strong>·  使用静态路由实现网络互通</strong>  ·  Leonard F. Li</div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">29</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide title active">
+      <p class="eyebrow">Chapter 14 · 章节测验</p>
+      <h1 class="title-h">使用静态路由实现网络互通<br><span class="accent">章节测验</span></h1>
+      <p class="lead">检验本章知识掌握情况。每页一题，单击显示答案与解析；按 <code>R</code> 切换显示/隐藏。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        单选 12 题 · 多选 6 题 · 填空 9 题 · 共 27 题
+      </p>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">1 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」由谁建立和管理？</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>路由器自动学习</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>管理员手工建立</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>DHCP 自动分配</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>DNS 自动同步</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 管理员手工建立</p>
+          <p class="explain"><span class="lbl">解析</span>静态路由由管理员手工建立与管理。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">2 / 27</span>
+        </div>
+        <p class="q-text">静态路由命令 <code>ip route 4.0.0.0 255.255.255.0 2.0.0.2</code> 中，<code>2.0.0.2</code> 是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>目的网络</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">B</div><div>子网掩码</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>下一跳 IP</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>出接口</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C. 下一跳 IP</p>
+          <p class="explain"><span class="lbl">解析</span>命令语法：目的网络 + 掩码 + 下一跳 IP（或出接口）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">3 / 27</span>
+        </div>
+        <p class="q-text">「默认路由」的命令是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>ip route 0.0.0.0 0.0.0.0 <下一跳></div></div>
+        <div class="opt" data-correct="false"><div class="lbl">B</div><div>ip default-gateway 1.1.1.1</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>ip route 255.255.255.255 0.0.0.0</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>ip static 0.0.0.0/0</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">A. ip route 0.0.0.0 0.0.0.0 <下一跳></p>
+          <p class="explain"><span class="lbl">解析</span>默认路由：目的 0.0.0.0 / 掩码 0.0.0.0 / 下一跳或出接口。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">4 / 27</span>
+        </div>
+        <p class="q-text">「默认路由」最适用于：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>大型多路径网络</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>单出口 / 末端网络</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>数据中心核心</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>运营商骨干</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 单出口 / 末端网络</p>
+          <p class="explain"><span class="lbl">解析</span>默认路由简化单出口网络的配置——末端/家庭路由常用。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">5 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」配置中，下一跳参数可以是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>只能是对端 IP</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">B</div><div>只能是本端出接口</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>下一跳 IP 或本端出接口</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>必须是物理 MAC</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C. 下一跳 IP 或本端出接口</p>
+          <p class="explain"><span class="lbl">解析</span>下一跳可以用对端 IP，也可以用本端出接口（点对点链路）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">6 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」配置后需要<strong>多久</strong>生效？</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>立即生效</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">B</div><div>等待下次重启</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>等待邻居发现</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>等待路由协议收敛</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">A. 立即生效</p>
+          <p class="explain"><span class="lbl">解析</span>静态路由输入即生效，无需等待协议收敛。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">7 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」<strong>不</strong>适合的网络环境是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>小型、拓扑稳定</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">B</div><div>单路径</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>拓扑频繁变化的复杂网络</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>家庭网络</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C. 拓扑频繁变化的复杂网络</p>
+          <p class="explain"><span class="lbl">解析</span>复杂、变化多的网络用静态路由工作量大；应选动态路由。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">8 / 27</span>
+        </div>
+        <p class="q-text">「直连路由」与「静态路由」的关系是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>同一回事</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>直连无需配置，静态需手工</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>都比静态优先</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>直连是动态</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 直连无需配置，静态需手工</p>
+          <p class="explain"><span class="lbl">解析</span>直连路由接口 up 自动出现；静态路由由管理员手工添加。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">9 / 27</span>
+        </div>
+        <p class="q-text">查看路由表的命令是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>show ip interface</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>show ip route</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>show running-config</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>show version</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. show ip route</p>
+          <p class="explain"><span class="lbl">解析</span><code>show ip route</code> 查看路由表。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">10 / 27</span>
+        </div>
+        <p class="q-text">「路由表」中「S*」标记通常表示：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>静态路由</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>默认路由（候选默认）</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>动态路由</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>直连路由</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 默认路由（候选默认）</p>
+          <p class="explain"><span class="lbl">解析</span>Cisco 路由表里 S* = 静态默认路由（candidate default）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">11 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」的 metric（距离）默认是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>0</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>1</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>255</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>无穷大</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 1</p>
+          <p class="explain"><span class="lbl">解析</span>静态路由默认距离为 1（可手动修改）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">12 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」的「管理距离」在 Cisco 设备上是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>0</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>1</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>120</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>110</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 1</p>
+          <p class="explain"><span class="lbl">解析</span>静态路由管理距离 1；直连 0；OSPF 110；RIP 120。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">13 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」的特点：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>由管理员手工建立</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>不自动变化</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>网络故障时不会自动切换</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">D</div><div>比动态路由安全</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C、A、D、B  ·  网络故障时不会自动切换；由管理员手工建立；比动态路由安全；不自动变化</p>
+          <p class="explain"><span class="lbl">解析</span>A/B/C 静态路由基本特征；D 安全性高（攻击面小）是其优势。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">14 / 27</span>
+        </div>
+        <p class="q-text">「默认路由」的优点：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>简化路由表</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>减少路由计算</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>适合单出口末端网络</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>替代所有明细路由</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C、A、B  ·  适合单出口末端网络；简化路由表；减少路由计算</p>
+          <p class="explain"><span class="lbl">解析</span>默认路由简化配置与计算；适合单出口；但<strong>不能</strong>替代所有明细。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">15 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」命令 <code>ip route</code> 的参数顺序：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>目的网络</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>子网掩码</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>下一跳 IP / 出接口</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>管理距离</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C、A、B  ·  下一跳 IP / 出接口；目的网络；子网掩码</p>
+          <p class="explain"><span class="lbl">解析</span>ip route <目的> <掩码> <下一跳或出接口> [距离]。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">16 / 27</span>
+        </div>
+        <p class="q-text">下列哪些<strong>适合</strong>用静态路由？</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>家庭网络（单出口）</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>小型办公网（2–10 个网络）</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>大型运营商骨干</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">D</div><div>末梢 stub 网络</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">A、D、B  ·  家庭网络（单出口）；末梢 stub 网络；小型办公网（2–10 个网络）</p>
+          <p class="explain"><span class="lbl">解析</span>小规模 / 末梢 / 单出口 → 静态；大型骨干 → 动态（OSPF / IS-IS）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">17 / 27</span>
+        </div>
+        <p class="q-text">「路由表」中可能出现以下路由来源：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>C 直连 (connected)</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>S 静态 (static)</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>D 动态 (EIGRP)</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">R</div><div>R RIP</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">O</div><div>OSPF</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">A、R、B  ·  C 直连 (connected)；R RIP；S 静态 (static)</p>
+          <p class="explain"><span class="lbl">解析</span>实际可能有 C / S / R / O 等；D 是 EIGRP 标记（思科私有）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">18 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」与「直连路由」的区别：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>直连无需配置 IP</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>直连无需配置下一跳</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>静态必须手工添加</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">D</div><div>静态可指定任意下一跳</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C、A、D、B  ·  静态必须手工添加；直连无需配置 IP；静态可指定任意下一跳；直连无需配置下一跳</p>
+          <p class="explain"><span class="lbl">解析</span>直连：接口 up + 有 IP 即出现；静态：手工指定目的 / 掩码 / 下一跳。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">19 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」由 <span class="blank" data-answer="管理员" style="min-width:4.2em"></span> 手工建立与管理。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　管理员</p>
+          <p class="explain"><span class="lbl">解析</span>静态路由由网络管理员手工配置。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">20 / 27</span>
+        </div>
+        <p class="q-text">「<span class="blank" data-answer="默认路由" style="min-width:5.1em"></span>」是最长前缀匹配失败时使用的兜底路由。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　默认路由</p>
+          <p class="explain"><span class="lbl">解析</span>默认路由 = 0.0.0.0/0；所有明细未匹配时使用。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">21 / 27</span>
+        </div>
+        <p class="q-text">静态路由命令格式：`ip route <span class="blank" data-answer="目的网络" style="min-width:5.1em"></span> <span class="blank" data-answer="子网掩码" style="min-width:5.1em"></span> <下一跳 / 出接口>`。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　目的网络　·　子网掩码</p>
+          <p class="explain"><span class="lbl">解析</span>ip route <目的> <掩码> <下一跳或出接口>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">22 / 27</span>
+        </div>
+        <p class="q-text">「默认路由」命令：`ip route <span class="blank" data-answer="0.0.0.0" style="min-width:7.6em"></span> <span class="blank" data-answer="0.0.0.0" style="min-width:7.6em"></span> <下一跳>`。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　0.0.0.0　·　0.0.0.0</p>
+          <p class="explain"><span class="lbl">解析</span>ip route 0.0.0.0 0.0.0.0 <下一跳>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">23 / 27</span>
+        </div>
+        <p class="q-text">查看路由表的命令是 <span class="blank" data-answer="show ip route" style="min-width:12.8em"></span>。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　show ip route</p>
+          <p class="explain"><span class="lbl">解析</span>Cisco IOS：show ip route。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">24 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」默认管理距离是 <span class="blank" data-answer="1" style="min-width:2.5em"></span>（思科）。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　1</p>
+          <p class="explain"><span class="lbl">解析</span>静态路由 AD=1；直连=0；OSPF=110；RIP=120；BGP eBGP=20。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">25 / 27</span>
+        </div>
+        <p class="q-text">「静态路由」**不**会自动响应网络 <span class="blank" data-answer="拓扑变化" style="min-width:5.1em"></span>，管理员必须手工<span class="blank" data-answer="更新" style="min-width:3.4em"></span>。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　拓扑变化　·　更新</p>
+          <p class="explain"><span class="lbl">解析</span>静态路由不自动适应拓扑变化；需要手工更新。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">26 / 27</span>
+        </div>
+        <p class="q-text">「<span class="blank" data-answer="静态" style="min-width:3.4em"></span> 路由」适合小型、单路径、静态拓扑；「<span class="blank" data-answer="动态" style="min-width:3.4em"></span> 路由」适合大型、多路径、动态拓扑。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　静态　·　动态</p>
+          <p class="explain"><span class="lbl">解析</span>静态：小 / 单 / 静；动态：大 / 多 / 动。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">27 / 27</span>
+        </div>
+        <p class="q-text">默认路由是 <span class="blank" data-answer="最长前缀" style="min-width:5.1em"></span> 匹配失败后的「最后兜底」。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　最长前缀</p>
+          <p class="explain"><span class="lbl">解析</span>默认路由前缀 /0 = 最短；其他都匹配失败时才用它。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">End of Quiz</p>
+      <h2 style="font-size:clamp(1.8rem,3.2vw,2.6rem)">答题完毕</h2>
+      <p class="lead">本章测验共 <strong>27</strong> 题。</p>
+      <div class="end-card">
+        <div>
+          <div class="end-stat"><span class="v">12</span><span class="k">单选</span></div>
+          <div class="end-stat"><span class="v">6</span><span class="k">多选</span></div>
+          <div class="end-stat"><span class="v">9</span><span class="k">填空</span></div>
+        </div>
+        <p class="muted" style="margin-top:1.6rem;font-size:.92rem">
+          建议把所有题做完后再用 <code>←</code> 回看错题。
+        </p>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  let i=0, revealed=new Set();
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>
+      d.classList.toggle('active',k===i))}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    if(revealed.has(next)) inn.classList.add('revealed');
+    setTimeout(()=>{out.classList.remove('active','leaving')},460);
+    i=next;now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot()}
+  function currentSlide(){
+    // find currently visible slide
+    return slides.find(s => s.classList.contains('active')) || slides[i];
+  }
+  function currentIdx(){
+    return slides.indexOf(currentSlide());
+  }
+  function revealCurrent(){
+    const s = currentSlide();
+    if(!s) return;
+    const idx = slides.indexOf(s);
+    s.classList.add('revealed');
+    revealed.add(idx);
+    s.querySelectorAll('.opt[data-correct="true"]')
+      .forEach(o=>o.classList.add('correct'));
+    s.querySelectorAll('.opt[data-correct="false"]')
+      .forEach(o=>o.classList.add('wrong-reveal'));
+    s.querySelectorAll('.blank').forEach(b=>{
+      const ans=b.getAttribute('data-answer');
+      if(ans){b.textContent=ans;b.classList.add('reveal');}
+    });
+  }
+  function unrevealCurrent(){
+    const s = currentSlide();
+    if(!s) return;
+    const idx = slides.indexOf(s);
+    s.classList.remove('revealed');
+    revealed.delete(idx);
+    s.querySelectorAll('.opt').forEach(o=>{
+      o.classList.remove('correct','wrong-reveal');
+    });
+    s.querySelectorAll('.blank').forEach(b=>{
+      const ans=b.getAttribute('data-answer');
+      if(ans){b.textContent='';b.classList.remove('reveal');}
+    });
+  }
+  function next(){if(i<slides.length-1)show(i+1)}
+  function prev(){if(i>0)show(i-1)}
+  function toggleTheme(){const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light')}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){
+      e.preventDefault();next()}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){
+      e.preventDefault();prev()}
+    else if(e.key==='Home'){e.preventDefault();show(0)}
+    else if(e.key==='End'){e.preventDefault();show(slides.length-1)}
+    else if(e.key==='t'||e.key==='T'){toggleTheme()}
+    else if(e.key==='f'||e.key==='F'){
+      if(document.fullscreenElement)document.exitFullscreen();
+      else deck.requestFullscreen&&deck.requestFullscreen()}
+    else if(e.key==='r'||e.key==='R'){
+      const cidx = currentIdx();
+      if(revealed.has(cidx)) unrevealCurrent();
+      else revealCurrent();
+    }
+  });
+  stage.addEventListener('click',e=>{
+    if(e.target.closest('.sidebar')) return;
+    const cur = currentSlide();
+    const cidx = slides.indexOf(cur);
+    if(e.target.closest('.opt')){
+      if(!revealed.has(cidx)) revealCurrent();
+      return;
+    }
+    if(revealed.has(cidx)) next();
+    else revealCurrent();
+  });
+  document.getElementById('b-theme').addEventListener('click',toggleTheme);
+  document.getElementById('b-overview')?.addEventListener('click',()=>{
+    alert('总览暂未启用，请用键盘 ←/→ 翻页');
+  });
+  document.getElementById('b-print')?.addEventListener('click',()=>window.print());
+  const start=Math.max(0,parseInt(location.hash.replace('#',''),10)-1)||0;
+  slides[0].classList.add('active');
+  if(revealed.has(start)) slides[start].classList.add('revealed');
+  show(start);
+  // rebuild revealed set from already-active slides on init (none)
+})();
+</script>
+</body>
+</html>

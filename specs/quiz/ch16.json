@@ -1,0 +1,192 @@
+{
+  "chapter": 16,
+  "title": "使用 OSPF 实现单区域内网络互通",
+  "questions": [
+    {
+      "type": "single",
+      "q": "「OSPF」基于哪种算法？",
+      "options": {"A": "向量-距离", "B": "链路-状态", "C": "路径向量", "D": "Bellman-Ford"},
+      "answer": "B",
+      "explain": "OSPF = Open Shortest Path First，基于链路-状态算法（SPF / Dijkstra）。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 的「链路状态信息」通过什么方式通告给全网？",
+      "options": {"A": "LSA", "B": "路由表广播", "C": "UDP 报文", "D": "ARP 请求"},
+      "answer": "A",
+      "explain": "OSPF 通过 LSA（Link-State Advertisement）通告链路状态。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 的「区域 0」的作用是：",
+      "options": {"A": "末梢区域", "B": "NSSA", "C": "主干区域", "D": "虚拟链路"},
+      "answer": "C",
+      "explain": "Area 0 = 主干区域；所有非骨干区域必须通过 Area 0 互连。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 中每台路由器通过收到的 LSA 构建的本地数据库是：",
+      "options": {"A": "ARP 表", "B": "MAC 表", "C": "LSDB", "D": "RIB"},
+      "answer": "C",
+      "explain": "LSDB = Link-State Database，链路-状态数据库。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 计算最短路径使用的算法是：",
+      "options": {"A": "Bellman-Ford", "B": "Dijkstra (SPF)", "C": "Kruskal", "D": "Prim"},
+      "answer": "B",
+      "explain": "OSPF 用 Dijkstra（SPF）算法算出到达各网络的最短路径。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 的「HELLO 报文」作用是：",
+      "options": {"A": "传输 LSA", "B": "发现并维持邻居关系", "C": "描述 LSDB", "D": "确认 LSDB"},
+      "answer": "B",
+      "explain": "HELLO 报文用于发现与维持邻居关系。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 中「DD 报文」的作用是：",
+      "options": {"A": "完整 LSA 列表", "B": "描述本地 LSDB 概要", "C": "请求 LSA", "D": "确认 LSA"},
+      "answer": "B",
+      "explain": "DD = Database Description，向邻居描述本地 LSDB 的概要。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 中「LSR 报文」的作用是：",
+      "options": {"A": "请求所需的 LSA", "B": "发送 LSA", "C": "确认 LSA", "D": "建立邻居"},
+      "answer": "A",
+      "explain": "LSR = Link-State Request，请求对端发送本端需要的 LSA。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 中「LSU 报文」的作用是：",
+      "options": {"A": "携带 LSA", "B": "请求 LSA", "C": "确认 LSA", "D": "建立邻居"},
+      "answer": "A",
+      "explain": "LSU = Link-State Update，携带具体的 LSA。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 中「LSAck」的作用是：",
+      "options": {"A": "请求 LSA", "B": "发送 LSA", "C": "确认收到 LSA", "D": "建立邻居"},
+      "answer": "C",
+      "explain": "LSAck = Link-State Acknowledgment，确认收到 LSU。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 的默认 Hello 时间是：",
+      "options": {"A": "5 秒", "B": "10 秒", "C": "30 秒", "D": "60 秒"},
+      "answer": "B",
+      "explain": "OSPF 默认 Hello 10 秒（多路访问网络）；Dead = 40 秒。"
+    },
+    {
+      "type": "single",
+      "q": "OSPF 启动路由进程的命令是：",
+      "options": {"A": "router ospf 1", "B": "ospf enable", "C": "ip routing ospf", "D": "routing-protocol ospf"},
+      "answer": "A",
+      "explain": "`router ospf <process-id>` 启动 OSPF 进程。"
+    },
+    {
+      "type": "multi",
+      "q": "「OSPF 报文」类型包括：",
+      "options": {"A": "HELLO", "B": "DD", "C": "LSR", "D": "LSU", "E": "LSAck"},
+      "answer": ["A", "B", "C", "D", "E"],
+      "explain": "OSPF 五种报文：HELLO / DD / LSR / LSU / LSAck。"
+    },
+    {
+      "type": "multi",
+      "q": "「OSPF 的优点」包括：",
+      "options": {"A": "收敛快", "B": "无跳数限制", "C": "支持 VLSM/CIDR", "D": "支持区域层次化"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "OSPF 全部具备以上优点。"
+    },
+    {
+      "type": "multi",
+      "q": "「OSPF 邻居」建立条件包括：",
+      "options": {"A": "同一网段", "B": "相同 Hello/Dead 间隔", "C": "相同区域 ID", "D": "相同子网掩码"},
+      "answer": ["A", "B", "C"],
+      "explain": "邻居建立：同网段 + 同 area + 同 hello/dead + 认证匹配。"
+    },
+    {
+      "type": "multi",
+      "q": "「OSPF 配置」关键步骤包括：",
+      "options": {"A": "router ospf <pid>", "B": "network <addr> <反掩码> area <area-id>", "C": "passive-interface <if>", "D": "ip default-network"},
+      "answer": ["A", "B", "C"],
+      "explain": "OSPF 三步：启动进程 → network 宣告（用反掩码 + 区域）→ passive-interface 优化。"
+    },
+    {
+      "type": "multi",
+      "q": "「OSPF vs RIP」主要区别：",
+      "options": {"A": "OSPF 链路-状态，RIP 向量-距离", "B": "OSPF 收敛快，RIP 收敛慢", "C": "OSPF 适合大型网，RIP 适合小到中型", "D": "OSPF 使用 TCP，RIP 使用 UDP"},
+      "answer": ["A", "B", "C"],
+      "explain": "D 错：OSPF 直接封装在 IP（协议号 89）；RIP 用 UDP 520。"
+    },
+    {
+      "type": "multi",
+      "q": "「OSPF 区域」的特点：",
+      "options": {"A": "分层降低 LSDB 规模", "B": "减少 SPF 计算开销", "C": "Area 0 必须存在", "D": "任意区域都能直连"},
+      "answer": ["A", "B", "C"],
+      "explain": "非骨干区域必须挂到 Area 0；分层降低开销。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 基于「{{1}}」算法；通过 {{2}} 通告链路状态。",
+      "answer": ["链路-状态", "LSA"],
+      "explain": "OSPF = 链路-状态（SPF）；用 LSA 通告。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 每台路由器维护的链路-状态数据库是 {{1}}。",
+      "answer": ["LSDB"],
+      "explain": "LSDB = Link-State Database。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 用 {{1}} 算法计算到达各网络的最短路径。",
+      "answer": ["Dijkstra（SPF）"],
+      "explain": "Dijkstra（SPF）算法。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 的主干区域是 {{1}}；所有非骨干区域必须通过它 {{2}}。",
+      "answer": ["Area 0", "互连"],
+      "explain": "Area 0 = 主干；非骨干区域必须挂 Area 0。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 五种报文：HELLO、{{1}}、LSR、{{2}}、LSAck。",
+      "answer": ["DD", "LSU"],
+      "explain": "HELLO / DD / LSR / LSU / LSAck。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 直接封装在 IP 中，IP 协议号是 {{1}}（而非 TCP/UDP）。",
+      "answer": ["89"],
+      "explain": "OSPF 协议号 89；RIP 用 UDP 520。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 配置中 `network x.x.x.x {{1}} area y` —— 用的是反掩码（通配符掩码）。",
+      "answer": ["反掩码"],
+      "explain": "network <addr> <反掩码> area <area-id>。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 路由器根据 LSDB 与 SPF 算法，构造一棵以自己为根的 {{1}} 树。",
+      "answer": ["最短路径"],
+      "explain": "OSPF 在 LSDB 上跑 Dijkstra 得到最短路径树（SPF Tree）。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 接口的默认 Hello / Dead 间隔是 {{1}} / {{2}} 秒。",
+      "answer": ["10", "40"],
+      "explain": "默认 Hello 10s、Dead 40s（多路访问网络）。"
+    },
+    {
+      "type": "fill",
+      "text": "OSPF 的「cost」是基于接口 {{1}} 计算的路径度量。",
+      "answer": ["带宽"],
+      "explain": "OSPF cost = 参考带宽 / 接口带宽；可用 auto-cost 调整。"
+    }
+  ]
+}

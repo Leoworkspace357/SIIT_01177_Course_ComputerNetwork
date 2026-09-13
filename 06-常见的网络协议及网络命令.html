@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 6 章  常见的网络协议及网络命令</title>
+<style>
+/* =====================================================================
+     LINEAR DARK · design tokens
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --status-good:#4cb782; --status-warning:#f2c94c;
+    --status-serious:#eb8c4a; --status-critical:#e34948;
+    --ease:cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-out:cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-soft:cubic-bezier(0.45, 0, 0.15, 1);
+    --dur-slide:900ms; --dur-frag:720ms;
+    --stagger:90ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{
+    --bg:#08080a; --bg-elev-1:#0d0d10; --bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f; --ink:#f7f8f8; --ink-2:#b4b8c0;
+    --ink-3:#8a8f98; --ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;
+  }
+  .deck[data-theme="light"]{
+    --bg:#fbfbfc; --bg-elev-1:#fff; --bg-elev-2:#f4f4f7;
+    --bg-elev-3:#ebebef; --ink:#0a0a0c; --ink-2:#4a4d57;
+    --ink-3:#6f727a; --ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:6vh 7vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(36px) scale(.985);
+    transition:opacity var(--dur-slide) var(--ease-soft),
+      transform var(--dur-slide) var(--ease-soft);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px) scale(.985);
+    transition:opacity 540ms var(--ease-soft),transform 540ms var(--ease-soft)}
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2);transition:border-color 400ms var(--ease)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6vw,5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h3{font-size:1.05rem;margin:1rem 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(.95rem,1.05vw,1.1rem);line-height:1.55;color:var(--ink-2)}
+  .lead{font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--ink-2);
+    max-width:60ch;margin-top:.3rem;line-height:1.5;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--accent)}
+  code,kbd{font-family:var(--font-mono);font-size:.86em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+  ul.clean{list-style:none;padding:0;margin:1.4rem 0 0;max-width:64ch}
+  ul.clean>li{padding:.9rem 0 .9rem 1.6rem;position:relative;
+    border-bottom:1px solid var(--hairline);
+    transition:border-color 300ms var(--ease)}
+  ul.clean>li:last-child{border-bottom:0}
+  ul.clean>li::before{content:"";position:absolute;left:0;top:1.4rem;
+    width:6px;height:6px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--accent-ring)}
+  ol.steps{counter-reset:step;list-style:none;padding:0;
+    margin:1.6rem 0 0;max-width:64ch}
+  ol.steps>li{counter-increment:step;padding:1.4rem 0 1.4rem 4rem;
+    position:relative;border-top:1px solid var(--hairline)}
+  ol.steps>li:last-child{border-bottom:1px solid var(--hairline)}
+  ol.steps>li::before{content:counter(step,decimal-leading-zero);
+    position:absolute;left:0;top:1.45rem;font-family:var(--font-mono);
+    font-size:.82rem;color:var(--accent);font-weight:500;letter-spacing:.04em}
+  .grid-2{display:grid;grid-template-columns:1.15fr 1fr;gap:2rem;
+    align-items:start;margin-top:1.4rem}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.4rem}
+  .card{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.4rem 1.5rem;background:var(--bg-elev-2);
+    transition:border-color 400ms var(--ease),transform 400ms var(--ease),
+      background 400ms var(--ease)}
+  .card:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .card.compact{padding:1rem 1.2rem}
+  .card h3{margin-top:.3rem}
+  .card .tag{display:inline-flex;align-items:center;gap:.35rem;
+    font-family:var(--font-mono);font-size:.68rem;letter-spacing:.04em;
+    color:var(--accent);margin-bottom:.6rem;font-weight:500}
+  .card .tag::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--accent)}
+  table.t{width:100%;border-collapse:collapse;margin-top:1.4rem;
+    font-variant-numeric:tabular-nums;
+    border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  table.t th,table.t td{text-align:left;padding:.85rem 1rem;
+    border-bottom:1px solid var(--hairline);font-size:.95rem;color:var(--ink-2);
+    background:var(--bg-elev-2)}
+  table.t th{color:var(--ink-3);font-weight:500;
+    border-bottom:1px solid var(--hairline-strong);
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--bg-elev-1)}
+  table.t tr:last-child td{border-bottom:0}
+  table.t tbody tr{transition:background 300ms var(--ease)}
+  table.t tbody tr:hover td{background:var(--bg-elev-3)}
+  blockquote{margin:1.4rem 0;padding:.4rem 0 .4rem 1.2rem;
+    border-left:2px solid var(--accent);color:var(--ink-2);font-style:normal;
+    font-size:clamp(1.05rem,1.25vw,1.22rem);line-height:1.55}
+  .callout{display:flex;gap:1.2rem;padding:1.1rem 1.3rem;border-radius:10px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    margin-top:1rem;transition:border-color 300ms var(--ease)}
+  .callout:hover{border-color:var(--accent-ring)}
+  .callout .ico{flex:none;font-family:var(--font-mono);font-weight:500;
+    font-size:.8rem;color:var(--accent);padding-top:.15rem}
+  .callout p{margin:0;color:var(--ink-2)}
+  .callout p+p{margin-top:.3rem}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.4rem}
+  .chip{padding:.45rem .9rem;border-radius:999px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    font-size:.92rem;color:var(--ink);
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .chip:hover{border-color:var(--accent-ring);background:var(--accent-soft)}
+  /* ============ Terminal mockup ============ */
+  .terminal{border:1px solid var(--hairline);border-radius:10px;
+    background:#0a0a0c;padding:1.2rem 1.4rem;margin-top:1.4rem;
+    font-family:var(--font-mono);font-size:.85rem;line-height:1.65;
+    color:var(--ink-2);max-width:780px;
+    box-shadow:0 8px 32px rgba(0,0,0,.3)}
+  .terminal .prompt{color:var(--accent);font-weight:500}
+  .terminal .cmd{color:var(--ink);font-weight:500}
+  .terminal .ok{color:var(--status-good)}
+  .terminal .err{color:var(--status-critical)}
+  .terminal .info{color:var(--status-warning)}
+  .terminal .dim{color:var(--ink-3)}
+  .terminal .head{color:var(--ink-3);font-size:.78rem;
+    border-bottom:1px solid var(--hairline);padding-bottom:.6rem;
+    margin-bottom:.6rem;letter-spacing:.04em}
+  /* ============ ARP visual ============ */
+  .arp-flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;
+    gap:1rem;align-items:center;margin-top:1.6rem;max-width:760px}
+  .arp-box{border:1px solid var(--hairline);border-radius:10px;
+    padding:1rem;background:var(--bg-elev-2);text-align:center;
+    transition:border-color 300ms var(--ease)}
+  .arp-box:hover{border-color:var(--accent-ring)}
+  .arp-box .name{font-weight:600;color:var(--ink);font-size:1rem}
+  .arp-box .ip{font-family:var(--font-mono);font-size:.78rem;
+    color:var(--accent);margin-top:.4rem}
+  .arp-box .mac{font-family:var(--font-mono);font-size:.7rem;
+    color:var(--ink-3);margin-top:.3rem;letter-spacing:.04em}
+  .arp-arrow{color:var(--accent);font-family:var(--font-mono);
+    font-size:.7rem;text-align:center;letter-spacing:.04em}
+  .arp-arrow .type{color:var(--ink-3);font-size:.65rem;margin-top:.3rem}
+  /* ============ Case box ============ */
+  .case-box{border:1px solid var(--accent-ring);border-radius:10px;
+    padding:1.2rem 1.4rem;background:var(--bg-elev-2);
+    margin-top:1.4rem;transition:border-color 300ms var(--ease)}
+  .case-box .case-title{font-family:var(--font-mono);font-size:.7rem;
+    color:var(--accent);margin-bottom:.6rem;letter-spacing:.04em}
+  .case-box p{margin:.4rem 0;color:var(--ink-2);font-size:.98rem}
+  /* ============ Ping timeline visual ============ */
+  .ping-step{display:grid;grid-template-columns:60px 1fr 220px;gap:1rem;
+    align-items:center;margin-top:1rem;padding:.7rem .8rem;
+    border:1px solid var(--hairline);border-radius:8px;
+    background:var(--bg-elev-2);transition:border-color 300ms var(--ease)}
+  .ping-step:hover{border-color:var(--accent-ring)}
+  .ping-step .num{font-family:var(--font-mono);font-size:1rem;
+    color:var(--accent);font-weight:600}
+  .ping-step .what{color:var(--ink);font-size:.92rem}
+  .ping-step .cmd{font-family:var(--font-mono);font-size:.82rem;
+    color:var(--status-good);text-align:right;letter-spacing:.02em}
+  .ping-step.fail .cmd{color:var(--status-critical)}
+  .fragment{opacity:0;transform:translateY(22px) scale(.97);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .fragment.visible{opacity:1;transform:translateY(0) scale(1);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.72rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:3px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;overflow-y:auto}
+  .sidebar .nav-dot{width:3px;height:3px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;flex:none;
+    transition:opacity 300ms var(--ease),transform 300ms var(--ease),
+      background 300ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 6px var(--accent-ring);transform:scale(1.4)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
+    letter-spacing:.02em;transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  .deck.overview .stage{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+    padding:80px 28px 80px 72px;overflow:auto;height:100vh;inset:0}
+  .deck.overview .slide{position:relative;inset:auto;aspect-ratio:16/9;
+    padding:1rem;border:1px solid var(--hairline);border-radius:10px;
+    background:var(--bg-elev-1);cursor:pointer;overflow:hidden;
+    transform:none!important;opacity:1!important}
+  .deck.overview .slide.active{border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent),0 0 16px var(--accent-glow)}
+  .deck.overview .slide>*{transform:scale(.18);transform-origin:top left}
+  .help{position:fixed;inset:0;background:rgba(8,8,10,.65);
+    backdrop-filter:blur(8px);display:none;align-items:center;
+    justify-content:center;z-index:40}
+  .help.open{display:flex;animation:helpFade 280ms var(--ease)}
+  @keyframes helpFade{from{opacity:0}to{opacity:1}}
+  .help .panel{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:12px;padding:1.8rem 2.2rem;max-width:520px;min-width:380px;
+    box-shadow:0 24px 80px rgba(0,0,0,.5);animation:helpIn 380ms var(--ease)}
+  @keyframes helpIn{from{opacity:0;transform:translateY(20px) scale(.97)}
+    to{opacity:1;transform:translateY(0) scale(1)}}
+  .help h3{margin-top:0}
+  .help .row{display:flex;justify-content:space-between;
+    padding:.55rem 0;border-bottom:1px solid var(--hairline)}
+  .help .row:last-child{border-bottom:0}
+  .help .row span:last-child{font-family:var(--font-mono);font-size:.82em;color:var(--ink-3)}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.chip,.card,.toolbar button,
+    .help,.help .panel,.progress,.nav-dot{transition-duration:0ms!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">第 6 章  常见的网络协议及网络命令  <strong>|  Leonard F. Li</strong></div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">42</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide title active">
+      <p class="eyebrow">Chapter 06  |  Protocols &amp; Commands</p>
+      <h1 class="title-h">网络协议<br><span class="accent">与命令</span></h1>
+      <p class="lead">ICMP、ARP、ping、tracert——会<strong>用</strong>命令的网络工程师,才算真的入了门。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        Instructor · Leonard F. Li　　·　　Period · 06　　·　　Spring 2026
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Objectives</p>
+      <h2>通过本次课,你将能够:</h2>
+      <ol class="steps">
+        <li class="fragment">解释 <strong>ICMP</strong> 协议的作用与 ping 的工作原理</li>
+        <li class="fragment">理解 <strong>ARP</strong> 协议的工作过程</li>
+        <li class="fragment">使用 <strong>ping / ipconfig / arp / tracert / nslookup</strong> 等命令</li>
+        <li class="fragment">按「由近及远」的思路<strong>排查网络故障</strong></li>
+        <li class="fragment">看懂命令输出并<strong>解释每个字段</strong></li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Agenda</p>
+      <h2>本章结构</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>PART 01</strong>　ICMP 协议与 ping 命令</li>
+        <li class="fragment"><strong>PART 02</strong>　ARP 协议</li>
+        <li class="fragment"><strong>PART 03</strong>　常用网络命令</li>
+        <li class="fragment"><strong>PART 04</strong>　故障排查思路与案例</li>
+      </ul>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 01</p>
+      <h2>ICMP 协议与 ping</h2>
+      <p class="lead">网络世界的<strong>「你还好吗」</strong>——通过回声测试可达性。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ICMP</p>
+      <h2>ICMP · Internet Control Message Protocol</h2>
+      <ul class="clean">
+        <li class="fragment">IP 协议的<strong>辅助</strong>协议　不传数据,只<em>传控制信息</em></li>
+        <li class="fragment">用于<strong>报告错误</strong>与<strong>诊断网络</strong></li>
+        <li class="fragment">直接封装在 IP 包中,IP 协议号 <strong>1</strong></li>
+        <li class="fragment">常见类型:<strong>Echo Request / Echo Reply</strong>(ping)、<strong>Destination Unreachable</strong>(目的不可达)、<strong>Time Exceeded</strong>(超时,traceroute 用)</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ICMP · Types</p>
+      <h2>ICMP 报文主要类型</h2>
+      <table class="t">
+        <thead><tr><th>类型 (Type)</th><th>代码 (Code)</th><th>含义</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>0</td><td>0</td><td>Echo Reply</td><td>ping 应答</td></tr>
+          <tr class="fragment"><td>3</td><td>0 – 15</td><td>Destination Unreachable</td><td>目的不可达</td></tr>
+          <tr class="fragment"><td>5</td><td>0 – 3</td><td>Redirect</td><td>重定向</td></tr>
+          <tr class="fragment"><td>8</td><td>0</td><td>Echo Request</td><td>ping 请求</td></tr>
+          <tr class="fragment"><td>11</td><td>0</td><td>Time Exceeded</td><td>TTL 超时 (traceroute)</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.9rem">
+        一句话:Type=8 是 ping 请求,Type=0 是 ping 应答,Type=11 是 TTL 超时。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Ping</p>
+      <h2>ping 命令的剖析</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">功能</span>
+          <h3>测试连通性</h3>
+          <p class="muted">测试网络的<em>连通性</em>与<em>可达性</em>——<em>「你还好吗」</em></p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">机理</span>
+          <h3>ICMP 报文</h3>
+          <p class="muted">基于 ICMP 「回应请求 / 回应应答」机制测试<em>目的主机</em>或<em>路由器</em>的可达性。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">支持</span>
+          <h3>跨平台</h3>
+          <p class="muted">UNIX / Linux / Windows / macOS 全部支持。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">细节</span>
+          <h3>略有差异</h3>
+          <p class="muted">不同操作系统的 ping 实现稍有差异,但<strong>语义</strong>相同。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Syntax</p>
+      <h2>ping 命令语法 (Windows)</h2>
+      <table class="t">
+        <thead><tr><th>参数</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td>-t</td><td>持续 ping,直到 Ctrl+C 中断</td></tr>
+          <tr><td>-a</td><td>将 IP 反解析为主机名</td></tr>
+          <tr><td>-n count</td><td>发送 count 个回显请求(默认 4)</td></tr>
+          <tr><td>-l size</td><td>发送 size 字节的数据包(默认 32)</td></tr>
+          <tr><td>-f</td><td>设置「不分段」标志</td></tr>
+          <tr><td>-i TTL</td><td>设置生存时间 (默认 128)</td></tr>
+          <tr><td>-w timeout</td><td>等待每次回复的超时时间(毫秒,默认 4000)</td></tr>
+          <tr><td>-S srcaddr</td><td>指定源地址</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.9rem">
+        最常用: <code>ping -t &lt;ip&gt;</code> (持续) · <code>ping -n 10 &lt;ip&gt;</code> (10 次) · <code>ping -l 1024 &lt;ip&gt;</code> (大包)
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Output · Success</p>
+      <h2>ping 命令输出 · 成功</h2>
+      <div class="terminal fragment">
+<div class="head">C:\Users\Leonard&gt;</div>
+<span class="prompt">C:\Users\Leonard&gt;</span> <span class="cmd">ping www.baidu.com</span>
+
+<span class="dim">正在 Ping www.baidu.com [110.242.68.66] 具有 32 字节的数据:</span>
+<span class="ok">来自 110.242.68.66 的回复: 字节=32 时间=18ms TTL=53</span>
+<span class="ok">来自 110.242.68.66 的回复: 字节=32 时间=16ms TTL=53</span>
+<span class="ok">来自 110.242.68.66 的回复: 字节=32 时间=17ms TTL=53</span>
+<span class="ok">来自 110.242.68.66 的回复: 字节=32 时间=18ms TTL=53</span>
+
+<span class="dim">110.242.68.66 的 Ping 统计信息:</span>
+    <span class="info">数据包: 已发送 = 4,已接收 = 4,丢失 = 0 (0% 丢失),</span>
+<span class="dim">往返行程的估计时间(以毫秒为单位):</span>
+    <span class="info">最短 = 16ms,最长 = 18ms,平均 = 17ms</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.9rem">
+        <strong>解读</strong>　字节=32 是 ICMP 包大小;时间=ms 表示往返延迟;TTL=53 是当前剩余生存时间;丢包率 = 0% 表示<strong>网络正常</strong>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Output · Failure</p>
+      <h2>ping 命令输出 · 失败</h2>
+      <div class="terminal fragment">
+<div class="head">C:\Users\Leonard&gt;</div>
+<span class="prompt">C:\Users\Leonard&gt;</span> <span class="cmd">ping 192.168.1.254</span>
+
+<span class="dim">正在 Ping 192.168.1.254 具有 32 字节的数据:</span>
+<span class="err">请求超时。</span>
+<span class="err">请求超时。</span>
+<span class="err">请求超时。</span>
+<span class="err">请求超时。</span>
+
+<span class="dim">192.168.1.254 的 Ping 统计信息:</span>
+    <span class="err">数据包: 已发送 = 4,已接收 = 0,丢失 = 4 (100% 丢失)</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.9rem">
+        <strong>解读</strong>　100% 丢包 → 目标不可达。常见原因:网线未插、目标主机关机、防火墙拦截 ICMP。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Step by Step</p>
+      <h2>Ping 三步走 · 由近及远</h2>
+      <div class="ping-step fragment">
+        <span class="num">01</span>
+        <span class="what">测试<strong>本机协议栈</strong></span>
+        <span class="cmd">ping 127.0.0.1</span>
+      </div>
+      <div class="ping-step fragment">
+        <span class="num">02</span>
+        <span class="what">测试<strong>本机网卡</strong></span>
+        <span class="cmd">ping 172.16.26.151</span>
+      </div>
+      <div class="ping-step fragment">
+        <span class="num">03</span>
+        <span class="what">测试<strong>网关 / 邻居</strong></span>
+        <span class="cmd">ping 172.16.26.2</span>
+      </div>
+      <div class="ping-step fragment">
+        <span class="num">04</span>
+        <span class="what">测试<strong>外网</strong></span>
+        <span class="cmd">ping 8.8.8.8</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.9rem">
+        哪一步失败,问题就在那一层——<em>「分段定位,逐层击破」</em>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Reading</p>
+      <h2>如何阅读 ping 输出</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">成功</span>
+          <h3>Reply from ...</h3>
+          <p class="muted">来自目的主机的回应,含 bytes / time / TTL。<strong>time 越短越好</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">失败</span>
+          <h3>Request timed out</h3>
+          <p class="muted">请求超时。可能原因:物理断开、防火墙、目的主机未开机。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">失败</span>
+          <h3>Destination unreachable</h3>
+          <p class="muted">目的不可达。常见原因:无路由、目标主机不存在、ARP 失败。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">丢包</span>
+          <h3>sent=X, received=Y</h3>
+          <p class="muted">丢失 Y/X 个包,提示<strong>网络不稳定或拥塞</strong>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">TTL</p>
+      <h2>TTL 字段 · Time To Live</h2>
+      <ul class="clean">
+        <li class="fragment">每个 IP 包<strong>出生</strong>时都带一个 TTL(默认 64/128/255)</li>
+        <li class="fragment">每经过一个路由器,TTL <strong>减 1</strong></li>
+        <li class="fragment">TTL=0 时,路由器丢弃该包并返回 <strong>ICMP Time Exceeded</strong></li>
+        <li class="fragment">ping 输出里的 TTL = <strong>到达时的剩余值</strong>　</li>
+        <li class="fragment">从 TTL 可反推经过了<strong>多少跳</strong>:64 - 53 = 11 跳</li>
+        <li class="fragment"><strong>traceroute</strong> 就是利用这个特性——故意把 TTL 从 1 开始递增</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">tracert</p>
+      <h2>tracert · 追踪到目标的路径</h2>
+      <div class="terminal fragment">
+<div class="head">C:\Users\Leonard&gt;</div>
+<span class="prompt">C:\Users\Leonard&gt;</span> <span class="cmd">tracert www.baidu.com</span>
+
+<span class="dim">通过最多 30 个跃点跟踪</span>
+<span class="dim">到 www.baidu.com [110.242.68.66] 的路由:</span>
+
+  <span class="info">  1</span>    <span class="dim">2 ms</span>    <span class="dim">1 ms</span>    <span class="dim">1 ms</span>  <span class="ok">192.168.1.1</span>
+  <span class="info">  2</span>   <span class="dim">10 ms</span>    <span class="dim">8 ms</span>    <span class="dim">9 ms</span>  <span class="ok">10.0.0.1</span>
+  <span class="info">  3</span>   <span class="dim">22 ms</span>   <span class="dim">20 ms</span>   <span class="dim">21 ms</span>  <span class="ok">202.97.33.1</span>
+  <span class="info">  4</span>   <span class="dim">38 ms</span>   <span class="dim">40 ms</span>   <span class="dim">37 ms</span>  <span class="ok">110.242.68.66</span>
+
+<span class="dim">跟踪完成。</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.9rem">
+        原理:发出 TTL=1 / 2 / 3 ... 的包,第一个返回 ICMP 超时的路由器就是路径上的<strong>第 1 跳</strong>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ICMP · Errors</p>
+      <h2>ICMP 错误报告 · 5 种典型场景</h2>
+      <table class="t">
+        <thead><tr><th>ICMP 类型</th><th>触发场景</th><th>常见原因</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>Destination Unreachable</td><td>目的不可达</td><td>路由缺失、目标宕机</td></tr>
+          <tr class="fragment"><td>Time Exceeded</td><td>TTL 减到 0</td><td>路由环路、距离过远</td></tr>
+          <tr class="fragment"><td>Redirect</td><td>路由器告知更优路径</td><td>原路由非最优</td></tr>
+          <tr class="fragment"><td>Source Quench (历史)</td><td>源端抑制</td><td>已废弃</td></tr>
+          <tr class="fragment"><td>Parameter Problem</td><td>IP 头错误</td><td>协议栈 bug</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 02</p>
+      <h2>ARP 协议</h2>
+      <p class="lead">IP 到 MAC 的<strong>翻译官</strong>——局域网通信的桥梁。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">What is ARP</p>
+      <h2>ARP · Address Resolution Protocol</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">作用</span>
+          <h3>IP → MAC</h3>
+          <p class="muted">根据 IP 地址查询对应的 MAC 地址。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">范围</span>
+          <h3>本地网络</h3>
+          <p class="muted">ARP 只在<strong>本局域网</strong>内有效,跨网络需要路由器的介入。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">方式</span>
+          <h3>广播请求</h3>
+          <p class="muted">主机广播<em>「谁的 IP 是 X?请告诉 Y」</em>,目标单播回应。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">缓存</span>
+          <h3>ARP 表</h3>
+          <p class="muted">每台主机维护<strong>IP ↔ MAC</strong>映射表(几分钟),减少广播。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ARP · Flow</p>
+      <h2>ARP 工作过程 · 4 步</h2>
+      <div class="arp-flow fragment">
+        <div class="arp-box">
+          <div class="name">主机 A</div>
+          <div class="ip">192.168.1.10</div>
+          <div class="mac">AA:AA:AA:AA:AA:0A</div>
+        </div>
+        <div class="arp-arrow">→ Broadcast<div class="type">ARP Request</div></div>
+        <div class="arp-box">
+          <div class="name">主机 B</div>
+          <div class="ip">192.168.1.20</div>
+          <div class="mac">BB:BB:BB:BB:BB:0B</div>
+        </div>
+        <div class="arp-arrow">← Unicast<div class="type">ARP Reply</div></div>
+        <div class="arp-box">
+          <div class="name">主机 A 缓存</div>
+          <div class="ip">192.168.1.20</div>
+          <div class="mac">BB:BB:BB:BB:BB:0B</div>
+        </div>
+      </div>
+      <ol class="steps" style="margin-top:1.4rem">
+        <li class="fragment">主机 A 想知道 <code>192.168.1.20</code> 的 MAC</li>
+        <li class="fragment">A 广播 ARP Request:<em>「谁是 192.168.1.20?」</em></li>
+        <li class="fragment">B 收到后单播 ARP Reply:<em>「我是,我的 MAC 是 BB:BB:BB:BB:BB:0B」</em></li>
+        <li class="fragment">A 把映射关系缓存到 <strong>ARP 表</strong></li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ARP · Command</p>
+      <h2>arp -a · 查看 ARP 缓存</h2>
+      <div class="terminal fragment">
+<div class="head">C:\Users\Leonard&gt;</div>
+<span class="prompt">C:\Users\Leonard&gt;</span> <span class="cmd">arp -a</span>
+
+<span class="dim">接口: 192.168.1.10 --- 0xc</span>
+  <span class="info">  Internet 地址</span>      <span class="info">物理地址</span>          <span class="info">类型</span>
+  <span class="ok">  192.168.1.1</span>          <span class="ok">aa-bb-cc-dd-ee-01</span>     <span class="ok">动态</span>
+  <span class="ok">  192.168.1.20</span>         <span class="ok">bb-bb-cc-dd-ee-0b</span>     <span class="ok">动态</span>
+  <span class="ok">  192.168.1.30</span>         <span class="ok">cc-bb-cc-dd-ee-1c</span>     <span class="ok">动态</span>
+  <span class="ok">  192.168.1.255</span>        <span class="ok">ff-ff-ff-ff-ff-ff</span>     <span class="ok">静态</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.9rem">
+        <strong>解读</strong>　「动态」表示通过 ARP 自动学习,会老化;「静态」表示手工绑定,永久生效。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ARP · Security</p>
+      <h2>ARP 的安全风险</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>ARP 欺骗 (ARP Spoofing)</strong>　攻击者伪造 ARP 应答,冒充网关</li>
+        <li class="fragment"><strong>中间人攻击 (MITM)</strong>　篡改流量路径,窃听数据</li>
+        <li class="fragment"><strong>ARP 洪水</strong>　大量广播 ARP 请求,耗尽主机资源</li>
+        <li class="fragment">防御:<strong>静态 ARP 绑定</strong>、<em>ARP 防火墙</em>、<em>802.1X 认证</em></li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ARP Family</p>
+      <h2>ARP 家族 · 4 个成员</h2>
+      <table class="t">
+        <thead><tr><th>协议</th><th>作用</th><th>方向</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td><strong>ARP</strong></td><td>IP → MAC</td><td>正向解析</td></tr>
+          <tr class="fragment"><td><strong>RARP</strong></td><td>MAC → IP</td><td>反向解析(已淘汰)</td></tr>
+          <tr class="fragment"><td><strong>代理 ARP</strong></td><td>路由器代为响应 ARP</td><td>跨网段通信</td></tr>
+          <tr class="fragment"><td><strong>RARP / BOOTP / DHCP</strong></td><td>开机自动获取 IP</td><td>无盘工作站</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 03</p>
+      <h2>常用网络命令</h2>
+      <p class="lead">ping / ipconfig / arp / tracert / nslookup / netstat / route — 工具箱里的<strong>七件套</strong>。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ipconfig</p>
+      <h2>ipconfig · 查看本机网络配置</h2>
+      <div class="terminal fragment">
+<div class="head">C:\Users\Leonard&gt;</div>
+<span class="prompt">C:\Users\Leonard&gt;</span> <span class="cmd">ipconfig /all</span>
+
+<span class="dim">Windows IP 配置</span>
+
+<span class="info">以太网适配器 以太网:</span>
+   <span class="dim">连接特定的 DNS 后缀 . . . . . . . :</span>
+   <span class="dim">物理地址 . . . . . . . . . . . . . . :</span> <span class="ok">AA-BB-CC-DD-EE-01</span>
+   <span class="dim">IPv4 地址 . . . . . . . . . . . . . :</span> <span class="ok">192.168.1.10</span>
+   <span class="dim">子网掩码 . . . . . . . . . . . . . :</span> <span class="ok">255.255.255.0</span>
+   <span class="dim">默认网关. . . . . . . . . . . . . . :</span> <span class="ok">192.168.1.1</span>
+   <span class="dim">DNS 服务器. . . . . . . . . . . . . :</span> <span class="ok">8.8.8.8</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ipconfig · Uses</p>
+      <h2>ipconfig 常用场景</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">基础</span>
+          <h3>ipconfig</h3>
+          <p class="muted">查看<strong>基本</strong>配置:IP、子网掩码、默认网关。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">完整</span>
+          <h3>ipconfig /all</h3>
+          <p class="muted">查看<strong>完整</strong>配置:含 MAC、DNS、DHCP 服务器、租约时间。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">释放</span>
+          <h3>ipconfig /release</h3>
+          <p class="muted">释放当前 DHCP 租约(临时没 IP)。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">续约</span>
+          <h3>ipconfig /renew</h3>
+          <p class="muted">重新获取 DHCP 租约(可能换 IP)。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">nslookup</p>
+      <h2>nslookup · DNS 查询</h2>
+      <div class="terminal fragment">
+<div class="head">C:\Users\Leonard&gt;</div>
+<span class="prompt">C:\Users\Leonard&gt;</span> <span class="cmd">nslookup www.baidu.com</span>
+
+<span class="info">服务器:  UnKnown</span>
+<span class="info">Address:  8.8.8.8</span>
+
+<span class="dim">非权威应答:</span>
+<span class="ok">名称:    www.baidu.com</span>
+<span class="ok">Addresses:  110.242.68.66</span>
+<span class="ok">          110.242.68.67</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.9rem">
+        服务器=本地 DNS;非权威应答=缓存结果;一个域名可对应<strong>多个 IP</strong>(DNS 轮询)。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">netstat</p>
+      <h2>netstat · 网络连接与端口</h2>
+      <div class="terminal fragment">
+<div class="head">C:\Users\Leonard&gt;</div>
+<span class="prompt">C:\Users\Leonard&gt;</span> <span class="cmd">netstat -an | findstr ESTABLISHED</span>
+
+  <span class="ok">TCP    192.168.1.10:49231    110.242.68.66:443    ESTABLISHED</span>
+  <span class="ok">TCP    192.168.1.10:49245    8.8.8.8:53            ESTABLISHED</span>
+  <span class="ok">TCP    192.168.1.10:49288    140.205.94.189:443    ESTABLISHED</span>
+
+<span class="dim">显示所有活动 TCP 连接。</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.9rem">
+        常用参数:<code>-a</code> 所有连接　·　<code>-n</code> 数字形式　·　<code>-b</code> 显示进程　·　<code>ESTABLISHED</code> 已建立
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">route</p>
+      <h2>route print · 路由表</h2>
+      <div class="terminal fragment">
+<div class="head">C:\Users\Leonard&gt;</div>
+<span class="prompt">C:\Users\Leonard&gt;</span> <span class="cmd">route print</span>
+
+<span class="dim">IPv4 路由表</span>
+<span class="dim">===========================================================================</span>
+<span class="dim">活动路由:</span>
+<span class="info">网络目标        网络掩码          网关              接口          跃点数</span>
+  <span class="ok">0.0.0.0          0.0.0.0          192.168.1.1       192.168.1.10     25</span>
+  <span class="ok">127.0.0.0        255.0.0.0        在链路上          127.0.0.1        331</span>
+  <span class="ok">192.168.1.0      255.255.255.0    在链路上          192.168.1.10     281</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.9rem">
+        第一条 <code>0.0.0.0</code> = <strong>默认路由</strong>,所有未匹配的目标都走网关 <code>192.168.1.1</code>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">States</p>
+      <h2>netstat · TCP 连接状态</h2>
+      <div class="chips">
+        <span class="chip fragment">LISTENING</span>
+        <span class="chip fragment">ESTABLISHED</span>
+        <span class="chip fragment">TIME_WAIT</span>
+        <span class="chip fragment">CLOSE_WAIT</span>
+        <span class="chip fragment">FIN_WAIT_1</span>
+        <span class="chip fragment">FIN_WAIT_2</span>
+        <span class="chip fragment">CLOSING</span>
+        <span class="chip fragment">LAST_ACK</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        <strong>LISTENING</strong>:服务端监听端口　·　<strong>ESTABLISHED</strong>:连接已建立　·　<strong>TIME_WAIT</strong>:等待 2MSL 关闭——短时间内大量出现说明<strong>连接频繁</strong>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Linux</p>
+      <h2>Linux 对应命令</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">Windows → Linux</span>
+          <h3>ipconfig → ifconfig / ip a</h3>
+          <p class="muted">Linux 上 <code>ip addr</code> 或 <code>ifconfig</code> 查看 IP。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Windows → Linux</span>
+          <h3>tracert → traceroute</h3>
+          <p class="muted">Linux 默认 <code>traceroute</code>(可能需安装)。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Windows → Linux</span>
+          <h3>nslookup → dig / host</h3>
+          <p class="muted"><code>dig www.baidu.com</code> 更详细的 DNS 查询。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Windows → Linux</span>
+          <h3>arp -a → ip neigh</h3>
+          <p class="muted"><code>ip neigh</code> 或 <code>arp -n</code> 查看 ARP 表。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Summary</p>
+      <h2>7 件套速查</h2>
+      <table class="t">
+        <thead><tr><th>命令</th><th>Windows</th><th>Linux</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>连通性</td><td>ping</td><td>ping</td><td>测试 ICMP 回声</td></tr>
+          <tr class="fragment"><td>本机配置</td><td>ipconfig</td><td>ip a / ifconfig</td><td>查看 IP / 掩码 / 网关</td></tr>
+          <tr class="fragment"><td>ARP 表</td><td>arp -a</td><td>ip neigh</td><td>IP ↔ MAC 映射</td></tr>
+          <tr class="fragment"><td>路径追踪</td><td>tracert</td><td>traceroute</td><td>逐跳路径</td></tr>
+          <tr class="fragment"><td>DNS 查询</td><td>nslookup</td><td>dig / host</td><td>域名解析</td></tr>
+          <tr class="fragment"><td>连接状态</td><td>netstat</td><td>ss / netstat</td><td>端口与连接</td></tr>
+          <tr class="fragment"><td>路由表</td><td>route print</td><td>ip route</td><td>路由信息</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 04</p>
+      <h2>故障排查思路与案例</h2>
+      <p class="lead">「打不开网页」背后有多少种可能？一步步定位。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Strategy</p>
+      <h2>三大排查思路</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">由近及远</span>
+          <h3>本机 → 网关 → 外网</h3>
+          <p class="muted">先 <code>ping 127.0.0.1</code>,再 <code>ping 本机 IP</code>,再 <code>ping 网关</code>,最后 <code>ping 外网</code>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">由软到硬</span>
+          <h3>配置 → 协议 → 物理</h3>
+          <p class="muted">先检查<strong>配置</strong>(IP/掩码/网关),再<strong>协议</strong>,最后<strong>物理</strong>层。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">看指示灯</span>
+          <h3>物理层信号</h3>
+          <p class="muted">网卡 / 交换机端口的<strong>Link 灯</strong>是否亮?闪烁频率正常吗?</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 01</p>
+      <h2>案例 1 · ping 不通网关</h2>
+      <div class="case-box">
+        <div class="case-title">故障现象</div>
+        <p>公司某员工电脑<strong>能 ping 通 127.0.0.1</strong>,但<strong>ping 不通网关</strong> 192.168.1.1。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 1 · 检查物理</div>
+        <p>看网卡 Link 灯:<strong>亮 → 物理 OK</strong>;不亮 → 网线/接口问题。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 2 · 检查本机配置</div>
+        <p><code>ipconfig /all</code>　看 IP / 掩码 / 网关是否配对。常见错误:<strong>掩码错</strong>或<strong>网关填错</strong>。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">步骤 3 · 检查 ARP</div>
+        <p><code>arp -a</code>　看网关 IP 是否有对应的 MAC。<em>无 → ARP 不通(广播问题);有但 ping 不通 → 网关本身问题</em>。</p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-good)">
+        <div class="case-title" style="color:var(--status-good)">结论</div>
+        <p>✅ 本机能 ping 127.0.0.1 → <strong>本机协议栈 OK</strong>。问题在<em>局域网内</em>——大概率是<strong>网线 / 网关配置</strong>。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 02</p>
+      <h2>案例 2 · 通网关,不通外网</h2>
+      <div class="case-box">
+        <div class="case-title">故障现象</div>
+        <p>能 ping 通<strong>网关</strong> 192.168.1.1,但 ping 不通 <strong>8.8.8.8</strong> 和 <strong>www.baidu.com</strong>。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">可能原因 1 · DNS 问题</div>
+        <p><code>nslookup www.baidu.com</code>　如果失败 → DNS 配置错或 DNS 服务器宕。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">可能原因 2 · 路由缺失</div>
+        <p><code>route print</code>　如果没有 <code>0.0.0.0 0.0.0.0 192.168.1.1</code> 这条默认路由,网关不会转发。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">可能原因 3 · 网关/防火墙</div>
+        <p>网关本身没接外网,或<strong>ACL 拦截</strong>了 ICMP / DNS。</p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-warning)">
+        <div class="case-title" style="color:var(--status-warning)">结论</div>
+        <p>⚠️ 能通网关 → <strong>局域网 OK</strong>。问题在<em>网关之后</em>——先查 DNS,再查路由,最后查<strong>上游</strong>。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 03</p>
+      <h2>案例 3 · 通 IP 不通域名</h2>
+      <div class="case-box">
+        <div class="case-title">故障现象</div>
+        <p><code>ping 110.242.68.66</code> ✅ 通　·　<code>ping www.baidu.com</code> ❌ 失败</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">诊断</div>
+        <p>IP 通 → 物理/路由都 OK　·　域名不通 → 一定是 <strong>DNS 问题</strong></p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">排查步骤</div>
+        <p>① <code>nslookup www.baidu.com</code>　看返回结果</p>
+        <p>② <code>nslookup 8.8.8.8 www.baidu.com</code>　指定 DNS 测试</p>
+        <p>③ 检查 <code>ipconfig /all</code> 里 DNS 服务器地址</p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-good)">
+        <div class="case-title" style="color:var(--status-good)">结论</div>
+        <p>✅ 100% 是 <strong>DNS 配置或服务</strong> 问题。把 DNS 改成 <code>8.8.8.8</code> / <code>114.114.114.114</code> 试试。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 04</p>
+      <h2>案例 4 · 时通时不通</h2>
+      <div class="case-box">
+        <div class="case-title">故障现象</div>
+        <p>ping 网关<strong>有时通有时不通</strong>,丢包率约 30%。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">可能原因 1 · 网线</div>
+        <p>水晶头<strong>接触不良</strong>、线缆老化、距离超 100m。换一根线试试。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">可能原因 2 · 端口</div>
+        <p>交换机端口<strong>故障</strong>,换一个端口试试。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">可能原因 3 · 拥塞</div>
+        <p>局域网<strong>广播风暴</strong>或带宽占满——检查交换机指示灯闪烁频率。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">可能原因 4 · 干扰</div>
+        <p>Wi-Fi 信道干扰、附近大功率电器、电磁干扰。</p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-warning)">
+        <div class="case-title" style="color:var(--status-warning)">结论</div>
+        <p>⚠️ <strong>先软后硬</strong>:先换线 / 换端口 → 再排查交换 / Wi-Fi 信道。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Packet Tracer</p>
+      <h2>Packet Tracer · 实时模式</h2>
+      <ul class="clean">
+        <li class="fragment">Cisco Packet Tracer 的 <strong>Simulation</strong> 模式可<em>逐包</em>查看传输过程</li>
+        <li class="fragment">点 <em>Capture / Forward</em> 一步步走 → 看 ARP / ICMP / TCP 包从 PC1 到 PC2</li>
+        <li class="fragment">每一步都显示:<em>协议、源 IP、目的 IP、设备、详细字段</em></li>
+        <li class="fragment">适合教学——把抽象的<strong>「看不见的网络」</strong>变成<strong>看得见</strong>的过程</li>
+        <li class="fragment">关键:用 Simulation 跑一遍 ping,看 ARP 请求 → ARP 应答 → ICMP 请求 → ICMP 应答</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Wireshark</p>
+      <h2>Wireshark · 真实抓包</h2>
+      <ul class="clean">
+        <li class="fragment">抓包工具的<strong>业界标准</strong>　免费、开源、跨平台</li>
+        <li class="fragment">支持<em>上千种</em>协议解析</li>
+        <li class="fragment">过滤器:<code>icmp</code>、<code>tcp.port == 80</code>、<code>ip.addr == 192.168.1.1</code></li>
+        <li class="fragment">课程项目:用 Wireshark 抓一次完整的<em>浏览器访问网页</em>过程</li>
+        <li class="fragment">你会看到:DNS 查询 → TCP 三次握手 → HTTP 请求 → 响应</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Recap</p>
+      <h2>本章小结</h2>
+      <ol class="steps">
+        <li class="fragment"><strong>ICMP</strong> 是 IP 的辅助协议,用于<em>错误报告与诊断</em>(Type=8 是 ping)</li>
+        <li class="fragment"><strong>ping</strong> 基于 ICMP Echo 测试连通性　·　<strong>tracert</strong> 利用 TTL 逐跳探测</li>
+        <li class="fragment"><strong>ARP</strong> 在局域网内把 IP 翻译成 MAC,<em>广播请求 + 单播应答</em></li>
+        <li class="fragment"><strong>命令 7 件套</strong>:ping / ipconfig / arp / tracert / nslookup / netstat / route</li>
+        <li class="fragment"><strong>排查思路</strong>:<em>由近及远、由软到硬</em>——逐层定位,先 <code>ping 127.0.0.1</code></li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Misconceptions</p>
+      <h2>常见误解 · 别踩坑</h2>
+      <ul class="clean">
+        <li class="fragment">「<em>ping 不通 = 网络不通</em>」——<strong>错</strong>。防火墙可拦截 ICMP,但 TCP / HTTP 可能仍通。</li>
+        <li class="fragment">「<em>TTL 越大越快</em>」——<strong>无关</strong>。TTL 只是防环路,与速度无关。</li>
+        <li class="fragment">「<em>ARP 表永久有效</em>」——<strong>错</strong>。默认几分钟老化,要靠 ARP 周期更新。</li>
+        <li class="fragment">「<em>tracert 显示完整路径</em>」——<strong>近似</strong>。中间路由器可能隐藏身份(<em>「* * * 请求超时」</em>)。</li>
+        <li class="fragment">「<em>网关越多越好</em>」——<strong>错</strong>。网关越多跳数越多,延迟越大。</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Homework</p>
+      <h2>作业</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>ping 实践</strong></p>
+          <p class="muted" style="margin-top:.3rem">分别执行 <code>ping 127.0.0.1</code>、<code>ping 本机 IP</code>、<code>ping 网关</code>、<code>ping 8.8.8.8</code>、<code>ping www.baidu.com</code>,记录并解释每次输出。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>ARP 观察</strong></p>
+          <p class="muted" style="margin-top:.3rem"><code>arp -a</code> 查看当前 ARP 表;ping 一台同网段主机后再 <code>arp -a</code>,记录<strong>变化</strong>。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>故障推理</strong></p>
+          <p class="muted" style="margin-top:.3rem">假设能 ping 通网关但 ping 不通外网,列出至少 3 种可能原因与排查方法。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">04</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>Packet Tracer</strong></p>
+          <p class="muted" style="margin-top:.3rem">用 Packet Tracer 搭建 2 PC + 1 路由的小网络,跑一次 <strong>ping + tracert</strong> 抓包,记录所有 ARP/ICMP 包。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide title">
+      <p class="eyebrow">End of Chapter 06</p>
+      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">网线制作</span></h1>
+      <p class="lead" style="margin-top:1.4rem">从「软件层」走到「物理层」——亲手做一根 RJ-45 网线。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        End · 42 slides · Chapter 06
+      </p>
+    </section>
+
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-help" title="键盘帮助 (?)">Help</button>
+    <button id="b-overview" title="总览 (Esc)">Overview</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+
+  <div class="help" id="help">
+    <div class="panel">
+      <h3>Keyboard | Mouse</h3>
+      <div class="row"><span>Next slide</span><span>→ / Space / PageDown</span></div>
+      <div class="row"><span>Prev slide</span><span>← / PageUp</span></div>
+      <div class="row"><span>First / Last</span><span>Home / End</span></div>
+      <div class="row"><span>Overview (click to jump)</span><span>Esc</span></div>
+      <div class="row"><span>Toggle theme</span><span>T</span></div>
+      <div class="row"><span>Fullscreen</span><span>F</span></div>
+      <div class="row"><span>Help</span><span>?</span></div>
+      <p class="muted" style="margin-top:.8rem;font-size:.82rem">
+        Click empty area to advance; press <kbd>?</kbd> to dismiss.
+      </p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  const help=document.getElementById('help');
+  let i=0;
+  let fragIdx=0;
+  function slideFrags(slide){ return slide.querySelectorAll('.fragment'); }
+  function revealFragments(){
+    const frags=slideFrags(slides[i]);
+    for(let k=0;k<frags.length;k++){
+      if(k<fragIdx){
+        frags[k].classList.add('visible');
+        frags[k].style.setProperty('--frag-stagger',(k*90)+'ms');
+      } else {
+        frags[k].classList.remove('visible');
+        frags[k].style.setProperty('--frag-stagger','0ms');
+      }
+    }
+  }
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>d.classList.toggle('active',k===i))}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    if(next===i)return;
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    setTimeout(()=>{out.classList.remove('active','leaving')},600);
+    i=next;
+    fragIdx=0;
+    revealFragments();
+    now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot()}
+  function next(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx<frags.length){
+      fragIdx++;revealFragments();
+    } else if(i<slides.length-1){
+      show(i+1);
+    }
+  }
+  function prev(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx>1){
+      fragIdx--;revealFragments();
+    } else if(fragIdx===1){
+      fragIdx=0;revealFragments();
+    } else if(i>0){
+      const prevIdx=i-1;
+      const inn=slides[prevIdx];
+      const prevFrags=slideFrags(inn);
+      inn.classList.add('active');
+      const out=slides[i];
+      out.classList.add('leaving');
+      setTimeout(()=>{out.classList.remove('active','leaving')},600);
+      i=prevIdx;
+      fragIdx=prevFrags.length;
+      revealFragments();
+      now.textContent=String(i+1).padStart(2,'0');
+      progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+      history.replaceState(null,'','#'+(i+1));setActiveDot();
+    }
+  }
+  function toggleOverview(){
+    const on=deck.classList.toggle('overview');
+    if(on){
+      stage.style.display='grid';
+      stage.style.gridTemplateColumns='repeat(4, 1fr)';
+      stage.style.gap='14px';
+      stage.style.padding='80px 28px 80px 72px';
+      stage.style.overflow='auto';
+      slides.forEach((s)=>{
+        s.style.display='flex';
+        s.style.position='relative';
+        s.style.inset='auto';
+        s.style.aspectRatio='16/9';
+        s.style.padding='1rem';
+        s.style.border='1px solid var(--hairline)';
+        s.style.borderRadius='10px';
+        s.style.background='var(--bg-elev-1)';
+        s.style.cursor='pointer';
+        s.style.overflow='hidden';
+        s.style.transform='none';
+        s.style.opacity='1';
+        Array.from(s.children).forEach((c)=>{
+          c.style.transform='scale(.18)';
+          c.style.transformOrigin='top left';
+        });
+      });
+    } else {
+      stage.style.display='';
+      slides.forEach((s)=>{s.style.display='';});
+      show(i);
+    }
+  }
+  function toggleTheme(){
+    const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light');
+  }
+  function toggleHelp(){help.classList.toggle('open')}
+  document.addEventListener('keydown',(e)=>{
+    if(help.classList.contains('open')){
+      if(e.key==='Escape'||e.key==='?'){toggleHelp();e.preventDefault()}
+      return;
+    }
+    if(deck.classList.contains('overview')){
+      if(e.key==='Escape'){toggleOverview();e.preventDefault()}
+      return;
+    }
+    switch(e.key){
+      case'ArrowRight':case'PageDown':case' ':case'Spacebar':
+        next();e.preventDefault();break;
+      case'ArrowLeft':case'PageUp':prev();e.preventDefault();break;
+      case'Home':show(0);e.preventDefault();break;
+      case'End':show(slides.length-1);e.preventDefault();break;
+      case'Escape':toggleOverview();e.preventDefault();break;
+      case't':case'T':toggleTheme();break;
+      case'f':case'F':if(document.fullscreenElement)document.exitFullscreen();
+        else deck.requestFullscreen&&deck.requestFullscreen();break;
+      case'?':case'/':toggleHelp();e.preventDefault();break;
+    }
+  });
+  stage.addEventListener('click',(e)=>{
+    if(deck.classList.contains('overview')){
+      const s=e.target.closest('.slide');
+      if(!s)return;
+      const idx=slides.indexOf(s);
+      if(idx>=0){toggleOverview();show(idx)}
+    } else {
+      const x=e.clientX/window.innerWidth;
+      if(x>0.5)next();else prev();
+    }
+  });
+  document.getElementById('b-theme').addEventListener('click',toggleTheme);
+  document.getElementById('b-help').addEventListener('click',toggleHelp);
+  document.getElementById('b-overview').addEventListener('click',toggleOverview);
+  document.getElementById('b-print').addEventListener('click',()=>window.print());
+
+  fragIdx=0;
+  revealFragments();
+})();
+</script>
+</body>
+</html>

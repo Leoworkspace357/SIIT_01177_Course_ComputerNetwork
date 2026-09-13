@@ -1,0 +1,111 @@
+{
+  "chapter": 3,
+  "title": "TCP/IP",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "period": "03",
+  "term": "Spring 2026",
+  "eyebrow": "Chapter 03 · 计算机网络",
+  "lead": "TCP/IP 是互联网的事实标准，理解它就是理解现代网络的工作方式。",
+  "slides": [
+    {
+      "layout": "objectives",
+      "eyebrow": "Objectives",
+      "title": "通过本次课，<br>你将能够：",
+      "items": [
+        "了解 **TCP/IP 体系结构** 的由来",
+        "掌握 **TCP/IP 各层的主要功能**",
+        "对比 **OSI 与 TCP/IP** 的异同",
+        "熟悉常见的 **TCP/IP 协议族**"
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Overview",
+      "title": "TCP/IP 是什么？",
+      "cards": [
+        {"tag":"性质","title":"工业标准 / 事实标准",
+         "body":"不是由某个标准化组织强制推行，而是被业界广泛采用形成的「事实」标准。"},
+        {"tag":"特点","title":"开放的协议标准",
+         "body":"可以免费使用，可独立于特定硬件与操作系统。"},
+        {"tag":"应用","title":"跨网络运行",
+         "body":"可运行于局域网、广域网与互联网，覆盖范围最广。"},
+        {"tag":"体系","title":"统一的地址分配",
+         "body":"所有连接到 TCP/IP 网络的设备都使用统一的 IP 地址方案。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "4 Layers",
+      "title": "TCP/IP 四层模型",
+      "cards": [
+        {"tag":"4","title":"应用层",
+         "body":"HTTP、FTP、SMTP、DNS……所有高层协议都在这一层。"},
+        {"tag":"3","title":"传输层",
+         "body":"TCP（可靠）与 UDP（不可靠），负责端到端的通信。"},
+        {"tag":"2","title":"互联层",
+         "body":"IP、ICMP、ARP，负责把分组从源主机送到目的主机。"},
+        {"tag":"1","title":"网络接口层",
+         "body":"对应 OSI 的物理层与数据链路层，处理网卡与驱动。"}
+      ]
+    },
+    {
+      "layout": "table",
+      "eyebrow": "OSI ↔ TCP/IP",
+      "title": "TCP/IP 与 OSI 参考模型的对应",
+      "headers": ["OSI 层", "TCP/IP 层", "对应协议示例"],
+      "rows": [
+        ["应用层 / 表示层 / 会话层", "应用层", "HTTP、FTP、SMTP、DNS"],
+        ["传输层", "传输层", "TCP、UDP"],
+        ["网络层", "互联层", "IP、ICMP、ARP"],
+        ["数据链路层 / 物理层", "网络接口层", "Ethernet、PPP、Wi-Fi"]
+      ],
+      "note": "**TCP/IP 把 OSI 的上三层合并为一层**，下两层也合并为一层——这是它「更实用、更易实现」的根源。"
+    },
+    {
+      "layout": "bullets",
+      "eyebrow": "Layer Details",
+      "title": "TCP/IP 各层功能",
+      "items": [
+        "**应用层**　包括所有高层协议：HTTP、FTP、SMTP、DNS、TELNET……",
+        "**传输层**　提供**端到端**的进程间通信：TCP 提供可靠的字节流服务，UDP 提供无连接的报文服务",
+        "**互联层**　把分组通过互联网**从源送到目的**：IP 定义地址，ICMP 处理差错，ARP 解析 MAC",
+        "**网络接口层**　负责**物理网络上收发 IP 数据报**，与具体的网卡、驱动、传输介质相关"
+      ]
+    },
+    {
+      "layout": "section",
+      "eyebrow": "OSI vs TCP/IP",
+      "title": "OSI 与 TCP/IP 的简单比较",
+      "lead": "两者都是分层模型，但设计哲学与历史命运截然不同。"
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Compare",
+      "title": "OSI 与 TCP/IP 的对比",
+      "cards": [
+        {"tag":"共同点","title":"层次化结构",
+         "body":"都采用分层思想，每一层为上一层提供服务，并使用下一层的服务。"},
+        {"tag":"OSI 不足","title":"定义复杂、实现困难",
+         "body":"功能定义与实现细节混在一起，效率偏低；某些功能在多层重复出现。"},
+        {"tag":"TCP/IP 不足","title":"层次划分粗",
+         "body":"网络接口层并不是实际的一层；各层的功能定义与实现方法没有清晰区分。"},
+        {"tag":"现实","title":"TCP/IP 胜出",
+         "body":"TCP/IP 简单实用，被业界广泛采用，成为互联网的基石。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Homework",
+      "title": "作业",
+      "items": [
+        {"ico":"01","title":"填空",
+         "body":"按照覆盖的地理范围，计算机网络可以分为 ______、______ 和 ______。ISO/OSI 参考模型将网络分为 ______ 层到 ______ 层共 7 层。"},
+        {"ico":"02","title":"单选",
+         "body":"在 TCP/IP 体系结构中，与 OSI 参考模型的网络层对应的是（　）。A. 主机—网络层　B. 互联层　C. 传输层　D. 应用层"},
+        {"ico":"03","title":"简答",
+         "body":"简述 TCP/IP 与 OSI 参考模型的主要异同，以及 TCP/IP 能够在互联网中取得主导地位的原因。"}
+      ]
+    }
+  ]
+}

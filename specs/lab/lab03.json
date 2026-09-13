@@ -1,0 +1,262 @@
+{
+  "id": 3,
+  "chapter": "静态路由",
+  "title": "静态路由配置",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "brand": "实验 03",
+  "software": "Cisco Packet Tracer 6.2",
+  "duration": "2 学时",
+  "difficulty": "★★★☆☆",
+  "lead": "掌握路由器基本配置与静态路由命令，3 路由器串接网络的端到端连通性验证。",
+  "slides": [
+    {
+      "layout": "goals",
+      "title": "实验目的",
+      "items": [
+        "掌握路由器的**基本配置**（主机名、口令、接口 IP）。",
+        "掌握**静态路由**的配置命令 `ip route` 的语法与含义。",
+        "理解**下一跳 IP** 与**出接口**两种配置方式。",
+        "学会**默认路由**的配置与使用场景。",
+        "验证跨多路由器网络的端到端连通性。",
+        "熟悉 `show ip route`、`tracert` 等排错命令。"
+      ]
+    },
+    {
+      "layout": "environment",
+      "title": "实验环境",
+      "items": [
+        ["路由器", "3 台（R1、R2、R3，Router-PT）"],
+        ["交换机", "3 台（2960-24TT，每台路由器下挂 1 台）"],
+        ["PC", "3 台（每路由器下挂 1 台：PC1、PC2、PC3）"],
+        ["串口线", "2 根（Serial，连接 R1-R2 与 R2-R3）"],
+        ["直连双绞线", "若干"],
+        ["控制线", "3 根（首次配置路由器）"],
+        ["软件", "Cisco Packet Tracer 6.2"]
+      ]
+    },
+    {
+      "layout": "topology",
+      "title": "实验拓扑",
+      "body": "        LAN1                LAN2                LAN3\n     192.168.1.0/24      192.168.2.0/24     192.168.3.0/24\n        │                    │                    │\n       SW1                  SW2                  SW3\n        │                    │                    │\n       PC1                 PC2                  PC3\n   192.168.1.10            192.168.2.10         192.168.3.10\n        │                    │                    │\n     Fa0/0                Fa0/0                Fa0/0\n      R1                   R2                  R3\n       │                    │                    │\n     S0/0/0 ─── S0/0/0   S0/0/1 ───── S0/0/0\n       │    10.1.0.0/24      │     10.2.0.0/24\n      (DCE=64000)         (DCE=64000)",
+      "desc": "R1 与 R3 各用 R2 的一个串口；两段串行链路分别 10.1.0.0/24 和 10.2.0.0/24。"
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 01",
+      "title": "背景 · 路由器接口类型",
+      "body": "**FastEthernet (Fa0/0)**：100 Mbps 以太网接口，接 LAN 交换机。\n\n**Serial (S0/0/0、S0/0/1)**：同步串行口（V.35），接 WAN。\n\n- **DCE 端**：必须配 `clock rate`（典型 64000 / 128000）。\n- **DTE 端**：无需 clock rate。\n\nPT 6.2 默认 Router-PT 已有 2 个 Serial 口，无需添加模块。"
+    },
+    {
+      "layout": "step",
+      "no": "01",
+      "title": "背景 · 静态路由命令语法",
+      "body": "命令格式：",
+      "cli": "ip route <目的网络> <子网掩码> <下一跳 IP 或 本端出接口>\n\n! 例 1：下一跳写法\nip route 192.168.3.0 255.255.255.0 10.1.0.2\n\n! 例 2：出接口写法（点对点链路）\nip route 192.168.3.0 255.255.255.0 Serial0/0/0"
+    },
+    {
+      "layout": "step",
+      "no": "02",
+      "title": "背景 · 默认路由",
+      "body": "默认路由（Default Route）适用于**单出口末梢网络**。",
+      "cli": "ip route 0.0.0.0 0.0.0.0 <下一跳 IP>\n\n! 例\nip route 0.0.0.0 0.0.0.0 192.168.1.1"
+    },
+    {
+      "layout": "step",
+      "no": "03",
+      "title": "背景 · 路由表查看命令",
+      "body": "常用的查看命令：",
+      "cli": "show ip route              ! 完整路由表\nshow ip route static        ! 只看静态路由\nshow ip route connected     ! 只看直连路由\nshow ip interface brief     ! 接口 IP 与状态\nshow running-config | section ip route"
+    },
+    {
+      "layout": "step_substeps",
+      "no": "04",
+      "title": "搭建拓扑",
+      "items": [
+        "启动 PT 6.2 → 保存为 `Lab3-StaticRoute.pkt`。",
+        "拖出 3 × Router-PT、3 × 2960-24TT、3 × PC。",
+        "**连线**：PC1 → SW1 → R1(Fa0/0)；PC2 → SW2 → R2(Fa0/0)；PC3 → SW3 → R3(Fa0/0)。",
+        "R1(S0/0/0) → R2(S0/0/0)，R2(S0/0/1) → R3(S0/0/0)（Serial DCE 在 R1 与 R2）。",
+        "确认 PT 中 Serial 线缆的小时钟图标位于 DCE 端。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "05",
+      "title": "路由器基本配置（每台都要做）",
+      "items": [
+        "单击路由器 → CLI 标签，等待提示符。",
+        "进入特权模式 `enable`。",
+        "进入全局配置 `configure terminal`。",
+        "设主机名：`hostname R1`（R2、R3 同理）。",
+        "关闭域名查找：`no ip domain-lookup`。",
+        "设 enable 口令：`enable secret class12345`。",
+        "配 console 登录：`line console 0` → `password cisco123` → `login`。",
+        "配 vty 登录：`line vty 0 4` → `password cisco123` → `login`。",
+        "配置后 `end; write memory` 保存。"
+      ]
+    },
+    {
+      "layout": "step_table",
+      "no": "06",
+      "title": "配置路由器接口 IP",
+      "intro": "按以下地址规划配置三台路由器的接口。Serial DCE 端配 `clock rate 64000`。",
+      "headers": ["设备", "接口", "IP 地址", "子网掩码"],
+      "rows": [
+        ["R1", "Fa0/0",         "192.168.1.1",  "255.255.255.0"],
+        ["R1", "S0/0/0 (DCE)",  "10.1.0.1",     "255.255.255.0"],
+        ["R2", "Fa0/0",         "192.168.2.1",  "255.255.255.0"],
+        ["R2", "S0/0/0",        "10.1.0.2",     "255.255.255.0"],
+        ["R2", "S0/0/1 (DCE)",  "10.2.0.1",     "255.255.255.0"],
+        ["R3", "Fa0/0",         "192.168.3.1",  "255.255.255.0"],
+        ["R3", "S0/0/0",        "10.2.0.2",     "255.255.255.0"]
+      ]
+    },
+    {
+      "layout": "step",
+      "no": "07",
+      "title": "R1 接口配置脚本",
+      "body": "完整命令：",
+      "cli": "enable\nconfigure terminal\ninterface FastEthernet0/0\n ip address 192.168.1.1 255.255.255.0\n no shutdown\n!\ninterface Serial0/0/0\n ip address 10.1.0.1 255.255.255.0\n clock rate 64000      ! DCE 端\n no shutdown\n!\nend\nwrite memory"
+    },
+    {
+      "layout": "step",
+      "no": "08",
+      "title": "R2 接口配置脚本",
+      "body": "完整命令：",
+      "cli": "enable\nconfigure terminal\ninterface FastEthernet0/0\n ip address 192.168.2.1 255.255.255.0\n no shutdown\n!\ninterface Serial0/0/0\n ip address 10.1.0.2 255.255.255.0\n no shutdown\n!\ninterface Serial0/0/1\n ip address 10.2.0.1 255.255.255.0\n clock rate 64000\n no shutdown\n!\nend\nwrite memory"
+    },
+    {
+      "layout": "step",
+      "no": "09",
+      "title": "R3 接口配置脚本",
+      "body": "完整命令：",
+      "cli": "enable\nconfigure terminal\ninterface FastEthernet0/0\n ip address 192.168.3.1 255.255.255.0\n no shutdown\n!\ninterface Serial0/0/0\n ip address 10.2.0.2 255.255.255.0\n no shutdown\n!\nend\nwrite memory"
+    },
+    {
+      "layout": "step_table",
+      "no": "10",
+      "title": "配置 PC 的 IP 与网关",
+      "intro": "PC → Desktop → IP Configuration → Static。",
+      "headers": ["PC", "IP", "子网掩码", "网关"],
+      "rows": [
+        ["PC1", "192.168.1.10", "255.255.255.0", "192.168.1.1"],
+        ["PC2", "192.168.2.10", "255.255.255.0", "192.168.2.1"],
+        ["PC3", "192.168.3.10", "255.255.255.0", "192.168.3.1"]
+      ]
+    },
+    {
+      "layout": "step",
+      "no": "11",
+      "title": "R1 静态路由配置（去往 LAN2 / LAN3）",
+      "body": "R1 需要知道如何到达 LAN2 与 LAN3。两条明细静态路由，下一跳为 R2 的 S0/0/0 IP。",
+      "cli": "enable\nconfigure terminal\nip route 192.168.2.0 255.255.255.0 10.1.0.2\nip route 192.168.3.0 255.255.255.0 10.1.0.2\nend\nwrite memory"
+    },
+    {
+      "layout": "step",
+      "no": "12",
+      "title": "R2 静态路由配置（去往 LAN1 / LAN3）",
+      "body": "R2 是中间路由器，需要知道如何到达 LAN1（经 R1）与 LAN3（经 R3）。",
+      "cli": "enable\nconfigure terminal\nip route 192.168.1.0 255.255.255.0 10.1.0.1\nip route 192.168.3.0 255.255.255.0 10.2.0.2\nend\nwrite memory"
+    },
+    {
+      "layout": "step",
+      "no": "13",
+      "title": "R3 静态路由配置（去往 LAN1 / LAN2）",
+      "body": "R3 需要知道如何到达 LAN1 与 LAN2，下一跳为 R2 的 S0/0/1 IP。",
+      "cli": "enable\nconfigure terminal\nip route 192.168.1.0 255.255.255.0 10.2.0.1\nip route 192.168.2.0 255.255.255.0 10.2.0.1\nend\nwrite memory"
+    },
+    {
+      "layout": "tip",
+      "body": "**简化技巧**：R1 和 R3 都可以用默认路由 `ip route 0.0.0.0 0.0.0.0 <R2>` 替代两条明细路由。试试自己替换。"
+    },
+    {
+      "layout": "step_substeps",
+      "no": "14",
+      "title": "验证路由表",
+      "items": [
+        "每台路由器执行 `show ip route` 与 `show ip route static`。",
+        "应能看到：`C 192.168.x.0`（直连，自动）与 `S 192.168.x.0 ...`（静态，手工）。",
+        "确认每条静态路由的下一跳 IP 正确。",
+        "若缺少条目，检查 `show run | include ip route`。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "15",
+      "title": "测试连通性",
+      "items": [
+        "PC1 ping PC2：应通；TTL ≈ 126（跨 1 跳路由）。",
+        "PC1 ping PC3：应通；TTL ≈ 125（跨 2 跳路由）。",
+        "PC2 ping PC3：应通；TTL ≈ 126。",
+        "若不通，先在 PC1 上 `tracert 192.168.3.10` 找出在哪一跳断开。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "16",
+      "title": "使用 tracert 跟踪路径",
+      "items": [
+        "在 PC1 命令提示符：`tracert 192.168.3.10`。",
+        "应看到经过 R1 → R2 → R3 → PC3 的逐跳 IP 与延迟。",
+        "每一跳的 IP 对应沿途路由器接口的 IP。",
+        "若某一跳显示 `* * *` 表示该跳不通，检查该路由器的接口与路由表。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "17",
+      "title": "进阶 · 浮动静态路由",
+      "items": [
+        "在 R1 上追加到 LAN3 的备份路由（管理距离调高）：",
+        "`ip route 192.168.3.0 255.255.255.0 10.1.0.2 110` — 管理距离 110。",
+        "主链路优先；当主链路失效时自动切换到备份（本实验因只有一条路径，看不出切换效果）。",
+        "在生产环境中常用 130、150、200 作为备份路径的 AD。"
+      ]
+    },
+    {
+      "layout": "verify_table",
+      "title": "验证结果对照",
+      "headers": ["起点", "终点", "期望 TTL", "实际 TTL"],
+      "rows": [
+        ["PC1", "192.168.2.1（R2 LAN 口）", "127", ""],
+        ["PC1", "192.168.3.10（PC3）", "125", ""],
+        ["PC2", "192.168.3.10（PC3）", "126", ""],
+        ["PC3", "192.168.1.10（PC1）", "125", ""]
+      ]
+    },
+    {
+      "layout": "text",
+      "badge": "ERR · 01",
+      "title": "常见错误与排错",
+      "body": "**Serial 接口 down / down**\n\nDCE 端未配 `clock rate` → DCE 端配 `clock rate 64000`。\n\n**路由表无静态条目**\n\n命令格式错 / 忘 `write mem` → 用 `show run | include ip route` 检查。\n\n**ping 网关通、ping 远端不通**\n\n缺静态路由 → 补 `ip route`。\n\n**TTL=1 仍 timeout**\n\nTTL 异常 / 路由环路 → `tracert` 定位。"
+    },
+    {
+      "layout": "report",
+      "title": "实验报告要求",
+      "items": [
+        "**拓扑图**（PT 截图），标注所有 IP 与接口。",
+        "**路由器完整配置脚本**（R1/R2/R3 的 `show running-config`）。",
+        "**路由表截图**：每台路由器的 `show ip route`。",
+        "**连通性测试矩阵**：3×3 PC 对的 ping 结果（含 TTL）。",
+        "**tracert 输出**：PC1 → PC3 的路径跟踪。",
+        "**故障分析**：故意把 R2 的 S0/0/1 关闭，观察 PC1 是否还能 ping PC3；分析原因。"
+      ]
+    },
+    {
+      "layout": "think",
+      "title": "思考题",
+      "items": [
+        "静态路由与默认路由的区别？何时用哪个？",
+        "管理距离的作用是什么？默认静态路由的 AD 是多少？",
+        "写出 R1 用「出接口」方式配置到 LAN3 的静态路由命令。",
+        "如果把 PC3 的网关错设为 R2 的 LAN 接口 IP，能否 ping 通 PC1？为什么？"
+      ]
+    },
+    {
+      "layout": "end",
+      "title": "实验完毕",
+      "lead": "保存 `.pkt` 文件并撰写实验报告，下次实验课进入「RIP 动态路由」。"
+    }
+  ]
+}

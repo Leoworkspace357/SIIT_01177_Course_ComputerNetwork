@@ -1,0 +1,306 @@
+{
+  "id": 6,
+  "chapter": "综合实践",
+  "title": "综合实践：企业网 VLAN + DHCP + 路由",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "brand": "实验 06",
+  "software": "Cisco Packet Tracer 6.2",
+  "duration": "4 学时",
+  "difficulty": "★★★★★",
+  "lead": "综合运用 VLAN + 三层交换 + DHCP + 静态路由的企业级网络搭建。",
+  "slides": [
+    {
+      "layout": "goals",
+      "title": "实验目的",
+      "items": [
+        "综合运用：**VLAN 划分、Trunk、三层交换或单臂路由**实现 VLAN 互通。",
+        "配置 **DHCP 服务器**自动分配 IP 给各 VLAN 主机。",
+        "配置**静态路由**实现跨网段互通。",
+        "验证多 VLAN、多子网环境下的端到端连通性。",
+        "培养企业级网络的设计与排错能力。"
+      ]
+    },
+    {
+      "layout": "environment",
+      "title": "实验环境",
+      "items": [
+        ["路由器", "1 台（Router-PT，做单臂路由或出口）"],
+        ["三层交换机", "1 台（3560-24PS）"],
+        ["二层交换机", "2 台（2960-24TT）"],
+        ["服务器", "1 台（Server-PT）"],
+        ["PC", "6 台（每 VLAN 2 台）"],
+        ["直连双绞线", "若干"],
+        ["软件", "Cisco Packet Tracer 6.2"]
+      ]
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 01",
+      "title": "实验背景",
+      "body": "某公司有 3 个部门：**销售部（Sales）**、**研发部（RD）**、**财务部（Finance）**。\n\n**公司网络要求**：\n- 每部门一个 VLAN，互相隔离广播域。\n- 每部门用一段独立子网，由 **DHCP** 自动分配 IP。\n- 部门间必须能互相通信（**VLAN 间路由**）。\n- 公司出口通过一台**路由器**连接「外网模拟网段」。"
+    },
+    {
+      "layout": "topology",
+      "title": "实验拓扑",
+      "body": "  Sales VLAN 10   RD VLAN 20        Finance VLAN 30   外网 200.0.0.0/24\n  192.168.10.0/24 192.168.20.0/24   192.168.30.0/24\n       │                │                  │                  │\n      SW0──┐           SW1──┐            SW2──┐          │\n       │   │            │   │             │   │       Router R0\n       │   └────────────┘   └─────────────┘   │     Fa0/0\n       │                  Trunk             │     Gi0/0/0\n       └──────────────┬────────────────────┘       │\n                   Switch3 (3560 三层) ─────────────┘\n                   Gi0/1 (Trunk 上行)            Fa0/1\n                      │\n                   Server (DHCP)                  \n                   192.168.100.10/24 (VLAN 100 管理) ",
+      "desc": "用 3560 三层交换机做 VLAN 间路由；R0 通过 Fa0/1 连接 3560 的 Gi0/2，模拟到「外网」的连接。"
+    },
+    {
+      "layout": "step_table",
+      "no": "01",
+      "title": "IP 与 VLAN 规划",
+      "rows": [
+        ["VLAN 10",  "Sales",      "192.168.10.0/24",  "255.255.255.0", "192.168.10.1",  "192.168.10.100–.200"],
+        ["VLAN 20",  "RD",         "192.168.20.0/24",  "255.255.255.0", "192.168.20.1",  "192.168.20.100–.200"],
+        ["VLAN 30",  "Finance",    "192.168.30.0/24",  "255.255.255.0", "192.168.30.1",  "192.168.30.100–.200"],
+        ["VLAN 100", "Management", "192.168.100.0/24", "255.255.255.0", "192.168.100.1", "—"],
+        ["—",        "外网",        "200.0.0.0/24",     "255.255.255.0", "—",            "—"]
+      ]
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 02",
+      "title": "背景 · 设备 IP",
+      "body": "**路由器 R0**：\n- Fa0/0: `200.0.0.1/24`（外网）\n- Fa0/1: `10.0.0.2/24`（接 3560 Gi0/2）\n\n**三层交换机 Switch3 (3560)**：\n- VLAN 10 SVI: `192.168.10.1/24`\n- VLAN 20 SVI: `192.168.20.1/24`\n- VLAN 30 SVI: `192.168.30.1/24`\n- VLAN 100 SVI: `192.168.100.1/24`\n- Gi0/2: `10.0.0.1/24`\n- 默认路由: `0.0.0.0/0 → 10.0.0.2`"
+    },
+    {
+      "layout": "step_substeps",
+      "no": "02",
+      "title": "搭建基础拓扑",
+      "items": [
+        "PT 6.2 新建 `Lab6-Enterprise.pkt`。",
+        "拖出：1 × 3560-24PS、3 × 2960、1 × Router-PT、1 × Server-PT、6 × PC。",
+        "**连线**：SW0/SW1/SW2 各有 2 台 PC（Fa0/1、Fa0/2）。",
+        "SW0/SW1/SW2 的 Gi0/1 → 三层交换机 Switch3 的 Gi0/1（Trunk）。",
+        "Switch3 的 Fa0/24 → Server。",
+        "Switch3 的 Gi0/2 → Router R0 的 Fa0/1。",
+        "R0 的 Fa0/0 → 模拟外网（拖一台额外的 PC 当 Internet 主机）。"
+      ]
+    },
+    {
+      "layout": "step",
+      "no": "03",
+      "title": "三层交换机基本配置 + VLAN + SVI",
+      "body": "Switch3 CLI 关键配置："
+    },
+    {
+      "layout": "step_substeps",
+      "no": "03.1",
+      "title": "Switch3 配置步骤概览",
+      "items": [
+        "进入全局配置 `configure terminal`",
+        "创建 VLAN 10/20/30/100 并命名",
+        "Gi0/1 配置为 Trunk（接 SW0/SW1/SW2 上行）",
+        "Fa0/24 配置为 VLAN 100 的 access（接 Server）",
+        "启用 IP 路由：`ip routing`（关键步骤）",
+        "为每个 VLAN 配置 SVI（VLAN 接口 IP = 各 VLAN 网关）",
+        "Gi0/2 设为路由口（no switchport + IP）",
+        "配置默认路由指向 R0",
+        "`end; write memory` 保存"
+      ]
+    },
+    {
+      "layout": "step",
+      "no": "03.2",
+      "title": "Switch3 完整 CLI",
+      "body": "",
+      "cli": "enable\nconfigure terminal\nhostname SW3\n!\n! 创建 VLAN\nvlan 10\n name Sales\nvlan 20\n name RD\nvlan 30\n name Finance\nvlan 100\n name Management\n!\n! Trunk 上行端口\ninterface GigabitEthernet0/1\n switchport trunk encapsulation dot1q\n switchport mode trunk\n!\n! Server 接入端口\ninterface FastEthernet0/24\n switchport mode access\n switchport access vlan 100\n spanning-tree portfast\n!\n! 启用 IP 路由（关键步骤）\nip routing\n!\n! SVI（VLAN 网关）\ninterface vlan 10\n ip address 192.168.10.1 255.255.255.0\n no shutdown\ninterface vlan 20\n ip address 192.168.20.1 255.255.255.0\n no shutdown\ninterface vlan 30\n ip address 192.168.30.1 255.255.255.0\n no shutdown\ninterface vlan 100\n ip address 192.168.100.1 255.255.255.0\n no shutdown\n!\n! 上联路由器口\ninterface GigabitEthernet0/2\n no switchport\n ip address 10.0.0.1 255.255.255.0\n no shutdown\n!\n! 默认路由\nip route 0.0.0.0 0.0.0.0 10.0.0.2\n!\nend\nwrite memory"
+    },
+    {
+      "layout": "step",
+      "no": "04",
+      "title": "二层交换机 VLAN + Trunk（以 SW0 为例）",
+      "body": "完整配置："
+    },
+    {
+      "layout": "step_substeps",
+      "no": "04.1",
+      "title": "SW0/SW1/SW2 配置步骤",
+      "items": [
+        "进入全局配置 `configure terminal`",
+        "设主机名 `hostname SW0`（SW1 / SW2 同理）",
+        "创建对应 VLAN 并 `exit`",
+        "上行 Gi0/1 配为 trunk",
+        "接入端口 Fa0/1-24 配为 access + 加入对应 VLAN",
+        "加上 `spanning-tree portfast`（可选，加速收敛）",
+        "`end; write memory`"
+      ]
+    },
+    {
+      "layout": "step",
+      "no": "04.2",
+      "title": "SW0 完整 CLI",
+      "body": "",
+      "cli": "enable\nconfigure terminal\nhostname SW0\nvlan 10\n name Sales\nexit\n!\ninterface GigabitEthernet0/1\n switchport mode trunk\n!\ninterface range FastEthernet0/1-24\n switchport mode access\n switchport access vlan 10\n spanning-tree portfast\n!\nend\nwrite memory"
+    },
+    {
+      "layout": "step",
+      "no": "04.3",
+      "title": "SW1 与 SW2 的 VLAN 分配",
+      "body": "SW1 用 VLAN 20（研发部），SW2 用 VLAN 30（财务部）。**其它配置同 SW0**，只需替换："
+    },
+    {
+      "layout": "step_table",
+      "no": "04.4",
+      "title": "三台二层交换机的 VLAN 与端口分配",
+      "rows": [
+        ["SW0", "VLAN 10（Sales）", "Gi0/1 = trunk", "Fa0/1–Fa0/24 → VLAN 10"],
+        ["SW1", "VLAN 20（RD）",    "Gi0/1 = trunk", "Fa0/1–Fa0/24 → VLAN 20"],
+        ["SW2", "VLAN 30（Finance）", "Gi0/1 = trunk", "Fa0/1–Fa0/24 → VLAN 30"]
+      ]
+    },
+    {
+      "layout": "step",
+      "no": "05",
+      "title": "路由器 R0 配置",
+      "body": "完整脚本："
+    },
+    {
+      "layout": "step_substeps",
+      "no": "05.1",
+      "title": "R0 接口与静态路由配置",
+      "items": [
+        "Fa0/0 = 外网接口 `200.0.0.1/24`，no shutdown",
+        "Fa0/1 = 上联 3560 接口 `10.0.0.2/24`，no shutdown",
+        "配置 4 条静态路由到内网（Sales / RD / Finance / Management）",
+        "下一跳统一为 `10.0.0.1`（3560 的 Gi0/2）",
+        "`end; write memory`"
+      ]
+    },
+    {
+      "layout": "step",
+      "no": "05.2",
+      "title": "R0 完整 CLI",
+      "body": "",
+      "cli": "enable\nconfigure terminal\nhostname R0\n!\ninterface FastEthernet0/0\n ip address 200.0.0.1 255.255.255.0\n no shutdown\n!\ninterface FastEthernet0/1\n ip address 10.0.0.2 255.255.255.0\n no shutdown\n!\n! 静态路由：到内网各 VLAN\nip route 192.168.10.0 255.255.255.0 10.0.0.1\nip route 192.168.20.0 255.255.255.0 10.0.0.1\nip route 192.168.30.0 255.255.255.0 10.0.0.1\nip route 192.168.100.0 255.255.255.0 10.0.0.1\n!\nend\nwrite memory"
+    },
+    {
+      "layout": "step",
+      "no": "06",
+      "title": "DHCP 服务器配置（SW3）",
+      "body": "在三层交换机 SW3 上配置 DHCP 服务（最简方案）："
+    },
+    {
+      "layout": "step",
+      "no": "06.1",
+      "title": "DHCP 完整 CLI",
+      "body": "",
+      "cli": "enable\nconfigure terminal\n!\n! 排除网关地址\nip dhcp excluded-address 192.168.10.1\nip dhcp excluded-address 192.168.20.1\nip dhcp excluded-address 192.168.30.1\n!\n! 三个地址池\nip dhcp pool Sales\n network 192.168.10.0 255.255.255.0\n default-router 192.168.10.1\n dns-server 8.8.8.8\n lease 7\nip dhcp pool RD\n network 192.168.20.0 255.255.255.0\n default-router 192.168.20.1\n dns-server 8.8.8.8\n lease 7\nip dhcp pool Finance\n network 192.168.30.0 255.255.255.0\n default-router 192.168.30.1\n dns-server 8.8.8.8\n lease 7\n!\nend\nwrite memory"
+    },
+    {
+      "layout": "step_substeps",
+      "no": "07",
+      "title": "PC 配置为 DHCP 客户端",
+      "items": [
+        "每台 PC → Desktop → IP Configuration → **DHCP**。",
+        "约 5-10 秒后 `ipconfig` 查看分配的 IP。",
+        "应得到对应 VLAN 的 IP（不含 .1 网关）。"
+      ]
+    },
+    {
+      "layout": "verify_table",
+      "no": "08",
+      "title": "连通性测试矩阵",
+      "title": "验证结果对照",
+      "rows": [
+        ["Sales → Sales 网关", "ping 192.168.10.1", "通"],
+        ["Sales → RD PC", "ping <RD-IP>", "通"],
+        ["RD → Finance PC", "ping <Finance-IP>", "通"],
+        ["任意内网 PC → 200.0.0.1 (外网)", "ping 200.0.0.1", "通"],
+        ["外网 PC → 任意内网 PC", "ping <内网-IP>", "通（如默认路由配好）"]
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "09",
+      "title": "抓包观察 DHCP",
+      "items": [
+        "切到 Simulation 模式。",
+        "把一台 PC 重新设为 DHCP（Static → DHCP）。",
+        "观察四步过程：**Discover → Offer → Request → ACK**。",
+        "DHCP 服务器是 SW3（SVI 的 IP Helper 转发 DHCP 广播）。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "10",
+      "title": "观察 Trunk 标签",
+      "items": [
+        "Simulation 模式：让 Sales PC1 ping RD PC1。",
+        "单步跟踪数据帧。",
+        "在 SW0 → SW3 之间的链路上，帧带 **802.1Q VLAN 标签**。",
+        "SW3 上去掉 VLAN 标签、按 VLAN 路由转发。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "11",
+      "title": "进阶 · ACL 隔离 VLAN",
+      "items": [
+        "用 ACL 阻止 Sales → Finance：",
+        "`access-list 100 deny ip 192.168.10.0 0.0.0.255 192.168.30.0 0.0.0.255`",
+        "`access-list 100 permit ip any any`",
+        "`interface vlan 10` → `ip access-group 100 in`",
+        "验证：Sales → Finance 不通，但 Sales → RD 仍通。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "12",
+      "title": "进阶 · 故障排查演练",
+      "items": [
+        "故意制造几种故障，让学员排错：",
+        "关闭三层交换机 VLAN 10 SVI → Sales 主机全断",
+        "把 SW0 的 Gi0/1 改为 access 模式 → Sales 主机全断（Trunk 失效）",
+        "改错默认路由 → 内网无法访问外网",
+        "DHCP 池中 default-router 错 → PC 拿到 IP 但跨 VLAN 不通",
+        "用 `show ip interface brief` / `show vlan brief` / `show interfaces trunk` 排错。"
+      ]
+    },
+    {
+      "layout": "verify_table",
+      "title": "完整排错命令清单",
+      "headers": ["设备", "命令", "作用"],
+      "rows": [
+        ["三层交换机", "show ip interface brief", "看所有接口 up/down"],
+        ["三层交换机", "show ip route", "看路由表"],
+        ["三层交换机", "show vlan brief", "看 VLAN 列表"],
+        ["三层交换机", "show interfaces trunk", "看 Trunk 端口"],
+        ["三层交换机", "show ip dhcp binding", "看 DHCP 已分配"],
+        ["二层交换机", "show interfaces trunk", "看 Trunk 端口"],
+        ["二层交换机", "show mac-address-table", "看 MAC 表"],
+        ["PC", "ipconfig / ipconfig /renew", "看 / 重获 IP"]
+      ]
+    },
+    {
+      "layout": "report",
+      "title": "实验报告要求",
+      "items": [
+        "**拓扑图**（PT 截图），标注 VLAN、IP、网关。",
+        "**完整配置脚本**：三层交换机 + 3 台二层交换机 + 路由器 + DHCP。",
+        "**测试矩阵**：所有 PC 对的连通性、ping 输出、TTL。",
+        "**DHCP 分配记录**：6 台 PC 的 IP 分配截图。",
+        "**VLAN 间路由证据**：`show ip route` 标出所有 C 和 S 条目。",
+        "**抓包分析**：DHCP 四步过程的截图。",
+        "**故障分析与排错报告**：3 个故意制造故障的现象、原因、解决。"
+      ]
+    },
+    {
+      "layout": "think",
+      "title": "思考题",
+      "items": [
+        "为什么 DHCP 广播能跨 VLAN 到达三层交换机的 DHCP 服务？",
+        "三层交换机与单臂路由的优劣对比。",
+        "Trunk 上为什么要用 802.1Q 标签？本实验没有 VLAN 标签会怎样？",
+        "ACL 放在 VLAN 10 SVI 的 `in` 方向，过滤的是哪个方向的流量？",
+        "如果公司增加一个新部门「HR」（VLAN 40, 192.168.40.0/24），需要修改哪些配置？"
+      ]
+    },
+    {
+      "layout": "end",
+      "title": "实验完毕",
+      "lead": "保存 `.pkt` 文件并撰写实验报告。本实验是本课程**最综合**的实践项目，覆盖 VLAN / DHCP / 三层交换 / 静态路由等核心技能。"
+    }
+  ]
+}

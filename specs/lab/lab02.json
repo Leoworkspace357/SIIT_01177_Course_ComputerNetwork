@@ -1,0 +1,234 @@
+{
+  "id": 2,
+  "chapter": "子网规划",
+  "title": "子网规划与单臂路由",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "brand": "实验 02",
+  "software": "Cisco Packet Tracer 6.2",
+  "duration": "2 学时",
+  "difficulty": "★★☆☆☆",
+  "lead": "掌握 IP 子网掩码的计算与借位划分子网，使用单臂路由（Router-on-a-Stick）实施跨子网互通。",
+  "slides": [
+    {
+      "layout": "goals",
+      "title": "实验目的",
+      "items": [
+        "掌握 **IP 子网掩码** 的计算方法。",
+        "学会根据给定需求**划分子网**（借位、子网数、主机数计算）。",
+        "在 PT 6.2 中按子网规划配置多台主机的 IP 与网关。",
+        "验证子网间通过**路由器**的互通。",
+        "理解子网划分对网络性能与管理的影响。"
+      ]
+    },
+    {
+      "layout": "environment",
+      "title": "实验环境",
+      "items": [
+        ["PC", "6 台（PC0 ~ PC5）"],
+        ["路由器", "1 台（Router 2911）"],
+        ["交换机", "2 台（2960-24TT）"],
+        ["直连双绞线", "若干"],
+        ["控制线", "1 根（首次配置路由器）"],
+        ["软件", "Cisco Packet Tracer 6.2"]
+      ]
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 01",
+      "title": "实验背景",
+      "body": "某公司有 4 个部门：行政（10 人）、研发（30 人）、市场（50 人）、财务（20 人），合计 **110 人**。公司从运营商获得一段公网地址 **`192.168.100.0/24`**，现要求：\n\n1. 把 `192.168.100.0/24` 划分为 **4 个等长子网**（每个子网最多 64 台主机）。\n2. 每个部门使用一个子网，并在 Packet Tracer 中模拟。\n3. 各子网之间通过**路由器**互通。"
+    },
+    {
+      "layout": "step",
+      "no": "01.1",
+      "title": "借位分析",
+      "body": "需要 4 个子网 → 至少 2 位子网号（`2^2 = 4`）。\n\n原始 `/24` → 借 2 位 → 新掩码 `/26` = `255.255.255.192`。\n\n每个子网主机位 = `32 - 26 = 6` → 最多 `2^6 - 2 = 62` 台主机 ✓（满足 ≤ 64 人的需求）。"
+    },
+    {
+      "layout": "step_table",
+      "no": "01.2",
+      "title": "子网划分表",
+      "intro": "本实验采用「单臂路由（Router-on-a-Stick）」。",
+      "headers": ["部门", "子网号", "网络地址", "子网掩码", "可用 IP 范围", "广播地址"],
+      "rows": [
+        ["行政", "0",   "192.168.100.0/26",   "255.255.255.192", "192.168.100.1 ~ .62",   "192.168.100.63"],
+        ["研发", "64",  "192.168.100.64/26",  "255.255.255.192", "192.168.100.65 ~ .126",  "192.168.100.127"],
+        ["市场", "128", "192.168.100.128/26", "255.255.255.192", "192.168.100.129 ~ .190", "192.168.100.191"],
+        ["财务", "192", "192.168.100.192/26", "255.255.255.192", "192.168.100.193 ~ .254", "192.168.100.255"]
+      ]
+    },
+    {
+      "layout": "warn",
+      "body": "第一个子网（.0/26）的网络号与原始 /24 相同，主机号全 0 也保留——本实验保留使用；如需严格禁用，可在路由器上关闭 `ip subnet-zero`。"
+    },
+    {
+      "layout": "topology",
+      "title": "实验拓扑（Router-on-a-Stick）",
+      "body": "                ┌── SW0 ──┐\n  行政 .0/26   ──┤          │\n  市场 .128/26  ─┤    │     │\n                │   Trunk──┼── R0 (Fa0/0)\n                │          │   ├─ sub-if Fa0/0.1  → 行政 .0/26\n                │          │   ├─ sub-if Fa0/0.2  → 市场 .128/26\n                └── SW1 ──┘\n  研发 .64/26   ──┤\n  财务 .192/26  ─┘",
+      "desc": "单条 Trunk 链路 + 802.1Q + 子接口承载多个子网。"
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 02",
+      "title": "背景 · 子网划分原理",
+      "body": "**借位**：从主机位借 N 位作子网号；N 位可分 `2^N` 个子网（去全 0/全 1）。\n\n**主机位**：`32 - 原前缀 - 借位数`；可用主机 = `2^主机位 - 2`（去网络地址 + 广播地址）。\n\n**子网掩码**：网络号 + 子网号对应位为 1，主机号对应位为 0。"
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 03",
+      "title": "背景 · Router-on-a-Stick",
+      "body": "通过**单条物理链路 + 802.1Q Trunk + 子接口**承载多个 VLAN / 子网的路由。\n\n**优点**：节省路由器端口。\n\n**缺点**：单链路瓶颈（实验环境下够用）。"
+    },
+    {
+      "layout": "step_substeps",
+      "no": "02.1",
+      "title": "搭建拓扑",
+      "items": [
+        "启动 PT 6.2 → 保存为 `Lab2-Subnet.pkt`。",
+        "拖出：**1 × 2911 路由器、2 × 2960-24TT 交换机、4 × PC**（每子网 1 台代表 PC）。",
+        "**连线**：PC0/PC1 → SW0，PC2/PC3 → SW1；SW0(Gi0/1) ↔ SW1(Gi0/1)（直连线）；SW0(Gi0/2) ↔ R0(Fa0/0)（直连线）。"
+      ]
+    },
+    {
+      "layout": "step_table",
+      "no": "02.2",
+      "title": "配置 PC 的 IP 与网关",
+      "intro": "按子网划分表配置 4 台 PC（每子网配一台代表主机）。PC → Desktop → IP Configuration → Static → 填写。",
+      "headers": ["PC", "IP", "子网掩码", "网关"],
+      "rows": [
+        ["PC0（行政）", "192.168.100.1",   "255.255.255.192", "192.168.100.62"],
+        ["PC1（市场）", "192.168.100.129", "255.255.255.192", "192.168.100.190"],
+        ["PC2（研发）", "192.168.100.65",  "255.255.255.192", "192.168.100.126"],
+        ["PC3（财务）", "192.168.100.193", "255.255.255.192", "192.168.100.254"]
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "02.3",
+      "title": "配置路由器（R0）的物理接口与子接口",
+      "items": [
+        "单击 R0 → **CLI** 标签，等待提示符出现。",
+        "按以下脚本配置物理接口与 4 个子接口：",
+        "物理接口 Fa0/0 要 no shutdown；4 个子接口用 `encapsulation dot1Q <vlan>` 配置。",
+        "完成后 `end; write memory` 保存。"
+      ]
+    },
+    {
+      "layout": "step",
+      "no": "02.4",
+      "title": "路由器 CLI 完整脚本",
+      "body": "R0 上执行的完整配置：",
+      "cli": "enable\nconfigure terminal\nhostname R0\n!\ninterface FastEthernet0/0\n no shutdown\n!\n! 行政子接口（VLAN 1 / 子网 192.168.100.0/26）\ninterface FastEthernet0/0.1\n encapsulation dot1Q 1\n ip address 192.168.100.62 255.255.255.192\n no shutdown\n!\n! 市场子接口（VLAN 10 / 子网 192.168.100.128/26）\ninterface FastEthernet0/0.10\n encapsulation dot1Q 10\n ip address 192.168.100.190 255.255.255.192\n no shutdown\n!\n! 研发子接口（VLAN 20 / 子网 192.168.100.64/26）\ninterface FastEthernet0/0.20\n encapsulation dot1Q 20\n ip address 192.168.100.126 255.255.255.192\n no shutdown\n!\n! 财务子接口（VLAN 30 / 子网 192.168.100.192/26）\ninterface FastEthernet0/0.30\n encapsulation dot1Q 30\n ip address 192.168.100.254 255.255.255.192\n no shutdown\n!\nend\nwrite memory"
+    },
+    {
+      "layout": "step_substeps",
+      "no": "02.5",
+      "title": "配置交换机的 VLAN 与 Trunk",
+      "items": [
+        "SW0 → CLI，创建 VLAN 1、VLAN 10、VLAN 20、VLAN 30 并命名。",
+        "将 Gi0/1 配置为 Trunk 模式（接 SW1）。",
+        "将 Gi0/2 配置为 Trunk 模式（接 R0）。",
+        "把 PC0 接入的端口划入 VLAN 1（行政）。",
+        "PC1 接入的端口划入 VLAN 10（市场）；SW1 上的 PC2 → VLAN 20、PC3 → VLAN 30。",
+        "配置完成后 `end; write memory`。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "02.6",
+      "title": "SW0 CLI 关键配置",
+      "items": [
+        "enable",
+        "configure terminal",
+        "hostname SW0",
+        "vlan 10",
+        " name Market",
+        "vlan 20",
+        " name RD",
+        "vlan 30",
+        " name Finance",
+        "exit",
+        "interface GigabitEthernet0/1",
+        " switchport mode trunk",
+        "interface GigabitEthernet0/2",
+        " switchport mode trunk",
+        "interface FastEthernet0/1",
+        " switchport mode access",
+        " switchport access vlan 1",
+        "interface FastEthernet0/2",
+        " switchport mode access",
+        " switchport access vlan 10",
+        "end",
+        "write memory"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "02.7",
+      "title": "验证子网配置",
+      "items": [
+        "在每台 PC 上 → Desktop → Command Prompt：`ipconfig`。",
+        "确认 IP、子网掩码、网关正确。",
+        "在 R0 CLI：`show ip interface brief` — 应看到 5 个 UP 接口（Fa0/0 + 4 个 sub-if）。",
+        "`show ip route` — 应看到 4 条直连路由（行政 / 研发 / 市场 / 财务）。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "02.8",
+      "title": "测试跨子网连通性",
+      "items": [
+        "PC0 ping PC1（行政 → 市场）：应通；TTL ≈ 126。",
+        "PC0 ping PC2（行政 → 研发）：应通。",
+        "PC0 ping PC3（行政 → 财务）：应通。",
+        "PC2 ping PC3（研发 → 财务）：应通。",
+        "注意：跨路由器子接口转发一次，TTL 减 1（TTL 由 128 → 126 → 124）。"
+      ]
+    },
+    {
+      "layout": "verify_table",
+      "title": "验证结果对照",
+      "headers": ["测试", "期望 TTL", "期望"],
+      "rows": [
+        ["PC0 (行政) → PC1 (市场)", "126", "通"],
+        ["PC0 (行政) → PC2 (研发)", "126", "通"],
+        ["PC0 (行政) → PC3 (财务)", "126", "通"],
+        ["PC2 (研发) → PC3 (财务)", "126", "通"],
+        ["跨多接口 (PC0 → PC2 跨 2 接口)", "125", "通"]
+      ]
+    },
+    {
+      "layout": "text",
+      "badge": "ERR · 01",
+      "title": "常见错误与排错",
+      "body": "**PC 不能 ping 通网关**\n\n子网掩码错 / 网关错 → 重新核对 `ipconfig`。\n\n**同子网内能 ping，跨子网不通**\n\n路由器子接口未 `no shutdown` → 检查 R0 CLI 中 `show ip interface brief`。\n\n**跨子网时通时不通**\n\nTrunk 配置丢失 → 确认 SW0/SW1 的 Gi0/1、Gig0/2 都是 trunk。\n\n**Simulation 中显示「Encapsulation failure」**\n\n子接口的 VLAN ID 与交换机不一致 → 检查 `encapsulation dot1Q N` 的 N。"
+    },
+    {
+      "layout": "report",
+      "title": "实验报告要求",
+      "items": [
+        "**子网规划计算表**：列出 4 个子网的子网号、掩码、可用范围、广播地址。",
+        "**配置脚本**：粘贴路由器与交换机的完整 CLI 输出（含 `show run` 摘要）。",
+        "**连通性测试表**：列出所有 PC 对的 ping 测试结果（成功 / 失败 + TTL）。",
+        "**路由表截图**：`show ip route` 输出，标注每条直连路由对应的子网。",
+        "**问题与思考**：为什么划分子网后广播域缩小了？如果财务部门只需 20 台 IP，应如何调整掩码？"
+      ]
+    },
+    {
+      "layout": "think",
+      "title": "思考题",
+      "items": [
+        "借 N 位能分出多少子网？可用多少主机？为什么？",
+        "单臂路由的优缺点各是什么？生产环境中常被什么方案替代？",
+        "子网号「全 0」「全 1」在不同设备上行为是否一致？",
+        "在路由器上 `no ip subnet-zero` 命令有什么作用？启用会怎样？"
+      ]
+    },
+    {
+      "layout": "end",
+      "title": "实验完毕",
+      "lead": "保存 `.pkt` 文件并撰写实验报告，下次实验课进入「静态路由配置」。"
+    }
+  ]
+}

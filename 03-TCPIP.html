@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 3 章  TCP/IP</title>
+<style>
+/* =====================================================================
+     LINEAR DARK · design tokens
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --status-good:#4cb782; --status-warning:#f2c94c;
+    --status-serious:#eb8c4a; --status-critical:#e34948;
+    --ease:cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-out:cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-soft:cubic-bezier(0.45, 0, 0.15, 1);
+    --dur-slide:900ms; --dur-frag:720ms;
+    --stagger:90ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{
+    --bg:#08080a; --bg-elev-1:#0d0d10; --bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f; --ink:#f7f8f8; --ink-2:#b4b8c0;
+    --ink-3:#8a8f98; --ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;
+  }
+  .deck[data-theme="light"]{
+    --bg:#fbfbfc; --bg-elev-1:#fff; --bg-elev-2:#f4f4f7;
+    --bg-elev-3:#ebebef; --ink:#0a0a0c; --ink-2:#4a4d57;
+    --ink-3:#6f727a; --ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:6vh 7vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(36px) scale(.985);
+    transition:opacity var(--dur-slide) var(--ease-soft),
+      transform var(--dur-slide) var(--ease-soft);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px) scale(.985);
+    transition:opacity 540ms var(--ease-soft),transform 540ms var(--ease-soft)}
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2);transition:border-color 400ms var(--ease)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6vw,5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h3{font-size:1.05rem;margin:1rem 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(.95rem,1.05vw,1.1rem);line-height:1.55;color:var(--ink-2)}
+  .lead{font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--ink-2);
+    max-width:60ch;margin-top:.3rem;line-height:1.5;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--accent)}
+  code,kbd{font-family:var(--font-mono);font-size:.86em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+  ul.clean{list-style:none;padding:0;margin:1.4rem 0 0;max-width:64ch}
+  ul.clean>li{padding:.9rem 0 .9rem 1.6rem;position:relative;
+    border-bottom:1px solid var(--hairline);
+    transition:border-color 300ms var(--ease)}
+  ul.clean>li:last-child{border-bottom:0}
+  ul.clean>li::before{content:"";position:absolute;left:0;top:1.4rem;
+    width:6px;height:6px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--accent-ring)}
+  ol.steps{counter-reset:step;list-style:none;padding:0;
+    margin:1.6rem 0 0;max-width:64ch}
+  ol.steps>li{counter-increment:step;padding:1.4rem 0 1.4rem 4rem;
+    position:relative;border-top:1px solid var(--hairline)}
+  ol.steps>li:last-child{border-bottom:1px solid var(--hairline)}
+  ol.steps>li::before{content:counter(step,decimal-leading-zero);
+    position:absolute;left:0;top:1.45rem;font-family:var(--font-mono);
+    font-size:.82rem;color:var(--accent);font-weight:500;letter-spacing:.04em}
+  .grid-2{display:grid;grid-template-columns:1.15fr 1fr;gap:2rem;
+    align-items:start;margin-top:1.4rem}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.4rem}
+  .card{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.4rem 1.5rem;background:var(--bg-elev-2);
+    transition:border-color 400ms var(--ease),transform 400ms var(--ease),
+      background 400ms var(--ease)}
+  .card:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .card.compact{padding:1rem 1.2rem}
+  .card h3{margin-top:.3rem}
+  .card .tag{display:inline-flex;align-items:center;gap:.35rem;
+    font-family:var(--font-mono);font-size:.68rem;letter-spacing:.04em;
+    color:var(--accent);margin-bottom:.6rem;font-weight:500}
+  .card .tag::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--accent)}
+  table.t{width:100%;border-collapse:collapse;margin-top:1.4rem;
+    font-variant-numeric:tabular-nums;
+    border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  table.t th,table.t td{text-align:left;padding:.85rem 1rem;
+    border-bottom:1px solid var(--hairline);font-size:.95rem;color:var(--ink-2);
+    background:var(--bg-elev-2)}
+  table.t th{color:var(--ink-3);font-weight:500;
+    border-bottom:1px solid var(--hairline-strong);
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--bg-elev-1)}
+  table.t tr:last-child td{border-bottom:0}
+  table.t tbody tr{transition:background 300ms var(--ease)}
+  table.t tbody tr:hover td{background:var(--bg-elev-3)}
+  blockquote{margin:1.4rem 0;padding:.4rem 0 .4rem 1.2rem;
+    border-left:2px solid var(--accent);color:var(--ink-2);font-style:normal;
+    font-size:clamp(1.05rem,1.25vw,1.22rem);line-height:1.55}
+  .callout{display:flex;gap:1.2rem;padding:1.1rem 1.3rem;border-radius:10px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    margin-top:1rem;transition:border-color 300ms var(--ease)}
+  .callout:hover{border-color:var(--accent-ring)}
+  .callout .ico{flex:none;font-family:var(--font-mono);font-weight:500;
+    font-size:.8rem;color:var(--accent);padding-top:.15rem}
+  .callout p{margin:0;color:var(--ink-2)}
+  .callout p+p{margin-top:.3rem}
+  .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    margin-top:1.8rem;position:relative}
+  .timeline::before{content:"";position:absolute;top:5px;left:0;right:0;
+    height:1px;background:var(--hairline)}
+  .timeline .era{padding:0 1rem 0 0;position:relative}
+  .timeline .era::before{content:"";position:absolute;left:0;top:1px;
+    width:9px;height:9px;border-radius:50%;background:var(--bg);
+    border:1.5px solid var(--accent);
+    transition:background 400ms var(--ease),box-shadow 400ms var(--ease)}
+  .slide.active .timeline .era.fragment.visible::before{
+    background:var(--accent);box-shadow:0 0 0 4px var(--accent-glow)}
+  .timeline .era .yr{margin:1.6rem 0 .3rem;font-family:var(--font-mono);
+    font-weight:500;color:var(--ink);font-size:.85rem;letter-spacing:.04em}
+  .timeline .era .lbl{color:var(--ink-3);font-size:.72rem;margin:0 0 .5rem;
+    font-family:var(--font-mono);letter-spacing:.04em}
+  .timeline .era p{font-size:.92rem;color:var(--ink-2);line-height:1.5;margin:0}
+  .timeline .era p strong{color:var(--ink);font-weight:600}
+  .layer-stack{display:flex;flex-direction:column;gap:.5rem;margin-top:1.6rem;
+    max-width:560px}
+  .layer-row{display:grid;grid-template-columns:60px 1fr 90px;align-items:center;
+    gap:1rem;padding:.7rem 1rem;border:1px solid var(--hairline);
+    border-radius:8px;background:var(--bg-elev-2);
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .layer-row:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .layer-row .num{font-family:var(--font-mono);font-size:.78rem;
+    color:var(--accent);font-weight:500;letter-spacing:.04em}
+  .layer-row .name{color:var(--ink);font-weight:600;font-size:1rem}
+  .layer-row .en{font-family:var(--font-mono);font-size:.72rem;
+    color:var(--ink-3);text-align:right;letter-spacing:.02em}
+  .cs-diagram{display:grid;grid-template-columns:1fr 1.4fr 1fr;
+    align-items:center;gap:1.2rem;margin-top:2rem}
+  .cs-node{padding:1.5rem 1.4rem;border:1px solid var(--hairline);
+    border-radius:10px;text-align:center;background:var(--bg-elev-2);
+    transition:border-color 400ms var(--ease),background 400ms var(--ease)}
+  .cs-node:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .cs-node .lbl{font-family:var(--font-mono);font-size:.68rem;
+    color:var(--ink-3);margin-bottom:.4rem;letter-spacing:.04em;text-transform:uppercase}
+  .cs-node h3{margin:0;font-size:1.3rem;color:var(--ink)}
+  .cs-node .sub{font-family:var(--font-mono);font-size:.78rem;
+    color:var(--ink-mute);margin-top:.4rem}
+  .cs-arrow{text-align:center;color:var(--ink-3);font-family:var(--font-mono);
+    font-size:.78rem;line-height:1.6}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.4rem}
+  .chip{padding:.45rem .9rem;border-radius:999px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    font-size:.92rem;color:var(--ink);
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .chip:hover{border-color:var(--accent-ring);background:var(--accent-soft)}
+  .compare4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.4rem}
+  .compare4>div{padding:1.2rem;border:1px solid var(--hairline);
+    border-radius:10px;background:var(--bg-elev-2);
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .compare4>div:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .compare4 h4{font-size:1rem;margin:0 0 .5rem;color:var(--ink);font-weight:600}
+  .compare4 p{font-size:.92rem;margin:0;color:var(--ink-2)}
+  .fragment{opacity:0;transform:translateY(22px) scale(.97);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .fragment.visible{opacity:1;transform:translateY(0) scale(1);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.72rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:3px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;overflow-y:auto}
+  .sidebar .nav-dot{width:3px;height:3px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;flex:none;
+    transition:opacity 300ms var(--ease),transform 300ms var(--ease),
+      background 300ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 6px var(--accent-ring);transform:scale(1.4)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
+    letter-spacing:.02em;transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  .deck.overview .stage{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+    padding:80px 28px 80px 72px;overflow:auto;height:100vh;inset:0}
+  .deck.overview .slide{position:relative;inset:auto;aspect-ratio:16/9;
+    padding:1rem;border:1px solid var(--hairline);border-radius:10px;
+    background:var(--bg-elev-1);cursor:pointer;overflow:hidden;
+    transform:none!important;opacity:1!important}
+  .deck.overview .slide.active{border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent),0 0 16px var(--accent-glow)}
+  .deck.overview .slide>*{transform:scale(.18);transform-origin:top left}
+  .help{position:fixed;inset:0;background:rgba(8,8,10,.65);
+    backdrop-filter:blur(8px);display:none;align-items:center;
+    justify-content:center;z-index:40}
+  .help.open{display:flex;animation:helpFade 280ms var(--ease)}
+  @keyframes helpFade{from{opacity:0}to{opacity:1}}
+  .help .panel{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:12px;padding:1.8rem 2.2rem;max-width:520px;min-width:380px;
+    box-shadow:0 24px 80px rgba(0,0,0,.5);animation:helpIn 380ms var(--ease)}
+  @keyframes helpIn{from{opacity:0;transform:translateY(20px) scale(.97)}
+    to{opacity:1;transform:translateY(0) scale(1)}}
+  .help h3{margin-top:0}
+  .help .row{display:flex;justify-content:space-between;
+    padding:.55rem 0;border-bottom:1px solid var(--hairline)}
+  .help .row:last-child{border-bottom:0}
+  .help .row span:last-child{font-family:var(--font-mono);font-size:.82em;color:var(--ink-3)}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.chip,.card,.cs-node,.toolbar button,
+    .help,.help .panel,.progress,.nav-dot{transition-duration:0ms!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">第 3 章  TCP/IP  <strong>|  Leonard F. Li</strong></div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">62</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide title active">
+      <p class="eyebrow">Chapter 03  |  TCP/IP</p>
+      <h1 class="title-h">TCP/IP<br><span class="accent">协议族</span></h1>
+      <p class="lead">互联网真正在用的协议栈——从 IP 地址到 TCP 三次握手，从应用层到网络接口层。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        Instructor · Leonard F. Li　　·　　Period · 03　　·　　Spring 2026
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Objectives</p>
+      <h2>通过本次课，你将能够：</h2>
+      <ol class="steps">
+        <li class="fragment">解释 <strong>TCP/IP 协议族</strong>的组成与定位</li>
+        <li class="fragment">说出 TCP/IP 与 OSI 两种<strong>参考模型的对应关系</strong></li>
+        <li class="fragment">区分 <strong>TCP 与 UDP</strong>，并解释三次握手</li>
+        <li class="fragment">理解 <strong>IP 地址、子网掩码、路由</strong>三个核心概念</li>
+        <li class="fragment">熟悉常见的<strong>应用层协议</strong>（HTTP、DNS、DHCP…）</li>
+      </ol>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 01</p>
+      <h2>TCP/IP 概述</h2>
+      <p class="lead">互联网事实标准的协议族。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Definition</p>
+      <h2>什么是 TCP/IP？</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">字面</span>
+          <h3>两个核心协议</h3>
+          <p class="muted"><strong>TCP</strong>（传输控制协议）+ <strong>IP</strong>（网际协议），但实际涵盖<strong>整个协议族</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">本质</span>
+          <h3>协议族</h3>
+          <p class="muted">一组协议的总和——TCP、IP、UDP、HTTP、FTP、DNS、ARP……</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">地位</span>
+          <h3>Internet 的基石</h3>
+          <p class="muted">整个<strong>互联网</strong>都跑在 TCP/IP 之上——没有它，就没有今天的网络世界。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">来源</span>
+          <h3>ARPA → 全球</h3>
+          <p class="muted">从美国国防部 ARPANET 项目起步，如今是<strong>全球统一</strong>的通信语言。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Features</p>
+      <h2>TCP/IP 的核心特点</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>开放的协议标准</strong>　免费、公开，可独立于特定硬件与操作系统</li>
+        <li class="fragment"><strong>跨网络运行</strong>　可运行于局域网、城域网、广域网，覆盖范围最广</li>
+        <li class="fragment"><strong>统一的地址方案</strong>　所有设备都使用<strong>IP 地址</strong>进行寻址</li>
+        <li class="fragment"><strong>层次化结构</strong>　每层独立演进，便于开发和维护</li>
+        <li class="fragment"><strong>事实标准</strong>　不是由 ISO 强制，而是<strong>被业界广泛采用</strong>形成的事实标准</li>
+        <li class="fragment"><strong>端到端确认</strong>　不依赖单一链路，<em>「自愈能力强」</em></li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">History</p>
+      <h2>TCP/IP 的诞生</h2>
+      <div class="timeline">
+        <div class="era fragment">
+          <div class="yr">1969</div>
+          <div class="lbl">ARPANET</div>
+          <p>美国国防部组建 <strong>ARPANET</strong>，4 台节点互联。</p>
+        </div>
+        <div class="era fragment">
+          <div class="yr">1974</div>
+          <div class="lbl">TCP/IP 论文</div>
+          <p>Cerf &amp; Kahn 发表 <strong>TCP/IP 协议</strong>设计论文。</p>
+        </div>
+        <div class="era fragment">
+          <div class="yr">1983</div>
+          <div class="lbl">全面切换</div>
+          <p>ARPANET 切到 TCP/IP——<strong>互联网生日</strong>。</p>
+        </div>
+        <div class="era fragment">
+          <div class="yr">1990s+</div>
+          <div class="lbl">全球扩张</div>
+          <p>WWW 出现，互联网<strong>爆发式</strong>增长。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">4 Layers</p>
+      <h2>TCP/IP 四层模型</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">L4 · 应用</span>
+          <h3>应用层</h3>
+          <p class="muted">HTTP、FTP、SMTP、DNS、DHCP……所有<strong>高层协议</strong>都在这一层。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">L3 · 传输</span>
+          <h3>传输层</h3>
+          <p class="muted"><strong>TCP</strong>（可靠）与 <strong>UDP</strong>（不可靠），提供<strong>端到端</strong>通信。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">L2 · 网际</span>
+          <h3>网际层</h3>
+          <p class="muted"><strong>IP</strong>、ICMP、ARP、IGMP——负责把分组<strong>从源送到目的</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">L1 · 接口</span>
+          <h3>网络接口层</h3>
+          <p class="muted">以太网、Wi-Fi、PPP——<strong>物理传输</strong>与帧的封装。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Visual · Stack</p>
+      <h2>TCP/IP 模型的纵向视角</h2>
+      <div class="layer-stack">
+        <div class="layer-row fragment"><span class="num">L4</span><span class="name">应用层</span><span class="en">Application</span></div>
+        <div class="layer-row fragment"><span class="num">L3</span><span class="name">传输层</span><span class="en">Transport</span></div>
+        <div class="layer-row fragment"><span class="num">L2</span><span class="name">网际层</span><span class="en">Internet</span></div>
+        <div class="layer-row fragment"><span class="num">L1</span><span class="name">网络接口层</span><span class="en">Link / Access</span></div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
+        常见记忆：<strong>应传网接</strong>　·　数据传输方向：<strong>应用 → 传输 → 网际 → 接口</strong>
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">OSI ↔ TCP/IP</p>
+      <h2>TCP/IP 与 OSI 的对应</h2>
+      <table class="t">
+        <thead><tr><th>OSI 层</th><th>TCP/IP 层</th><th>对应协议示例</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>应用层 / 表示层 / 会话层</td><td>应用层</td><td>HTTP、FTP、SMTP、DNS</td></tr>
+          <tr class="fragment"><td>传输层</td><td>传输层</td><td>TCP、UDP</td></tr>
+          <tr class="fragment"><td>网络层</td><td>网际层</td><td>IP、ICMP、ARP</td></tr>
+          <tr class="fragment"><td>数据链路层 / 物理层</td><td>网络接口层</td><td>Ethernet、PPP、Wi-Fi</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        TCP/IP 把 OSI 的<strong>上三层合并</strong>，<strong>下两层也合并</strong>——这就是它「更实用、更易实现」的根源。
+      </p>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 02</p>
+      <h2>应用层协议</h2>
+      <p class="lead">用户看得见摸得着的「网络服务」。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">App · Overview</p>
+      <h2>常见应用层协议</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">Web</span>
+          <h3>HTTP / HTTPS</h3>
+          <p class="muted">超文本传输；HTTPS = HTTP + TLS 加密。端口 80 / 443。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Transfer</span>
+          <h3>FTP / SFTP</h3>
+          <p class="muted">文件传输协议；SFTP 通过 SSH 加密。端口 20/21 / 22。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Mail</span>
+          <h3>SMTP / POP3 / IMAP</h3>
+          <p class="muted">邮件发送 / 接收协议。端口 25 / 110 / 143。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Name</span>
+          <h3>DNS</h3>
+          <p class="muted">域名 → IP 地址解析。端口 53（UDP / TCP）。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Config</span>
+          <h3>DHCP</h3>
+          <p class="muted">自动分配 IP、子网掩码、网关。端口 67/68。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Remote</span>
+          <h3>SSH / Telnet</h3>
+          <p class="muted">远程登录；SSH 加密，Telnet 明文。端口 22 / 23。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">HTTP</p>
+      <h2>HTTP · Web 的语言</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>请求 / 响应</strong> 模型：客户端发请求，服务器回响应</li>
+        <li class="fragment">典型方法：<code>GET</code>（取）、<code>POST</code>（提交）、<code>PUT</code>、<code>DELETE</code></li>
+        <li class="fragment">状态码：<code>200</code> 成功、<code>404</code> 未找到、<code>500</code> 服务器错误</li>
+        <li class="fragment"><strong>HTTPS</strong> = HTTP + TLS——在 HTTP 与 TCP 之间插入<strong>加密层</strong></li>
+        <li class="fragment">一次 HTTP 请求的完整旅程：<em>浏览器 → DNS → TCP → HTTP → 渲染</em></li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">DNS</p>
+      <h2>DNS · 互联网的「地址簿」</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">作用</span>
+          <h3>域名 → IP</h3>
+          <p class="muted"><code>www.baidu.com</code> → <code>220.181.38.148</code>——把人类易记的名字<strong>翻译成机器用的地址</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">层次</span>
+          <h3>分布式数据库</h3>
+          <p class="muted"><strong>根 → 顶级域 → 二级域 → 主机</strong>——全球 13 组根服务器，分级查询。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">查询</span>
+          <h3>递归 / 迭代</h3>
+          <p class="muted">客户端<strong>递归</strong>查询，本地 DNS <strong>迭代</strong>查询根、顶级、权威服务器。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">优化</span>
+          <h3>缓存</h3>
+          <p class="muted">各级 DNS 服务器<strong>缓存</strong>结果，加快后续查询，减小根服务器压力。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">DHCP</p>
+      <h2>DHCP · 自动分配地址</h2>
+      <blockquote>没有 DHCP，每台新设备都要<strong>手动配置</strong> IP、子网掩码、网关、DNS——繁琐且易错。</blockquote>
+      <ul class="clean">
+        <li class="fragment"><strong>DORA 四步</strong>：Discover → Offer → Request → ACK</li>
+        <li class="fragment">客户端<strong>广播</strong>「谁给我一个 IP？」</li>
+        <li class="fragment">服务器<strong>从地址池</strong>选一个，下发给客户端</li>
+        <li class="fragment">客户端<strong>租约期</strong>内使用，到期可续租</li>
+        <li class="fragment">家庭路由器、企业网络、校园网都跑着 DHCP</li>
+      </ul>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 03</p>
+      <h2>传输层：TCP 与 UDP</h2>
+      <p class="lead">为应用程序提供<strong>端到端</strong>的通信服务。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Transport · Role</p>
+      <h2>传输层的角色</h2>
+      <ul class="clean">
+        <li class="fragment">为<strong>应用进程</strong>提供端到端的逻辑通信</li>
+        <li class="fragment">在 IP <strong>「尽力而为」</strong>的基础上，<strong>补偿可靠性</strong>（TCP）或保持<strong>高效</strong>（UDP）</li>
+        <li class="fragment">通过<strong>端口号</strong>区分同一主机上的不同应用</li>
+        <li class="fragment">典型端口：HTTP 80 / HTTPS 443 / SSH 22 / DNS 53</li>
+        <li class="fragment">是程序员<strong>编写网络程序</strong>时直接打交道的层——socket API</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">TCP vs UDP</p>
+      <h2>TCP 与 UDP 的对比</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">TCP</span>
+          <h3>面向连接 · 可靠</h3>
+          <p class="muted">三次握手建立连接；四次挥手关闭；<strong>重传、排序、流控、拥塞控制</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">UDP</span>
+          <h3>无连接 · 快速</h3>
+          <p class="muted">发完就走；<strong>不保证</strong>到达、顺序；<strong>开销小、延迟低</strong>。</p>
+        </div>
+      </div>
+      <table class="t">
+        <thead><tr><th>特性</th><th>TCP</th><th>UDP</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>连接</td><td>面向连接</td><td>无连接</td></tr>
+          <tr class="fragment"><td>可靠性</td><td>可靠（重传、确认）</td><td>不可靠（尽力而为）</td></tr>
+          <tr class="fragment"><td>顺序</td><td>保证顺序</td><td>不保证</td></tr>
+          <tr class="fragment"><td>速度</td><td>慢（开销大）</td><td>快（开销小）</td></tr>
+          <tr class="fragment"><td>应用</td><td>HTTP、FTP、邮件</td><td>DNS、视频、直播、游戏</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">TCP · 3WHS</p>
+      <h2>TCP 三次握手</h2>
+      <div class="cs-diagram" style="grid-template-columns:1fr auto 1fr auto 1fr">
+        <div class="cs-node fragment">
+          <div class="lbl">Client</div>
+          <h3>SYN</h3>
+          <div class="sub">seq = x</div>
+        </div>
+        <div class="cs-arrow fragment">→</div>
+        <div class="cs-node fragment">
+          <div class="lbl">Server</div>
+          <h3>SYN + ACK</h3>
+          <div class="sub">seq = y, ack = x+1</div>
+        </div>
+        <div class="cs-arrow fragment">→</div>
+        <div class="cs-node fragment">
+          <div class="lbl">Client</div>
+          <h3>ACK</h3>
+          <div class="sub">ack = y+1</div>
+        </div>
+      </div>
+      <ul class="clean" style="margin-top:1.6rem">
+        <li class="fragment">第一次：客户端 <strong>SYN</strong>，请求建立连接</li>
+        <li class="fragment">第二次：服务器 <strong>SYN + ACK</strong>，同意并同步序号</li>
+        <li class="fragment">第三次：客户端 <strong>ACK</strong>，连接建立</li>
+        <li class="fragment">为什么是<strong>三次</strong>？——双方各确认一次<em>「收」</em>和<em>「发」</em>能力</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">TCP · 4WT</p>
+      <h2>TCP 四次挥手</h2>
+      <ul class="clean">
+        <li class="fragment">第一次：客户端 <strong>FIN</strong>　<em>「我发完了」</em></li>
+        <li class="fragment">第二次：服务器 <strong>ACK</strong>　<em>「我知道了，但你先等一下」</em></li>
+        <li class="fragment">第三次：服务器 <strong>FIN</strong>　<em>「我也发完了」</em></li>
+        <li class="fragment">第四次：客户端 <strong>ACK</strong>　<em>「好的，连接关闭」</em></li>
+        <li class="fragment">等待 <strong>2MSL</strong>（约 2 分钟）后真正释放——防<em>「迟到包」</em>干扰</li>
+        <li class="fragment">为什么是<strong>四次</strong>？因为 TCP 是<em>全双工</em>——双方都得单独关</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Port</p>
+      <h2>端口号 · 应用的「门牌号」</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">范围</span>
+          <h3>0 – 65535</h3>
+          <p class="muted">16 位端口号；0–1023 是<strong>知名端口</strong>，由 IANA 分配给标准服务。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">区分</span>
+          <h3>同一 IP 上的多个应用</h3>
+          <p class="muted">一台服务器可以同时跑 <em>HTTP（80）</em>、<em>HTTPS（443）</em>、<em>SSH（22）</em>——靠端口区分。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">套接字</span>
+          <h3>Socket = IP + Port</h3>
+          <p class="muted"><code>192.168.1.1:80</code>——<strong>IP</strong> 标识主机，<strong>Port</strong> 标识进程。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">三类</span>
+          <h3>知名 / 注册 / 动态</h3>
+          <p class="muted">0–1023 知名；1024–49151 注册；49152–65535 动态（客户端临时）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 04</p>
+      <h2>网际层：IP</h2>
+      <p class="lead">整个 TCP/IP 协议族的<strong>基石</strong>——把分组送到任何地方。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">IP · Role</p>
+      <h2>IP 协议 · 网际层的核心</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>无连接</strong>　每个 IP 分组独立转发</li>
+        <li class="fragment"><strong>不可靠</strong>　不保证送达、不保证顺序——尽力而为</li>
+        <li class="fragment"><strong>点对点</strong>　只关心<em>「下一跳」</em>是谁</li>
+        <li class="fragment">每台主机必须有<strong>唯一 IP 地址</strong></li>
+        <li class="fragment">正是 IP 的<em>简单</em>，让互联网能<strong>互联</strong>全球几十亿设备</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">IPv4</p>
+      <h2>IPv4 · 32 位地址</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">格式</span>
+          <h3>点分十进制</h3>
+          <p class="muted">4 个 0–255 的十进制数，<code>192.168.1.1</code>，共 <strong>2³² ≈ 43 亿</strong>个。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">结构</span>
+          <h3>网络号 + 主机号</h3>
+          <p class="muted">前 N 位是<strong>网络号</strong>，后 32–N 位是<strong>主机号</strong>——由<em>子网掩码</em>界定。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">分类</span>
+          <h3>A / B / C 类</h3>
+          <p class="muted">A 类 0.x.x.x（巨型）、B 类 128.x.x.x（大）、C 类 192.x.x.x（小）。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">私有</span>
+          <h3>内网地址</h3>
+          <p class="muted"><code>10.x.x.x</code>、<code>172.16–31.x.x</code>、<code>192.168.x.x</code>——不暴露在公网。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">IPv6</p>
+      <h2>IPv6 · 128 位地址</h2>
+      <ul class="clean">
+        <li class="fragment">地址耗尽的<strong>终极解决方案</strong>——2¹²⁸ 个，约 3.4×10³⁸</li>
+        <li class="fragment">格式：<code>2001:da8:1234:5678::1</code>（冒号十六进制）</li>
+        <li class="fragment">比 IPv4 <strong>更简洁的 header</strong>、<strong>内置 IPSec</strong>、<strong>无广播</strong>（用组播代替）</li>
+        <li class="fragment">中国<strong>2025 年规划</strong>：IPv6 活跃用户数达到 8 亿</li>
+        <li class="fragment">目前 IPv4 / IPv6 <strong>双栈共存</strong>（Dual Stack）——过渡期</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Subnet Mask</p>
+      <h2>子网掩码 · 网络号与主机号的「分界线」</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">作用</span>
+          <h3>划分网络</h3>
+          <p class="muted">连续 1 表示<strong>网络位</strong>，连续 0 表示<strong>主机位</strong>——如 <code>255.255.255.0</code> = <code>/24</code>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">例</span>
+          <h3>192.168.1.10/24</h3>
+          <p class="muted">前 24 位是<strong>网络号</strong>（192.168.1），后 8 位是<strong>主机号</strong>（10）。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">CIDR</span>
+          <h3>无类域间路由</h3>
+          <p class="muted">Classless Inter-Domain Routing——<em>斜杠后数字</em>表示网络前缀长度。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">意义</span>
+          <h3>决定广播域</h3>
+          <p class="muted">同一子网内主机<strong>直接通信</strong>；不同子网必须经过<strong>路由器</strong>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Routing</p>
+      <h2>路由 · 把分组送到下一跳</h2>
+      <ul class="clean">
+        <li class="fragment">每台路由器维护一张<strong>路由表</strong>：目的网络 → 下一跳 / 出接口</li>
+        <li class="fragment">决策原则：<strong>最长前缀匹配</strong>（more specific wins）</li>
+        <li class="fragment"><strong>直连路由</strong>　接口所在网络自动学习</li>
+        <li class="fragment"><strong>静态路由</strong>　管理员<em>手写</em>（小型网络）</li>
+        <li class="fragment"><strong>动态路由</strong>　OSPF、RIP、BGP 等协议<em>自动学习</em>（大型网络）</li>
+        <li class="fragment">没有匹配项？——<strong>默认网关</strong>，<em>「交给上级」</em></li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ARP</p>
+      <h2>ARP · IP 到 MAC 的桥梁</h2>
+      <ul class="clean">
+        <li class="fragment">已知对方 <strong>IP</strong>，但局域网通信需要 <strong>MAC</strong>——ARP 来翻译</li>
+        <li class="fragment">主机广播：<em>「192.168.1.1 是谁？告诉我你的 MAC」</em></li>
+        <li class="fragment">目标主机单播回复：<em>「我是 192.168.1.1，MAC 是 AA:BB:CC:…」</em></li>
+        <li class="fragment">收到的映射被<strong>缓存</strong>在 ARP 表中（几分钟）</li>
+        <li class="fragment">没有 ARP，局域网通信<strong>完全无法进行</strong></li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">ICMP</p>
+      <h2>ICMP · 差错与控制</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>Internet Control Message Protocol</strong>　IP 协议的<em>辅助</em>协议</li>
+        <li class="fragment">用于<strong>报告错误</strong>：目的不可达、超时、参数错误……</li>
+        <li class="fragment"><code>ping</code> 命令基于 ICMP Echo Request / Reply</li>
+        <li class="fragment"><code>traceroute</code> 利用<strong>TTL 字段</strong>和 ICMP 超时报文，<em>逐跳探测路径</em></li>
+        <li class="fragment">ICMP 本身<strong>不传数据</strong>，只<em>传控制信息</em></li>
+      </ul>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 05</p>
+      <h2>网络接口层</h2>
+      <p class="lead">最后一公里——把数据变成物理信号。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Link Layer</p>
+      <h2>网络接口层的作用</h2>
+      <ul class="clean">
+        <li class="fragment">把 IP 分组<strong>封装成帧</strong>，加上 MAC 地址等链路信息</li>
+        <li class="fragment">在<strong>同一物理网络</strong>（如以太网、Wi-Fi）上<em>邻居间</em>传送</li>
+        <li class="fragment">负责<strong>介质访问控制</strong>——同一时间谁可以发？</li>
+        <li class="fragment"><strong>差错检测</strong>：CRC 校验，但<em>不纠错</em>——出错就丢</li>
+        <li class="fragment">典型技术：以太网（Ethernet）、Wi-Fi、PPP、HDLC</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Ethernet</p>
+      <h2>以太网 · 局域网的事实标准</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">历史</span>
+          <h3>1973 → 10 Gbps</h3>
+          <p class="muted">Xerox PARC 发明；从 10 Mbps 到 100M、1G、10G、100G，<em>每 10 年提速 10 倍</em>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">MAC</span>
+          <h3>48 位地址</h3>
+          <p class="muted">如 <code>00:1A:2B:3C:4D:5E</code>——前 24 位是<em>厂商代码</em>，后 24 位<em>设备序号</em>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">CSMA/CD</span>
+          <h3>载波监听 / 冲突检测</h3>
+          <p class="muted">发送前<em>先听</em>，发送中<em>检测冲突</em>，冲突后<em>退避重试</em>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">Today</span>
+          <h3>全双工 + 交换机</h3>
+          <p class="muted">现代以太网都是<strong>全双工</strong>，通过<strong>交换机</strong>直连——<em>CSMA/CD 几乎不用了</em>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Encapsulation</p>
+      <h2>数据在 TCP/IP 中的封装</h2>
+      <blockquote>每加一层头部，就<strong>多一层职责</strong>——<em>「分工」</em>的真实体现。</blockquote>
+      <div class="grid-2" style="margin-top:1.4rem">
+        <div class="card fragment">
+          <span class="tag">应用层</span>
+          <h3>HTTP 请求</h3>
+          <p class="muted"><code>GET / HTTP/1.1</code><br><code>Host: www.baidu.com</code></p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">传输层 · TCP</span>
+          <h3>加 TCP 头</h3>
+          <p class="muted">源端口 8888，目的端口 80，seq=1，flags=SYN</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">网际层 · IP</span>
+          <h3>加 IP 头</h3>
+          <p class="muted">源 IP 192.168.1.100，目的 IP 110.242.68.66，TTL=64</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">接口层 · Ethernet</span>
+          <h3>加帧头帧尾</h3>
+          <p class="muted">源 MAC、目的 MAC、EtherType=0x0800、FCS</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 06</p>
+      <h2>OSI vs TCP/IP · 总结对比</h2>
+      <p class="lead">两种参考模型的异同与历史命运。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Common</p>
+      <h2>OSI 与 TCP/IP 的共同点</h2>
+      <ul class="clean">
+        <li class="fragment">都采用<strong>分层结构</strong>，每层向上一层<em>提供服务</em>，向下一层<em>请求服务</em></li>
+        <li class="fragment">都解决<strong>异构网络互联</strong>问题</li>
+        <li class="fragment">都基于<strong>协议族</strong>的概念——一组协同工作的协议</li>
+        <li class="fragment">都强调<strong>「下层为上层服务」</strong>的单向依赖</li>
+        <li class="fragment">都是<strong>参考模型</strong>，而非具体实现</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Differences</p>
+      <h2>OSI 与 TCP/IP 的核心差异</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">OSI</span>
+          <h3>理论驱动</h3>
+          <p class="muted">先有<strong>模型</strong>，后有<strong>协议</strong>；7 层细致；<em>通用但复杂</em>，没有真正实现。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">TCP/IP</span>
+          <h3>实践驱动</h3>
+          <p class="muted">先有<strong>协议</strong>，后有<strong>模型</strong>；4 层简洁；<em>实用且高效</em>，成为互联网事实标准。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Why TCP/IP Won</p>
+      <h2>为什么 TCP/IP 胜出？</h2>
+      <ul class="clean">
+        <li class="fragment">OSI <strong>设计过度</strong>——7 层太细、实现复杂、效率低</li>
+        <li class="fragment">TCP/IP <strong>简单实用</strong>——4 层足够，开源、免费、文档完整</li>
+        <li class="fragment">美国国防部 ARPANET <strong>强力背书</strong>，并入 BSD Unix</li>
+        <li class="fragment"><strong>先有生态</strong>，后有标准——市场规律</li>
+        <li class="fragment">OSI 沦为<strong>教学模型</strong>，TCP/IP 成为<strong>实际网络</strong></li>
+        <li class="fragment">今天<strong>5G、IoT、云、SDN</strong>——都跑在 TCP/IP 之上</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">5-Layer</p>
+      <h2>五层教学模型（折中）</h2>
+      <div class="layer-stack">
+        <div class="layer-row fragment"><span class="num">L5</span><span class="name">应用层</span><span class="en">Application</span></div>
+        <div class="layer-row fragment"><span class="num">L4</span><span class="name">传输层</span><span class="en">Transport</span></div>
+        <div class="layer-row fragment"><span class="num">L3</span><span class="name">网络层</span><span class="en">Network</span></div>
+        <div class="layer-row fragment"><span class="num">L2</span><span class="name">数据链路层</span><span class="en">Data Link</span></div>
+        <div class="layer-row fragment"><span class="num">L1</span><span class="name">物理层</span><span class="en">Physical</span></div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
+        国内教材最常用——把 TCP/IP 的<strong>网络接口层</strong>拆成<strong>数据链路 + 物理</strong>，便于讲清细节。
+      </p>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 07</p>
+      <h2>实践与排错</h2>
+      <p class="lead">把 TCP/IP 用起来——常见命令与排错思路。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Tools</p>
+      <h2>常用网络命令</h2>
+      <table class="t">
+        <thead><tr><th>命令</th><th>作用</th><th>所在层</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td><code>ping</code></td><td>测试连通性</td><td>网际层（ICMP）</td></tr>
+          <tr class="fragment"><td><code>traceroute</code> / <code>tracert</code></td><td>查看路径</td><td>网际层</td></tr>
+          <tr class="fragment"><td><code>ipconfig</code> / <code>ifconfig</code></td><td>查看本机 IP</td><td>网际层 / 接口层</td></tr>
+          <tr class="fragment"><td><code>arp -a</code></td><td>查看 ARP 缓存</td><td>接口层</td></tr>
+          <tr class="fragment"><td><code>netstat -an</code></td><td>查看端口连接</td><td>传输层</td></tr>
+          <tr class="fragment"><td><code>nslookup</code> / <code>dig</code></td><td>DNS 查询</td><td>应用层</td></tr>
+          <tr class="fragment"><td><code>curl</code> / <code>wget</code></td><td>HTTP 请求</td><td>应用层</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Troubleshooting</p>
+      <h2>分层排错思路</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">自下而上</span>
+          <h3>物理 → 应用</h3>
+          <p class="muted">先查<strong>物理层</strong>（网线、Wi-Fi）→ 链路层 → 网络层 → 传输层 → 应用层。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">例子</span>
+          <h3>打不开网页？</h3>
+          <p class="muted">① 网线插好？② Wi-Fi 连上？③ IP 配对？④ ping 通网关？⑤ ping 通 DNS？⑥ 浏览器能访问 IP？</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">A Real Visit</p>
+      <h2>一个 HTTP 请求的完整旅程</h2>
+      <ol class="steps">
+        <li class="fragment">浏览器解析 <code>https://www.baidu.com</code></li>
+        <li class="fragment">查 DNS → 得到 110.242.68.66</li>
+        <li class="fragment">建立 TCP 连接（三次握手）</li>
+        <li class="fragment">建立 TLS（HTTPS）</li>
+        <li class="fragment">发送 HTTP GET 请求</li>
+        <li class="fragment">服务器回 HTML / CSS / JS</li>
+        <li class="fragment">浏览器渲染页面</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Recap</p>
+      <h2>本章小结</h2>
+      <ol class="steps">
+        <li class="fragment"><strong>TCP/IP 协议族</strong>：互联网的事实标准</li>
+        <li class="fragment"><strong>四层结构</strong>：应用、传输、网际、网络接口</li>
+        <li class="fragment"><strong>应用层</strong>：HTTP、DNS、DHCP、FTP…</li>
+        <li class="fragment"><strong>传输层</strong>：TCP（三次握手、可靠）vs UDP（无连接、快速）</li>
+        <li class="fragment"><strong>网际层</strong>：IP 地址、子网掩码、路由、ARP、ICMP</li>
+        <li class="fragment"><strong>网络接口层</strong>：以太网、Wi-Fi、MAC 地址</li>
+        <li class="fragment">OSI 与 TCP/IP 的<strong>对应关系</strong>与历史命运</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Homework</p>
+      <h2>课后任务</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>查命令</strong></p>
+          <p class="muted" style="margin-top:.3rem">在电脑上执行 <code>ipconfig /all</code>、<code>arp -a</code>、<code>ping www.baidu.com</code>，记录并解释输出。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>算地址</strong></p>
+          <p class="muted" style="margin-top:.3rem">已知 <code>192.168.10.0/26</code>，划分 4 个子网，写出每个子网的网络地址、广播地址、可用主机范围。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>分析</strong></p>
+          <p class="muted" style="margin-top:.3rem">用 TCP/IP 协议栈，描述一次<em>从浏览器输入 URL 到页面显示</em>的完整过程（每层发生了什么）。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">04</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>思考</strong></p>
+          <p class="muted" style="margin-top:.3rem">为什么<em>「三次握手」</em>是三次而不是两次？如果是两次，可能出现什么问题？</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Misconceptions</p>
+      <h2>常见误解 · 别踩坑</h2>
+      <ul class="clean">
+        <li class="fragment">「<em>TCP 比 UDP 高级</em>」——<strong>错</strong>。二者适用场景不同，UDP 在实时场景下更优。</li>
+        <li class="fragment">「<em>IP 地址 = 主机身份</em>」——<strong>不准确</strong>。同一主机可有多 IP；同一 IP 可对应多设备（NAT）。</li>
+        <li class="fragment">「<em>DNS 必须用 UDP</em>」——<strong>不绝对</strong>。大响应、超时重传会切到 TCP。</li>
+        <li class="fragment">「<em>MAC 地址全球唯一</em>」——理论上<strong>是</strong>，但虚拟机、网卡克隆会重复。</li>
+        <li class="fragment">「<em>Ping 通 = 网络通</em>」——<strong>不</strong>。Ping 走 ICMP，可能被防火墙拦；应用层可能仍不通。</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">IP Header</p>
+      <h2>IPv4 头部结构（简化）</h2>
+      <table class="t">
+        <thead><tr><th>字段</th><th>长度</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>版本</td><td>4 bit</td><td>4 = IPv4，6 = IPv6</td></tr>
+          <tr class="fragment"><td>首部长度</td><td>4 bit</td><td>IP 头长度（×4 字节）</td></tr>
+          <tr class="fragment"><td>总长度</td><td>16 bit</td><td>整个 IP 包长度</td></tr>
+          <tr class="fragment"><td>TTL</td><td>8 bit</td><td>生存时间，每跳 -1；=0 时丢弃</td></tr>
+          <tr class="fragment"><td>协议</td><td>8 bit</td><td>6 = TCP，17 = UDP，1 = ICMP</td></tr>
+          <tr class="fragment"><td>源 IP</td><td>32 bit</td><td>发送方 IP</td></tr>
+          <tr class="fragment"><td>目的 IP</td><td>32 bit</td><td>接收方 IP</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">TCP Header</p>
+      <h2>TCP 头部结构（关键字段）</h2>
+      <table class="t">
+        <thead><tr><th>字段</th><th>长度</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>源端口</td><td>16 bit</td><td>发送方端口</td></tr>
+          <tr class="fragment"><td>目的端口</td><td>16 bit</td><td>接收方端口</td></tr>
+          <tr class="fragment"><td>序列号</td><td>32 bit</td><td>数据字节编号（保证顺序）</td></tr>
+          <tr class="fragment"><td>确认号</td><td>32 bit</td><td>「我已收到 X，期待 X+1」</td></tr>
+          <tr class="fragment"><td>标志位</td><td>6 bit</td><td>SYN / ACK / FIN / RST / PSH / URG</td></tr>
+          <tr class="fragment"><td>窗口大小</td><td>16 bit</td><td>流量控制（我能收多少）</td></tr>
+          <tr class="fragment"><td>校验和</td><td>16 bit</td><td>差错检测</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Protocol Zoo</p>
+      <h2>TCP/IP 协议族一览</h2>
+      <div class="chips">
+        <span class="chip fragment">HTTP</span>
+        <span class="chip fragment">HTTPS</span>
+        <span class="chip fragment">FTP</span>
+        <span class="chip fragment">SFTP</span>
+        <span class="chip fragment">SMTP</span>
+        <span class="chip fragment">POP3</span>
+        <span class="chip fragment">IMAP</span>
+        <span class="chip fragment">DNS</span>
+        <span class="chip fragment">DHCP</span>
+        <span class="chip fragment">SNMP</span>
+        <span class="chip fragment">NTP</span>
+        <span class="chip fragment">SSH</span>
+        <span class="chip fragment">Telnet</span>
+        <span class="chip fragment">TCP</span>
+        <span class="chip fragment">UDP</span>
+        <span class="chip fragment">IP</span>
+        <span class="chip fragment">IPv6</span>
+        <span class="chip fragment">ICMP</span>
+        <span class="chip fragment">IGMP</span>
+        <span class="chip fragment">ARP</span>
+        <span class="chip fragment">RARP</span>
+        <span class="chip fragment">OSPF</span>
+        <span class="chip fragment">RIP</span>
+        <span class="chip fragment">BGP</span>
+        <span class="chip fragment">PPPoE</span>
+        <span class="chip fragment">Ethernet</span>
+        <span class="chip fragment">Wi-Fi</span>
+        <span class="chip fragment">MPLS</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Glossary</p>
+      <h2>本章关键术语</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>TCP</strong>　Transmission Control Protocol　传输控制协议</li>
+        <li class="fragment"><strong>UDP</strong>　User Datagram Protocol　用户数据报协议</li>
+        <li class="fragment"><strong>IP</strong>　Internet Protocol　网际协议</li>
+        <li class="fragment"><strong>ICMP</strong>　Internet Control Message Protocol　差错控制协议</li>
+        <li class="fragment"><strong>ARP</strong>　Address Resolution Protocol　地址解析协议</li>
+        <li class="fragment"><strong>MAC</strong>　Media Access Control　介质访问控制地址</li>
+        <li class="fragment"><strong>DNS</strong>　Domain Name System　域名系统</li>
+        <li class="fragment"><strong>DHCP</strong>　Dynamic Host Configuration Protocol　动态主机配置协议</li>
+        <li class="fragment"><strong>HTTP</strong>　HyperText Transfer Protocol　超文本传输协议</li>
+        <li class="fragment"><strong>TTL</strong>　Time To Live　生存时间</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Real Packet</p>
+      <h2>一个真实的 TCP 三次握手</h2>
+      <p class="muted" style="margin-top:.3rem">在 Wireshark 中抓包的样子：</p>
+      <div class="grid-2" style="margin-top:1.4rem">
+        <div class="card fragment">
+          <span class="tag">No.1</span>
+          <h3>Client → Server</h3>
+          <p class="muted">SYN, seq=0, win=64240<br>Length=0</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">No.2</span>
+          <h3>Server → Client</h3>
+          <p class="muted">SYN, ACK, seq=0, ack=1, win=64240<br>Length=0</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">No.3</span>
+          <h3>Client → Server</h3>
+          <p class="muted">ACK, seq=1, ack=1, win=64240<br>Length=0</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">结果</span>
+          <h3>连接建立</h3>
+          <p class="muted">此后开始传数据——三次握手<em>本身不携带业务数据</em>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">DNS Walkthrough</p>
+      <h2>DNS 解析的一次完整过程</h2>
+      <ol class="steps">
+        <li class="fragment">浏览器：<em>「www.baidu.com 的 IP？」</em></li>
+        <li class="fragment">本地缓存查找（命中则直接返回）</li>
+        <li class="fragment">向本地 DNS 服务器发起<strong>递归</strong>查询</li>
+        <li class="fragment">本地 DNS 向<strong>根</strong>服务器问：<em>「.com 谁管？」</em></li>
+        <li class="fragment">根返回 <em>.com</em> 顶级域服务器地址</li>
+        <li class="fragment">再问 <em>.com</em> 服务器：<em>「baidu.com 谁管？」</em></li>
+        <li class="fragment">返回 <em>baidu.com</em> 权威 DNS 地址</li>
+        <li class="fragment">最后问到 <code>www.baidu.com</code> 的 IP，<strong>返回给客户端</strong></li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">NAT</p>
+      <h2>NAT · 内网共享公网 IP</h2>
+      <ul class="clean">
+        <li class="fragment">IPv4 地址紧张——<strong>NAT</strong> 让多个内网设备<em>共用</em>一个公网 IP</li>
+        <li class="fragment">家用路由器的核心功能——<em>「全家共享一根宽带」</em></li>
+        <li class="fragment">NAPT（PAT）最常用：<strong>IP + 端口</strong>组合标识每个内网连接</li>
+        <li class="fragment">优点：<em>节省地址、隐藏内网</em></li>
+        <li class="fragment">缺点：<em>破坏端到端透明性</em>（P2P、VoIP 需要穿透）</li>
+        <li class="fragment">IPv6 普及后，<strong>NAT 终将退出历史舞台</strong></li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Firewall</p>
+      <h2>防火墙 · 守门人</h2>
+      <ul class="clean">
+        <li class="fragment">根据<strong>规则</strong>决定哪些流量<em>放行</em>、哪些<em>丢弃</em></li>
+        <li class="fragment">工作层次：包过滤（网络层）→ 状态检测（传输层）→ 应用层网关</li>
+        <li class="fragment">Linux 的 <code>iptables</code> / <code>nftables</code>——经典工具</li>
+        <li class="fragment">默认策略：<em>「白名单」</em>优于<em>「黑名单」</em></li>
+        <li class="fragment">Ping 不通 ≠ 主机宕机——可能只是<strong>ICMP 被拦</strong></li>
+        <li class="fragment">现代 <strong>NAT + 防火墙</strong>往往<em>一体化</em>（家用路由器）</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Use Cases</p>
+      <h2>不同场景的协议选择</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">网页浏览</span>
+          <h3>HTTPS over TCP</h3>
+          <p class="muted">可靠性优先——不能丢包；选 TCP；安全再叠 TLS。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">视频直播</span>
+          <h3>RTP over UDP</h3>
+          <p class="muted">实时优先——丢一帧没关系；选 UDP；容忍延迟但不耐卡顿。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">文件下载</span>
+          <h3>HTTP / FTP over TCP</h3>
+          <p class="muted">完整性优先——不能丢字节；选 TCP；可重传。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">DNS 查询</span>
+          <h3>DNS over UDP (small)</h3>
+          <p class="muted">短小、低延迟——选 UDP；大响应或 DoT/DoH 走 TCP。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Socket</p>
+      <h2>Socket · 程序员的世界</h2>
+      <ul class="clean">
+        <li class="fragment">TCP/IP 在编程层面的<strong>API 抽象</strong>——<em>「端点」</em></li>
+        <li class="fragment">Berkeley Sockets：<code>socket()</code>、<code>bind()</code>、<code>listen()</code>、<code>accept()</code>、<code>connect()</code>、<code>send()</code>、<code>recv()</code></li>
+        <li class="fragment">一个 Socket = <strong>IP : Port</strong> 的一对——标识<em>一个网络端点</em></li>
+        <li class="fragment">服务器：<em>bind → listen → accept</em>，被动等连接</li>
+        <li class="fragment">客户端：<em>connect</em>，主动发起连接</li>
+        <li class="fragment">几乎所有网络程序（C / Python / Java）都基于 socket</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Handshake Detail</p>
+      <h2>为什么是三次，不是两次？</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">两次的问题</span>
+          <h3>旧请求 S/D 问题</h3>
+          <p class="muted">如果只有两次，<strong>失效的旧 SYN</strong> 可能突然到达服务器，让它<em>误以为</em>有新连接，浪费资源。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">三次的好处</span>
+          <h3>双方都验证</h3>
+          <p class="muted">第三次 ACK 让<strong>客户端确认</strong>自己发的包被服务器<em>真正收到</em>，<em>「信道是双向可用的」</em>。</p>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        一句话：<em>三次握手 = 双方各确认一次收发能力</em>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">HTTP Versions</p>
+      <h2>HTTP 协议的发展</h2>
+      <table class="t">
+        <thead><tr><th>版本</th><th>年份</th><th>关键改进</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>HTTP/0.9</td><td>1991</td><td>原始版，仅支持 GET</td></tr>
+          <tr class="fragment"><td>HTTP/1.0</td><td>1996</td><td>增加 POST、Header、状态码</td></tr>
+          <tr class="fragment"><td>HTTP/1.1</td><td>1997</td><td>持久连接、chunked、分块传输</td></tr>
+          <tr class="fragment"><td>HTTPS</td><td>1995+</td><td>HTTP + TLS 加密</td></tr>
+          <tr class="fragment"><td>HTTP/2</td><td>2015</td><td>多路复用、HPACK、服务器推送</td></tr>
+          <tr class="fragment"><td>HTTP/3</td><td>2022</td><td>基于 QUIC（UDP），更低延迟</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Internet Layers</p>
+      <h2>一个完整的 HTTP 旅程（按层）</h2>
+      <ol class="steps">
+        <li class="fragment"><strong>应用层</strong>　浏览器组装 HTTP GET 请求</li>
+        <li class="fragment"><strong>传输层</strong>　TCP 三次握手建立连接</li>
+        <li class="fragment"><strong>传输层</strong>　数据被切成段（segment），加上 TCP 头</li>
+        <li class="fragment"><strong>网际层</strong>　段被封装为 IP 包，加上 IP 头（src/dst IP）</li>
+        <li class="fragment"><strong>网际层</strong>　路由器查表，逐跳转发到目的 IP</li>
+        <li class="fragment"><strong>接口层</strong>　包被封装成帧，加上 MAC 头（src/dst MAC）</li>
+        <li class="fragment"><strong>物理层</strong>　帧变成<em>电信号 / 光脉冲 / 无线电波</em>在介质上传输</li>
+        <li class="fragment"><strong>反向</strong>　到达后层层<em>解封装</em>，最终 HTTP 响应回到浏览器</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Throughput</p>
+      <h2>性能与吞吐</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">延迟</span>
+          <h3>Latency</h3>
+          <p class="muted">从发出到收到的<strong>总时间</strong>——RTT（往返时延）是关键指标。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">带宽</span>
+          <h3>Bandwidth</h3>
+          <p class="muted">单位时间能传的<strong>最大比特数</strong>——理论上限。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">吞吐</span>
+          <h3>Throughput</h3>
+          <p class="muted">实际<strong>每秒成功传输</strong>的数据量——<em>「瓶颈」</em>决定上限。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">优化</span>
+          <h3>TCP 拥塞控制</h3>
+          <p class="muted">慢启动、拥塞避免、快重传、快恢复——自适应网络状况。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Security</p>
+      <h2>TCP/IP 的安全挑战</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>IP 欺骗</strong>　伪造源 IP 地址</li>
+        <li class="fragment"><strong>SYN 洪水</strong>　半开连接耗尽服务器资源</li>
+        <li class="fragment"><strong>端口扫描</strong>　枚举开放服务</li>
+        <li class="fragment"><strong>中间人攻击</strong>　ARP 欺骗、DNS 劫持</li>
+        <li class="fragment"><strong>DDoS</strong>　分布式拒绝服务</li>
+        <li class="fragment">防御：防火墙、IDS/IPS、TLS 加密、IPSec</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Future</p>
+      <h2>TCP/IP 的未来</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">IPv6</span>
+          <h3>全面普及</h3>
+          <p class="muted">全球 IPv6 部署率持续上升；<em>「IPv6-only」</em>网络开始出现。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">QUIC</span>
+          <h3>HTTP/3 的传输</h3>
+          <p class="muted">基于 UDP 的<strong>新一代传输</strong>——更快的握手、更好的多路复用。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">SDN</span>
+          <h3>软件定义网络</h3>
+          <p class="muted">控制面与数据面<strong>分离</strong>，网络可编程化。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">eBPF</span>
+          <h3>内核可编程</h3>
+          <p class="muted">在<strong>内核</strong>里跑用户程序——网络性能优化新范式。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Look Ahead</p>
+      <h2>下一章预告</h2>
+      <p class="lead">掌握 TCP/IP 之后，下一章我们深入<strong>认识 IP 地址</strong>——子网划分、掩码计算、CIDR、VLSM。</p>
+      <p class="muted" style="margin-top:1.4rem;font-size:.92rem">从「知道 TCP/IP」到「熟练使用 TCP/IP」，差距就在 IP 地址这一关。</p>
+    </section>
+
+    <section class="slide title">
+      <p class="eyebrow">End of Chapter 03</p>
+      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">认识 IP 地址</span></h1>
+      <p class="lead" style="margin-top:1.4rem">从 <code>192.168.1.1</code> 到子网划分——掌握 IP 地址的<strong>全部</strong>细节。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        End · 60+ slides · Chapter 03
+      </p>
+    </section>
+
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-help" title="键盘帮助 (?)">Help</button>
+    <button id="b-overview" title="总览 (Esc)">Overview</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+
+  <div class="help" id="help">
+    <div class="panel">
+      <h3>Keyboard | Mouse</h3>
+      <div class="row"><span>Next slide</span><span>→ / Space / PageDown</span></div>
+      <div class="row"><span>Prev slide</span><span>← / PageUp</span></div>
+      <div class="row"><span>First / Last</span><span>Home / End</span></div>
+      <div class="row"><span>Overview (click to jump)</span><span>Esc</span></div>
+      <div class="row"><span>Toggle theme</span><span>T</span></div>
+      <div class="row"><span>Fullscreen</span><span>F</span></div>
+      <div class="row"><span>Help</span><span>?</span></div>
+      <p class="muted" style="margin-top:.8rem;font-size:.82rem">
+        Click empty area to advance; press <kbd>?</kbd> to dismiss.
+      </p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  const help=document.getElementById('help');
+  let i=0;
+  let fragIdx=0;
+  function slideFrags(slide){ return slide.querySelectorAll('.fragment'); }
+  function revealFragments(){
+    const frags=slideFrags(slides[i]);
+    for(let k=0;k<frags.length;k++){
+      if(k<fragIdx){
+        frags[k].classList.add('visible');
+        frags[k].style.setProperty('--frag-stagger',(k*90)+'ms');
+      } else {
+        frags[k].classList.remove('visible');
+        frags[k].style.setProperty('--frag-stagger','0ms');
+      }
+    }
+  }
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>d.classList.toggle('active',k===i))}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    if(next===i)return;
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    setTimeout(()=>{out.classList.remove('active','leaving')},600);
+    i=next;
+    fragIdx=0;
+    revealFragments();
+    now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot()}
+  function next(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx<frags.length){
+      fragIdx++;revealFragments();
+    } else if(i<slides.length-1){
+      show(i+1);
+    }
+  }
+  function prev(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx>1){
+      fragIdx--;revealFragments();
+    } else if(fragIdx===1){
+      fragIdx=0;revealFragments();
+    } else if(i>0){
+      const prevIdx=i-1;
+      const inn=slides[prevIdx];
+      const prevFrags=slideFrags(inn);
+      inn.classList.add('active');
+      const out=slides[i];
+      out.classList.add('leaving');
+      setTimeout(()=>{out.classList.remove('active','leaving')},600);
+      i=prevIdx;
+      fragIdx=prevFrags.length;
+      revealFragments();
+      now.textContent=String(i+1).padStart(2,'0');
+      progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+      history.replaceState(null,'','#'+(i+1));setActiveDot();
+    }
+  }
+  function toggleOverview(){
+    const on=deck.classList.toggle('overview');
+    if(on){
+      stage.style.display='grid';
+      stage.style.gridTemplateColumns='repeat(4, 1fr)';
+      stage.style.gap='14px';
+      stage.style.padding='80px 28px 80px 72px';
+      stage.style.overflow='auto';
+      slides.forEach((s)=>{
+        s.style.display='flex';
+        s.style.position='relative';
+        s.style.inset='auto';
+        s.style.aspectRatio='16/9';
+        s.style.padding='1rem';
+        s.style.border='1px solid var(--hairline)';
+        s.style.borderRadius='10px';
+        s.style.background='var(--bg-elev-1)';
+        s.style.cursor='pointer';
+        s.style.overflow='hidden';
+        s.style.transform='none';
+        s.style.opacity='1';
+        Array.from(s.children).forEach((c)=>{
+          c.style.transform='scale(.18)';
+          c.style.transformOrigin='top left';
+        });
+      });
+    } else {
+      stage.style.display='';
+      slides.forEach((s)=>{s.style.display='';});
+      show(i);
+    }
+  }
+  function toggleTheme(){
+    const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light');
+  }
+  function toggleHelp(){help.classList.toggle('open')}
+  document.addEventListener('keydown',(e)=>{
+    if(help.classList.contains('open')){
+      if(e.key==='Escape'||e.key==='?'){toggleHelp();e.preventDefault()}
+      return;
+    }
+    if(deck.classList.contains('overview')){
+      if(e.key==='Escape'){toggleOverview();e.preventDefault()}
+      return;
+    }
+    switch(e.key){
+      case'ArrowRight':case'PageDown':case' ':case'Spacebar':
+        next();e.preventDefault();break;
+      case'ArrowLeft':case'PageUp':prev();e.preventDefault();break;
+      case'Home':show(0);e.preventDefault();break;
+      case'End':show(slides.length-1);e.preventDefault();break;
+      case'Escape':toggleOverview();e.preventDefault();break;
+      case't':case'T':toggleTheme();break;
+      case'f':case'F':if(document.fullscreenElement)document.exitFullscreen();
+        else deck.requestFullscreen&&deck.requestFullscreen();break;
+      case'?':case'/':toggleHelp();e.preventDefault();break;
+    }
+  });
+  stage.addEventListener('click',(e)=>{
+    if(deck.classList.contains('overview')){
+      const s=e.target.closest('.slide');
+      if(!s)return;
+      const idx=slides.indexOf(s);
+      if(idx>=0){toggleOverview();show(idx)}
+    } else {
+      const x=e.clientX/window.innerWidth;
+      if(x>0.5)next();else prev();
+    }
+  });
+  document.getElementById('b-theme').addEventListener('click',toggleTheme);
+  document.getElementById('b-help').addEventListener('click',toggleHelp);
+  document.getElementById('b-overview').addEventListener('click',toggleOverview);
+  document.getElementById('b-print').addEventListener('click',()=>window.print());
+
+  fragIdx=0;
+  revealFragments();
+})();
+</script>
+</body>
+</html>

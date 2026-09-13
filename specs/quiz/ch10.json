@@ -1,0 +1,192 @@
+{
+  "chapter": 10,
+  "title": "配置 VLAN",
+  "questions": [
+    {
+      "type": "single",
+      "q": "「VLAN」是：",
+      "options": {"A": "虚拟局域网", "B": "大型局域网", "C": "城域网", "D": "无线网"},
+      "answer": "A",
+      "explain": "VLAN = Virtual LAN 虚拟局域网。"
+    },
+    {
+      "type": "single",
+      "q": "下列关于 VLAN1，**错误**的是：",
+      "options": {"A": "VLAN1 是默认 VLAN", "B": "所有端口默认属于 VLAN1", "C": "VLAN1 可以创建", "D": "VLAN1 不能删除"},
+      "answer": "C",
+      "explain": "VLAN1 是默认 VLAN——既不能创建也不能删除。"
+    },
+    {
+      "type": "single",
+      "q": "VLAN 的两大主要作用是：",
+      "options": {"A": "提速 + 加密", "B": "限制广播 + 分组设备", "C": "压缩 + 路由", "D": "认证 + 计费"},
+      "answer": "B",
+      "explain": "VLAN 限制广播域 + 把设备按逻辑分组（增强隔离与安全）。"
+    },
+    {
+      "type": "single",
+      "q": "「基于端口划分 VLAN」是最常见的 VLAN 划分方式，其优点是：",
+      "options": {"A": "用户移动无需重配", "B": "配置简单清晰", "C": "可解决 HUB 细粒度问题", "D": "按协议分组"},
+      "answer": "B",
+      "explain": "基于端口：简单、稳定；缺点是用户换物理位置需要重配端口。"
+    },
+    {
+      "type": "single",
+      "q": "下列哪种 VLAN 划分方式允许「用户移动到其它物理网段但 VLAN 不变」？",
+      "options": {"A": "基于端口", "B": "基于 MAC 地址", "C": "基于网络层", "D": "基于 IP 子网"},
+      "answer": "B",
+      "explain": "基于 MAC：终端 MAC 不变，VLAN 跟着走——移动友好。"
+    },
+    {
+      "type": "single",
+      "q": "「基于网络层划分 VLAN」**不**适合下列哪种情况？",
+      "options": {"A": "按 IP 子网分组", "B": "需要 IP 盗用防护", "C": "用户自由移动", "D": "所有设备都支持"},
+      "answer": "D",
+      "explain": "基于网络层需要设备支持该功能；并非所有设备都支持；需考虑 IP 盗用。"
+    },
+    {
+      "type": "single",
+      "q": "VLAN 间的通信**必须**经过：",
+      "options": {"A": "集线器", "B": "路由器或三层交换机", "C": "另一台交换机", "D": "调制解调器"},
+      "answer": "B",
+      "explain": "VLAN 间通信必须经路由（路由器或三层交换机）。"
+    },
+    {
+      "type": "single",
+      "q": "跨交换机的 VLAN 通常需要配置：",
+      "options": {"A": "Trunk（中继）端口", "B": "Access 端口", "C": "Routed 端口", "D": "Mirror 端口"},
+      "answer": "A",
+      "explain": "Trunk 端口能承载多个 VLAN 的流量；Access 只属于一个 VLAN。"
+    },
+    {
+      "type": "single",
+      "q": "「基于端口」划分 VLAN 时，若端口连接的是 **HUB**，HUB 下的所有用户：",
+      "options": {"A": "各自属于不同 VLAN", "B": "只能属于同一 VLAN", "C": "由 HUB 自动分配 VLAN", "D": "无法使用 VLAN"},
+      "answer": "B",
+      "explain": "HUB 是共享介质；按端口划分只能将整个 HUB 划入一个 VLAN。"
+    },
+    {
+      "type": "single",
+      "q": "「VLAN」对广播域的影响是：",
+      "options": {"A": "扩大广播域", "B": "缩小广播域", "C": "不影响", "D": "随机"},
+      "answer": "B",
+      "explain": "VLAN 把大广播域切成多个小广播域——缩小了。"
+    },
+    {
+      "type": "single",
+      "q": "「基于 MAC 地址划分 VLAN」的主要缺点是：",
+      "options": {"A": "不支持移动", "B": "维护大量 MAC 映射", "C": "不支持三层", "D": "速度慢"},
+      "answer": "B",
+      "explain": "MAC 数量大且无规律——配置和维护工作量大。"
+    },
+    {
+      "type": "single",
+      "q": "「VLAN Trunk」一般使用哪种协议打标签？",
+      "options": {"A": "STP", "B": "802.1Q", "C": "VTP", "D": "HSRP"},
+      "answer": "B",
+      "explain": "IEEE 802.1Q 是标准 VLAN Trunk 标记协议。"
+    },
+    {
+      "type": "multi",
+      "q": "「VLAN 的优点」包括：",
+      "options": {"A": "限制广播", "B": "增强安全", "C": "分组灵活", "D": "物理位置灵活（按 MAC / 网络层）"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "VLAN 四大优点：限广播、加安全、分组灵活、跨物理位置（基于 MAC/网络层）。"
+    },
+    {
+      "type": "multi",
+      "q": "「基于端口 VLAN」的特点：",
+      "options": {"A": "简单稳定", "B": "用户换位置需重配", "C": "适合 HUB 接入", "D": "维护 MAC 映射"},
+      "answer": ["A", "B"],
+      "explain": "A 简单稳定；B 用户换物理位置需重配端口；不适合 HUB（C 错）；D 是基于 MAC 划分的特点。"
+    },
+    {
+      "type": "multi",
+      "q": "下列哪些**属于**常见的 VLAN 划分方式？",
+      "options": {"A": "基于端口", "B": "基于 MAC", "C": "基于网络层", "D": "基于应用层"},
+      "answer": ["A", "B", "C"],
+      "explain": "三大常见划分方式：端口、MAC、网络层；按应用层划分不是主流。"
+    },
+    {
+      "type": "multi",
+      "q": "「VLAN1」的特点：",
+      "options": {"A": "默认 VLAN", "B": "所有端口默认属于它", "C": "可以创建也可以删除", "D": "通常作为管理 VLAN"},
+      "answer": ["A", "B", "D"],
+      "explain": "VLAN1 默认、不能创建也不能删除；所有端口默认属于它；常作为管理 VLAN。"
+    },
+    {
+      "type": "multi",
+      "q": "「VLAN 间通信」可行的方式：",
+      "options": {"A": "路由器", "B": "三层交换机", "C": "HUB 级联", "D": "Trunk 端口"},
+      "answer": ["A", "B"],
+      "explain": "VLAN 间通信需要路由：路由器或三层交换机；Trunk 只是承载多 VLAN 流量，不做路由。"
+    },
+    {
+      "type": "multi",
+      "q": "「Trunk 端口」与「Access 端口」的区别：",
+      "options": {"A": "Trunk 承载多 VLAN，Access 只属于一 VLAN", "B": "Trunk 用 802.1Q 标签，Access 不带标签", "C": "Access 永远不连 PC", "D": "Trunk 多用于交换机互联"},
+      "answer": ["A", "B", "D"],
+      "explain": "A 正确；B 802.1Q 打标签；C 错，Access 端口**常**连 PC；D 多用于交换机间。"
+    },
+    {
+      "type": "fill",
+      "text": "VLAN 中文是「{{1}}」；其主要作用是限制 {{2}} 域。",
+      "answer": ["虚拟局域网", "广播"],
+      "explain": "VLAN = 虚拟局域网；主要作用：限制广播域 + 分组设备。"
+    },
+    {
+      "type": "fill",
+      "text": "「VLAN1」是交换机的 {{1}} VLAN，{{2}} 创建也不能删除。",
+      "answer": ["默认", "不能"],
+      "explain": "VLAN1 默认；既不能创建也不能删除。"
+    },
+    {
+      "type": "fill",
+      "text": "三种常见 VLAN 划分方式：基于 {{1}}、基于 MAC 地址、基于 {{2}}。",
+      "answer": ["端口", "网络层"],
+      "explain": "基于端口、基于 MAC、基于网络层。"
+    },
+    {
+      "type": "fill",
+      "text": "跨交换机的 VLAN 互联一般通过 {{1}} 端口（802.1Q）实现。",
+      "answer": ["Trunk"],
+      "explain": "Trunk 端口用 802.1Q 标签承载多 VLAN 流量。"
+    },
+    {
+      "type": "fill",
+      "text": "VLAN 间通信必须经过 {{1}} 或三层交换机。",
+      "answer": ["路由器"],
+      "explain": "VLAN 间通信必须路由——路由器或三层交换机。"
+    },
+    {
+      "type": "fill",
+      "text": "「基于 MAC 的 VLAN」优点是用户 {{1}} 后 VLAN 资格不变。",
+      "answer": ["物理位置变化"],
+      "explain": "基于 MAC：MAC 不变，VLAN 资格不变——移动友好。"
+    },
+    {
+      "type": "fill",
+      "text": "「基于端口的 VLAN」缺点：用户换物理位置时需要 {{1}}。",
+      "answer": ["重新配置端口"],
+      "explain": "基于端口 VLAN 与物理端口绑定——换位置需重配。"
+    },
+    {
+      "type": "fill",
+      "text": "IEEE {{1}} 是 VLAN Trunk 的标准打标签协议。",
+      "answer": ["802.1Q"],
+      "explain": "802.1Q 是 Trunk 标记标准。"
+    },
+    {
+      "type": "fill",
+      "text": "「基于网络层的 VLAN」可按 {{1}} 子网或 {{2}} 来划分成员。",
+      "answer": ["IP", "协议"],
+      "explain": "基于网络层 = 按 IP 子网或协议类型划分。"
+    },
+    {
+      "type": "fill",
+      "text": "「VLAN」可隔离广播：广播帧仅在本 VLAN 内 {{1}}，不会跨 VLAN 转发。",
+      "answer": ["泛洪"],
+      "explain": "VLAN 内的广播/单播**不会**自动转发到其它 VLAN。"
+    }
+  ]
+}

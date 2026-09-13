@@ -1,0 +1,190 @@
+{
+  "id": 1,
+  "chapter": "小型交换式局域网",
+  "title": "小型交换式局域网构建",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "brand": "实验 01",
+  "software": "Cisco Packet Tracer 6.2",
+  "duration": "2 学时",
+  "difficulty": "★☆☆☆☆",
+  "lead": "熟悉 PT 6.2 界面与基本操作，掌握主机 IP 配置、ping 测试、HUB 与 Switch 行为对比。",
+  "slides": [
+    {
+      "layout": "goals",
+      "title": "实验目的",
+      "items": [
+        "熟悉 **Cisco Packet Tracer 6.2** 的界面与基本操作（设备选择、连线、配置）。",
+        "掌握**主机名、IP 地址、子网掩码、默认网关**的基本配置方法。",
+        "学会使用 `ping`、`ipconfig` 验证网络连通性。",
+        "理解**共享式 LAN（HUB）** 与 **交换式 LAN（Switch）** 的区别。",
+        "培养观察指示灯、阅读命令输出的排错能力。"
+      ]
+    },
+    {
+      "layout": "environment",
+      "title": "实验环境",
+      "items": [
+        ["PC", "4 台（型号 PC-PT）"],
+        ["集线器 HUB", "1 台（型号 Hub-PT）"],
+        ["交换机 Switch", "1 台（型号 2960-24TT）"],
+        ["控制线", "1 根（首次配置交换机）"],
+        ["直连双绞线", "若干（Copper Straight-Through）"],
+        ["软件", "Cisco Packet Tracer 6.2"]
+      ]
+    },
+    {
+      "layout": "topology",
+      "title": "实验拓扑",
+      "body": "                       ┌─────────────┐\n  PC0 ─┐               │  Switch0    │\n  PC1 ─┼─ Hub0 ──────┤  (2960)     │\n  PC2 ─┘               │             │\n                       PC3 ────────┘",
+      "desc": "4 台 PC 同一网段 `192.168.10.0/24`，PC0/PC1/PC2 接 HUB，PC3 直连交换机。"
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 01",
+      "title": "背景 · Packet Tracer 6.2 界面",
+      "body": "打开 PT 6.2 后，左下角 **Network Devices** 与 **End Devices** 是设备库。\n\n单击设备 → 在工作区拖出；按住 `Ctrl` 多选批量放置。\n\n用 **Connections** 选择线缆类型（最常用 `Copper Straight-Through` 与 `Copper Cross-Over`）。\n\n单击设备 → 弹出配置窗口，有 **Physical / Config / CLI / Desktop** 四个标签。"
+    },
+    {
+      "layout": "step_table",
+      "no": "01.1",
+      "title": "设备端口速查",
+      "intro": "不同设备的默认端口与状态不同，配置前确认清楚。",
+      "headers": ["设备", "常用端口", "默认状态"],
+      "rows": [
+        ["PC-PT", "FastEthernet0", "已启用"],
+        ["Hub-PT", "Port0 ~ PortN", "即插即用"],
+        ["Switch 2960-24TT", "FastEthernet0/1 ~ 0/24", "默认 VLAN1"]
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "01.2",
+      "title": "新建拓扑文件",
+      "items": [
+        "启动 Packet Tracer 6.2 → **File → New**。",
+        "**File → Save As…** → 文件名 `Lab1-SmallLAN.pkt` → 保存到本地。",
+        "在右下角 **End Devices** 中选 **PC** → 拖出 4 台。",
+        "在 **Network Devices** 中选 **Hub** → 拖出 1 台；选 **Switches** → **2960-24TT** → 拖出 1 台。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "01.3",
+      "title": "连线（按拓扑图）",
+      "items": [
+        "选择 **Connections → Copper Straight-Through**。",
+        "单击 PC0 → 选 `FastEthernet0`，再单击 Hub0 → 选 `Port0`。",
+        "同样连接 PC1-Hub0(Port1)、PC2-Hub0(Port2)。",
+        "选择一根线把 Hub0 的某端口接到 Switch0 的 Fa0/1（HUB ↔ SWITCH 异种设备 → 直连线）。",
+        "再用一根直连线连接 PC3 的 Fa0 到 Switch0 的 Fa0/2。"
+      ]
+    },
+    {
+      "layout": "tip",
+      "body": "**HUB ↔ SWITCH** 是异种设备 → 用**直连线**；同种设备（如 SWITCH-SWITCH 早期）才用交叉线。本实验所有连线都是**直连线**。"
+    },
+    {
+      "layout": "step_table",
+      "no": "01.4",
+      "title": "配置 PC 的 IP 地址",
+      "intro": "每台 PC 设为静态 IP。单击 PC → Desktop → IP Configuration → Static → 填写。",
+      "headers": ["PC", "IP 地址", "子网掩码"],
+      "rows": [
+        ["PC0", "192.168.10.10", "255.255.255.0"],
+        ["PC1", "192.168.10.11", "255.255.255.0"],
+        ["PC2", "192.168.10.12", "255.255.255.0"],
+        ["PC3", "192.168.10.20", "255.255.255.0"]
+      ]
+    },
+    {
+      "layout": "tip",
+      "body": "也可以在 **Config** 标签的 **FastEthernet0** 接口里直接填写 IP，效果一样。"
+    },
+    {
+      "layout": "step_substeps",
+      "no": "01.5",
+      "title": "观察指示灯",
+      "items": [
+        "仔细观察设备上的小圆点（指示灯）。",
+        "**HUB 端口**：插线后立即变绿；数据传输时闪烁。",
+        "**Switch 端口**：绿 = up，灭 = down；PC3 的端口指示灯应为绿色。",
+        "如果某个端口指示灯不亮 → 检查物理连线是否牢固。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "01.6",
+      "title": "测试连通性（ping）",
+      "items": [
+        "单击 **PC0** → **Desktop** → **Command Prompt**。",
+        "在命令提示符输入 `ping 192.168.10.11` — 看到「Reply from 192.168.10.11 ...」表示 PC0 ↔ PC1 通。",
+        "同样测试 PC0 → PC2、PC0 → PC3：都应通。",
+        "测试 PC1 → PC3：应通。",
+        "测试 PC0 → 192.168.10.99（不存在的 IP）：应显示「Request timed out」。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "01.7",
+      "title": "观察 HUB 与 SWITCH 的差异（Simulation 模式）",
+      "items": [
+        "进入 **Simulation** 模式（右下角切换）。",
+        "让 PC0 ping PC1，并单步跟踪数据包。",
+        "**HUB** 会把 PC0 的帧**广播**给 Port0、Port1、Port2（PC0、PC1、PC2 都收到），然后只有 PC1 应答；PC2 也会收到 PC0 的包但丢弃。",
+        "**Switch** 收到 PC0 的帧后，先**学习** PC0 的 MAC，记录到 MAC 表；接着查 MAC 表看 PC1 在哪个端口 → **直接转发**给 PC3 那条链路上的端口（不广播）。",
+        "切回 **Realtime** 模式继续。"
+      ]
+    },
+    {
+      "layout": "step",
+      "no": "01.8",
+      "title": "交换机 CLI 基本查看",
+      "body": "单击 Switch0 → **CLI** 标签。等出现提示符 `Switch>` 后输入以下命令，观察输出。",
+      "cli": "Switch> enable\nSwitch# show version\nSwitch# show mac-address-table\nSwitch# show interfaces status\nSwitch# exit"
+    },
+    {
+      "layout": "verify_table",
+      "title": "验证结果对照表",
+      "headers": ["测试", "命令", "期望"],
+      "rows": [
+        ["PC0 → PC1 同网段", "ping 192.168.10.11", "Reply from ... · time<10ms"],
+        ["PC0 → PC3 跨 HUB+Switch", "ping 192.168.10.20", "Reply from ... · time<10ms"],
+        ["PC1 → PC3", "ping 192.168.10.20", "Reply from ... · time<10ms"],
+        ["PC0 → 不存在 IP", "ping 192.168.10.99", "Request timed out"]
+      ]
+    },
+    {
+      "layout": "text",
+      "badge": "ERR · 01",
+      "title": "常见错误与排错",
+      "body": "**ping 不通（Request timed out）**\n\n可能原因：IP 错 / 子网掩码错 / 网线松。处理：重新检查 IP 配置与指示灯。\n\n**ping 不通（Destination unreachable）**\n\n可能原因：默认网关未配且跨网段（本实验内无路由器，可忽略）。\n\n**Switch 端口指示灯不亮**\n\n可能原因：线缆物理故障 / 端口损坏。处理：换线或换端口。\n\n**Simulation 中 HUB 也显示单播转发**\n\n视图问题。切到 Hub 中间观察「广播」效果。"
+    },
+    {
+      "layout": "report",
+      "title": "实验报告要求",
+      "items": [
+        "画出实验拓扑图（用 Packet Tracer 截图即可）。",
+        "列出各 PC 的 IP 配置表（含子网掩码、网关）。",
+        "记录所有 `ping` 命令的输出，并解释每条结果的含义。",
+        "对比 HUB 与 Switch 的转发行为（结合 Simulation 模式观察）。",
+        "给出 `show mac-address-table` 的输出，并解释每一行。"
+      ]
+    },
+    {
+      "layout": "think",
+      "title": "思考题",
+      "items": [
+        "同一网段内 IP 不同、子网掩码相同，能 ping 通吗？为什么？",
+        "为什么 HUB 会引起「冲突域」问题，而 Switch 不会？",
+        "在只有 Switch 的网络中，A 给从未通信过的 B 发包，Switch 会怎么处理？",
+        "如果把 PC0 的子网掩码错填为 `255.255.0.0`，其他 PC 不变，会发生什么现象？"
+      ]
+    },
+    {
+      "layout": "end",
+      "title": "实验完毕",
+      "lead": "保存 `.pkt` 文件并撰写实验报告，下次实验课将进入「子网规划」。"
+    }
+  ]
+}

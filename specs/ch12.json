@@ -1,0 +1,187 @@
+{
+  "chapter": 12,
+  "title": "DHCP 服务器的配置",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "period": "12",
+  "term": "Spring 2026",
+  "eyebrow": "Chapter 12 · 计算机网络",
+  "lead": "让网络自动给每台主机分配 IP——告别手工配置、避免地址冲突。",
+  "slides": [
+    {
+      "layout": "callouts",
+      "eyebrow": "Scenario",
+      "title": "任务情境 · 手工配置太累了",
+      "items": [
+        {"ico":"需求","title":"IP 是必备",
+         "body":"网络中的主机要相互通信，必须有**合适的 IP 地址**才能在网络上标识自己。"},
+        {"ico":"办法 A","title":"手工设定",
+         "body":"由管理员逐台手工设定——可行但**费时**。"},
+        {"ico":"办法 B","title":"自动分配",
+         "body":"由网络上的 **DHCP 服务器**自动给主机分配 IP——更快、更不易出错。"},
+        {"ico":"问题","title":"手工的代价",
+         "body":"大规模网络下，手工配置给管理员带来**巨大工作负担**；用户不遵守规则还会导致**IP 冲突**。"}
+      ]
+    },
+    {
+      "layout": "paragraphs",
+      "eyebrow": "Goal",
+      "title": "任务目标",
+      "paragraphs": [
+        "能够在运行 Windows Server 的主机上**安装与配置 DHCP 服务**。",
+        "**客户机**能够成功获取 IP 地址——DHCP 服务器与客户机协同完成地址分配。"
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Environment",
+      "title": "使用环境",
+      "cards": [
+        {"tag":"硬件","title":"1 台服务器 + N 台客户机",
+         "body":"一台 DHCP 服务器 + 若干客户机；**所有机器互相连通**。"},
+        {"tag":"服务器 OS","title":"Windows Server",
+         "body":"服务器操作系统采用 **Windows Server** 系列。"},
+        {"tag":"客户机 OS","title":"Windows",
+         "body":"客户机安装 Windows 系统（Win 7 / 10 / 11 均可）。"},
+        {"tag":"实践","title":"Packet Tracer 模拟",
+         "body":"教学环境下常用 Packet Tracer 模拟——`Config → Service → DHCP → On`。"}
+      ]
+    },
+    {
+      "layout": "objectives",
+      "eyebrow": "Tasks",
+      "title": "本课主要任务",
+      "items": [
+        "**任务一**　安装 DHCP 服务",
+        "**任务二**　配置 DHCP 服务器（地址池、租期等）",
+        "**任务三**　配置 DHCP 客户机（自动获取 IP / DNS）",
+        "**相关知识**　DHCP 介绍、工作过程、作用"
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Task 01",
+      "title": "任务一 · 安装 DHCP 服务",
+      "items": [
+        {"ico":"步骤","title":"登录服务器",
+         "body":"用管理员账号登录 Windows Server 主机。"},
+        {"ico":"步骤","title":"添加角色",
+         "body":"「服务器管理器」→「添加角色和功能」→「DHCP 服务器」。"},
+        {"ico":"步骤","title":"完成安装",
+         "body":"按向导完成；安装完成后可在「管理工具」中打开 DHCP 控制台。"},
+        {"ico":"步骤","title":"验证",
+         "body":"服务列表中显示 **DHCP Server** 处于「已启动」状态。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Task 02",
+      "title": "任务二 · 配置 DHCP 服务器",
+      "items": [
+        {"ico":"01","title":"规划地址池",
+         "body":"用户数 100，可能扩展到 **200**。"},
+        {"ico":"02","title":"设定范围",
+         "body":"IP 范围：**192.168.1.1 – 192.168.1.200**。"},
+        {"ico":"03","title":"子网掩码",
+         "body":"**255.255.255.0**；网关一般设为 192.168.1.254。"},
+        {"ico":"04","title":"DNS",
+         "body":"DNS 服务器根据实际情况配置（本章示例可暂用 8.8.8.8）。"},
+        {"ico":"05","title":"租期",
+         "body":"默认 **8 天**；按需调整（教室环境可设 1 小时便于复用）。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Task 03",
+      "title": "任务三 · 配置 DHCP 客户机",
+      "items": [
+        {"ico":"步骤","title":"打开网络设置",
+         "body":"「控制面板」→「网络和共享中心」→ 适配器属性。"},
+        {"ico":"步骤","title":"IPv4 属性",
+         "body":"双击「Internet 协议版本 4 (TCP/IPv4)」。"},
+        {"ico":"步骤","title":"自动获得",
+         "body":"IP 地址：**自动获得 IP 地址**；DNS：**自动获得 DNS 服务器地址**。"},
+        {"ico":"验证","title":"查看结果",
+         "body":"在命令行执行 `ipconfig`，看到 IP、子网掩码、网关、DNS 均已自动填充。"}
+      ]
+    },
+    {
+      "layout": "section",
+      "eyebrow": "Background",
+      "title": "相关知识",
+      "lead": "DHCP 是什么？怎么工作的？"
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "What is DHCP",
+      "title": "DHCP 介绍",
+      "cards": [
+        {"tag":"全称","title":"Dynamic Host Configuration Protocol",
+         "body":"**动态主机配置协议**——为网络中的主机自动分配 TCP/IP 配置信息。"},
+        {"tag":"角色","title":"服务器 vs 客户机",
+         "body":"提供 DHCP 服务的计算机是 **DHCP 服务器**；不需要手动设置固定 IP 的是 **DHCP 客户机**。"},
+        {"tag":"分配内容","title":"TCP/IP 全套",
+         "body":"DHCP 完成**客户机的 TCP/IP 配置**：IP 地址、子网掩码、网关、DNS 等。"},
+        {"tag":"特点","title":"动态 + 集中",
+         "body":"地址**动态分配**、**集中管理**——降低维护成本、避免冲突。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Process · A",
+      "title": "DHCP 工作过程 · 四个阶段",
+      "items": [
+        {"ico":"01","title":"DISCOVER",
+         "body":"客户端首次登录时没有任何 IP 数据，**广播** DHCP DISCOVER 包寻找服务器。"},
+        {"ico":"02","title":"OFFER",
+         "body":"服务器从尚未租出的地址池中选一个 IP，**单播 / 广播**回应 DHCP OFFER。"},
+        {"ico":"03","title":"REQUEST",
+         "body":"客户端可能收到多份 OFFER；它**广播** DHCP REQUEST 告知所有服务器——「我选这一份」。"},
+        {"ico":"04","title":"ACK",
+         "body":"被选中的服务器**广播** DHCP ACK，确认租约正式生效。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Process · B",
+      "title": "DHCP 工作过程 · 关键细节",
+      "items": [
+        {"ico":"!","title":"重传",
+         "body":"若客户端在一定时间内没收到响应，会**多次重发 DISCOVER** 广播。"},
+        {"ico":"!","title":"挑选",
+         "body":"客户端通常选**最先到达**的 OFFER——不必挑选最优服务器。"},
+        {"ico":"!","title":"拒绝",
+         "body":"客户端收到 ACK 后还会**ARP 检测**该 IP 是否已被占用；冲突则发 DHCPDECLINE 重新申请。"},
+        {"ico":"!","title":"续租",
+         "body":"租期过半时客户端发起 **DHCP REQUEST** 续租；超时未续则归还 IP。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Why DHCP",
+      "title": "DHCP 的作用",
+      "cards": [
+        {"tag":"减负","title":"减少管理员负担",
+         "body":"不必逐台手工配置 IP；新增主机「即插即用」。"},
+        {"tag":"可靠","title":"配置安全可靠",
+         "body":"由服务器**集中下发**，避免手工输入错误、地址冲突、子网掩码错配。"},
+        {"tag":"便利","title":"移动用户便利",
+         "body":"笔记本在不同子网间漫游时**自动获取**新子网的 IP。"},
+        {"tag":"节约","title":"解决地址不够",
+         "body":"通过**地址复用**提高利用率——尤其在用户多于地址数的场景。"}
+      ]
+    },
+    {
+      "layout": "objectives",
+      "eyebrow": "Recap",
+      "title": "本章小结",
+      "items": [
+        "**DHCP**　动态主机配置协议，自动分配 IP / 子网掩码 / 网关 / DNS",
+        "**服务器配置**　安装角色 → 创建地址池 → 设定租期",
+        "**客户机配置**　IPv4 设为「自动获得」",
+        "**工作过程**　DISCOVER → OFFER → REQUEST → ACK",
+        "**下一章**　路由配置——让不同网段之间能够相互通信"
+      ]
+    }
+  ]
+}

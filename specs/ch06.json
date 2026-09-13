@@ -1,0 +1,150 @@
+{
+  "chapter": 6,
+  "title": "常见的网络协议及网络命令",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "period": "06",
+  "term": "Spring 2026",
+  "eyebrow": "Chapter 06 · 计算机网络",
+  "lead": "掌握常用的 ICMP 协议与 ping / arp / ipconfig 等命令，是排查网络故障的基本功。",
+  "slides": [
+    {
+      "layout": "objectives",
+      "eyebrow": "Objectives",
+      "title": "通过本次课，<br>你将能够：",
+      "items": [
+        "熟悉 **ICMP 协议** 的作用",
+        "了解 **ARP 协议** 的工作原理",
+        "**使用网络命令测试网络连通性**",
+        "**使用网络命令排除常见网络故障**"
+      ]
+    },
+    {
+      "layout": "section",
+      "eyebrow": "Task 01",
+      "title": "熟悉 ICMP 协议",
+      "lead": "用 Ping 命令测试网络的连通性。"
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "ICMP · Ping",
+      "title": "Ping 命令的剖析",
+      "items": [
+        {"ico":"功能","title":"测试连通性",
+         "body":"测试网络的连通性与可达性。"},
+        {"ico":"机理","title":"ICMP 报文",
+         "body":"基于 ICMP「回应请求 / 回应应答」机制测试目的主机或路由器的可达性。"},
+        {"ico":"支持","title":"跨平台",
+         "body":"UNIX、Linux、Windows 等网络操作系统都支持 ping。"},
+        {"ico":"实现","title":"略有差异",
+         "body":"不同操作系统对 ping 的实现稍有差异，但语义相同。"}
+      ]
+    },
+    {
+      "layout": "table",
+      "eyebrow": "Syntax",
+      "title": "ping 命令语法",
+      "headers": ["参数", "含义"],
+      "rows": [
+        ["-t",      "持续 ping，直到 Ctrl+C 中断"],
+        ["-a",      "将 IP 反解析为主机名"],
+        ["-n count","发送 count 个回显请求"],
+        ["-l size", "发送 size 字节的数据包"],
+        ["-f",      "设置「不分段」标志"],
+        ["-i TTL",  "设置生存时间（TTL）"],
+        ["-w timeout","等待每次回复的超时时间（毫秒）"],
+        ["目标 IP", "要测试的目的地址"]
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Step by Step",
+      "title": "Ping 三步走 · 由近及远",
+      "items": [
+        {"ico":"01","title":"ping 127.0.0.1",
+         "body":"测试**本机协议栈**是否正常工作。"},
+        {"ico":"02","title":"ping 本机 IP",
+         "body":"测试**本机网卡**的配置与安装是否正常，例如 172.16.26.151。"},
+        {"ico":"03","title":"ping 网关 / 邻居",
+         "body":"测试**网线和 RJ-45 接头**是否正常，例如 172.16.26.2。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Reading Output",
+      "title": "如何阅读 Ping 输出",
+      "cards": [
+        {"tag":"成功","title":"Reply from ...",
+         "body":"来自目的主机的回应，含 bytes / time / TTL。time 越短越好。"},
+        {"tag":"失败","title":"Request timed out",
+         "body":"请求超时。可能原因：物理断开、防火墙、目的主机未开机。"},
+        {"tag":"失败","title":"Destination unreachable",
+         "body":"目的不可达。常见原因：无路由、目标主机不存在、ARP 失败。"},
+        {"tag":"丢包","title":"Packets: sent=X, received=Y",
+         "body":"丢失 Y/X 个包，提示**网络不稳定或拥塞**。"}
+      ]
+    },
+    {
+      "layout": "section",
+      "eyebrow": "Task 02",
+      "title": "了解 ARP 协议",
+      "lead": "把 IP 地址解析为 MAC 地址的「地址翻译官」。"
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "What is ARP",
+      "title": "ARP 协议（Address Resolution Protocol）",
+      "cards": [
+        {"tag":"作用","title":"IP → MAC",
+         "body":"根据 IP 地址查询对应的 MAC 地址。"},
+        {"tag":"范围","title":"本地网络",
+         "body":"ARP 只在**本局域网**内有效，跨网络需要路由器的介入。"},
+        {"tag":"方式","title":"广播请求",
+         "body":"主机向局域网广播「谁的 IP 是 X？请告诉 Y」，目标主机单播回应。"},
+        {"tag":"缓存","title":"ARP 表",
+         "body":"每台主机维护一张「IP–MAC」映射表（ARP 缓存），减少广播。"}
+      ]
+    },
+    {
+      "layout": "bullets",
+      "eyebrow": "Commands",
+      "title": "常用网络命令 · Windows",
+      "items": [
+        "**ipconfig**　查看本机 IP 地址、子网掩码、默认网关",
+        "**ipconfig /all**　查看完整 TCP/IP 配置（含 MAC、DNS、DHCP 等）",
+        "**ping**　测试网络连通性（基于 ICMP）",
+        "**arp -a**　查看本机的 ARP 缓存表",
+        "**tracert**　（Linux 为 traceroute）追踪到目的地的路径",
+        "**nslookup**　查询 DNS 解析"
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Troubleshooting",
+      "title": "网络故障排查思路",
+      "cards": [
+        {"tag":"由近及远","title":"本机 → 网关 → 外网",
+         "body":"先 ping 127.0.0.1，再 ping 本机 IP，再 ping 网关，最后 ping 外网。"},
+        {"tag":"由软到硬","title":"配置 → 协议 → 物理",
+         "body":"先检查 IP 配置是否正确，再检查协议栈，最后才怀疑网线、交换机。"},
+        {"tag":"看指示灯","title":"物理层信号",
+         "body":"网卡 / 交换机端口的 Link 灯是否亮？闪烁频率是否正常？"},
+        {"tag":"抓包验证","title":"实时模式",
+         "body":"用 Packet Tracer 的 Simulation 模式查看数据包的收发过程。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Homework",
+      "title": "作业",
+      "items": [
+        {"ico":"01","title":"ping 实践",
+         "body":"在 Windows 命令行分别执行 `ping 127.0.0.1`、`ping 本机 IP`、`ping 网关 IP`、`ping www.baidu.com`，记录并解释每次输出的含义。"},
+        {"ico":"02","title":"ARP 观察",
+         "body":"执行 `arp -a` 查看当前 ARP 表；再 `ping` 一台同网段主机后再次 `arp -a`，观察表的变化。"},
+        {"ico":"03","title":"故障推理",
+         "body":"假设你能 ping 通网关但 ping 不通外网，可能的故障原因是什么？请列出至少 3 种并说明排查方法。"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "chapter": 17,
+  "title": "WWW 和 DNS 服务",
+  "questions": [
+    {
+      "type": "single",
+      "q": "「WWW」服务的默认端口是：",
+      "options": {"A": "21", "B": "23", "C": "80", "D": "443"},
+      "answer": "C",
+      "explain": "HTTP 默认 80；HTTPS 443。"
+    },
+    {
+      "type": "single",
+      "q": "「DNS」的主要功能是：",
+      "options": {"A": "动态分配 IP", "B": "域名解析为 IP", "C": "路由选择", "D": "Web 服务"},
+      "answer": "B",
+      "explain": "DNS = Domain Name System，域名解析为 IP。"
+    },
+    {
+      "type": "single",
+      "q": "「DNS」默认使用哪个端口？",
+      "options": {"A": "53", "B": "80", "C": "25", "D": "110"},
+      "answer": "A",
+      "explain": "DNS = UDP/TCP 53。"
+    },
+    {
+      "type": "single",
+      "q": "「DNS 查询」默认使用哪种传输协议？",
+      "options": {"A": "TCP", "B": "UDP", "C": "ICMP", "D": "SCTP"},
+      "answer": "B",
+      "explain": "DNS 主要用 UDP 53；区域传送用 TCP 53。"
+    },
+    {
+      "type": "single",
+      "q": "「域名的层次结构」由什么构成？",
+      "options": {"A": "随机字符串", "B": "树状结构（从根到叶子）", "C": "平面结构", "D": "环状结构"},
+      "answer": "B",
+      "explain": "DNS 域名是树状结构；从 TLD 顶级域到叶子主机。"
+    },
+    {
+      "type": "single",
+      "q": "「顶级域名 .cn」属于哪一类？",
+      "options": {"A": "通用顶级（gTLD）", "B": "国家顶级（ccTLD）", "C": "新型顶级", "D": "保留顶级"},
+      "answer": "B",
+      "explain": ".cn = 中国国家顶级域（ccTLD）。"
+    },
+    {
+      "type": "single",
+      "q": "「WWW 服务器」使用的协议是：",
+      "options": {"A": "FTP", "B": "SMTP", "C": "HTTP / HTTPS", "D": "DNS"},
+      "answer": "C",
+      "explain": "WWW = Web 服务，使用 HTTP / HTTPS。"
+    },
+    {
+      "type": "single",
+      "q": "「DNS 递归查询」与「迭代查询」的区别：",
+      "options": {"A": "递归由本地 DNS 代查，迭代由客户端逐级查", "B": "两者相同", "C": "都用 UDP", "D": "都与根服务器无关"},
+      "answer": "A",
+      "explain": "递归：客户端→本地 DNS 一次问到底；迭代：本地 DNS→根→顶级→权威逐级问。"
+    },
+    {
+      "type": "single",
+      "q": "「正向查找区域」是：",
+      "options": {"A": "IP → 域名", "B": "域名 → IP", "C": "MAC → IP", "D": "域名 → MAC"},
+      "answer": "B",
+      "explain": "正向查找：域名 → IP；反向查找：IP → 域名。"
+    },
+    {
+      "type": "single",
+      "q": "「A 记录」表示：",
+      "options": {"A": "别名记录", "B": "域名 → IPv4 地址", "C": "邮件服务器记录", "D": "反向解析记录"},
+      "answer": "B",
+      "explain": "A 记录 = 域名 → IPv4 地址；AAAA = IPv6；CNAME = 别名；MX = 邮件。"
+    },
+    {
+      "type": "single",
+      "q": "「CNAME 记录」表示：",
+      "options": {"A": "邮件服务器", "B": "别名（指向另一个域名）", "C": "IPv4 地址", "D": "权威服务器"},
+      "answer": "B",
+      "explain": "CNAME = Canonical Name 别名记录。"
+    },
+    {
+      "type": "single",
+      "q": "「MX 记录」的作用是：",
+      "options": {"A": "邮件交换器记录", "B": "IPv4 地址", "C": "别名", "D": "反向解析"},
+      "answer": "A",
+      "explain": "MX = Mail Exchange，邮件服务器记录。"
+    },
+    {
+      "type": "multi",
+      "q": "「DNS 主要资源记录」包括：",
+      "options": {"A": "A / AAAA", "B": "CNAME", "C": "MX", "D": "PTR / SOA / NS"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "常见 RR 类型：A / AAAA / CNAME / MX / NS / SOA / PTR / TXT。"
+    },
+    {
+      "type": "multi",
+      "q": "「DNS 查询方式」包括：",
+      "options": {"A": "递归查询", "B": "迭代查询", "C": "反向查询", "D": "随机查询"},
+      "answer": ["A", "B", "C"],
+      "explain": "DNS 实际是递归 + 迭代组合；PTR 是反向查询。"
+    },
+    {
+      "type": "multi",
+      "q": "「顶级域名 TLD」的两大类别：",
+      "options": {"A": "通用顶级（gTLD）", "B": "国家顶级（ccTLD）", "C": "企业顶级", "D": "军事顶级"},
+      "answer": ["A", "B"],
+      "explain": "TLD 分 gTLD（如 .com）和 ccTLD（如 .cn）。"
+    },
+    {
+      "type": "multi",
+      "q": "「DNS 服务器类型」包括：",
+      "options": {"A": "主 DNS（Primary）", "B": "辅助 DNS（Secondary）", "C": "缓存 DNS", "D": "转发 DNS"},
+      "answer": ["A", "B", "C"],
+      "explain": "主 / 辅 / 缓存 DNS 是常见类型；转发也是常见功能。"
+    },
+    {
+      "type": "multi",
+      "q": "「域名查询的层次」自上而下包括：",
+      "options": {"A": "根服务器", "B": "顶级域（TLD）服务器", "C": "权威服务器", "D": "本地域名服务器"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "查询流程：本地 DNS → 根 → TLD → 权威。"
+    },
+    {
+      "type": "multi",
+      "q": "「HTTPS」相比 HTTP 增加了：",
+      "options": {"A": "TLS / SSL 加密", "B": "数据完整性保护", "C": "服务器身份认证", "D": "URL 重写"},
+      "answer": ["A", "B", "C"],
+      "explain": "HTTPS = HTTP + TLS 加密、完整性、身份认证。"
+    },
+    {
+      "type": "fill",
+      "text": "「{{1}}」协议把域名解析为 IP 地址；默认端口是 {{2}}。",
+      "answer": ["DNS", "53"],
+      "explain": "DNS 默认 UDP/TCP 53。"
+    },
+    {
+      "type": "fill",
+      "text": "「{{1}}」是把域名转换为 IP 的分布式数据库，采用{{2}}结构。",
+      "answer": ["DNS", "树状"],
+      "explain": "DNS 是分布式数据库，域名是树状结构。"
+    },
+    {
+      "type": "fill",
+      "text": "DNS 域名查询的两种方式：{{1}}查询与 {{2}}查询。",
+      "answer": ["递归", "迭代"],
+      "explain": "客户端→本地 DNS 用递归；本地 DNS→上级用迭代。"
+    },
+    {
+      "type": "fill",
+      "text": "「A 记录」把域名映射到 {{1}}；「AAAA 记录」映射到 {{2}}。",
+      "answer": ["IPv4 地址", "IPv6 地址"],
+      "explain": "A → IPv4；AAAA → IPv6。"
+    },
+    {
+      "type": "fill",
+      "text": "「{{1}}」是「反向查找区域」，用于 IP → 域名解析。",
+      "answer": ["PTR 记录"],
+      "explain": "PTR = 反向解析记录；用于 IP → 域名。"
+    },
+    {
+      "type": "fill",
+      "text": "顶级域名 `.com` 属于 {{1}} TLD；`.cn` 属于 {{2}} TLD。",
+      "answer": ["通用（gTLD）", "国家（ccTLD）"],
+      "explain": ".com = 通用；.cn = 中国国家顶级。"
+    },
+    {
+      "type": "fill",
+      "text": "「HTTP」默认端口是 {{1}}；「HTTPS」默认端口是 {{2}}。",
+      "answer": ["80", "443"],
+      "explain": "HTTP=80；HTTPS=443。"
+    },
+    {
+      "type": "fill",
+      "text": "访问 `www.siit.cn` 时，DNS 把域名解析成 {{1}}；浏览器再用它去取{{2}}。",
+      "answer": ["IP 地址", "网页内容"],
+      "explain": "DNS 解析 → 浏览器用 IP 取 HTTP 网页。"
+    },
+    {
+      "type": "fill",
+      "text": "「DNS」使用 {{1}} 协议端口 53 进行查询；区域传送改用 {{2}} 协议 53。",
+      "answer": ["UDP", "TCP"],
+      "explain": "DNS 查询 UDP 53；区域传送 TCP 53（更大、更可靠）。"
+    },
+    {
+      "type": "fill",
+      "text": "「DNS 层次」自上而下：根 → {{1}} → 权威 → 本地。",
+      "answer": ["顶级域（TLD）"],
+      "explain": "根 → TLD → 权威 → 本地 DNS。"
+    }
+  ]
+}

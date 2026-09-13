@@ -1,0 +1,186 @@
+{
+  "chapter": 11,
+  "title": "VLAN 互通",
+  "questions": [
+    {
+      "type": "single",
+      "q": "「VLAN 间互通」需要哪种设备？",
+      "options": {"A": "集线器", "B": "二层交换机", "C": "三层交换机或路由器", "D": "调制解调器"},
+      "answer": "C",
+      "explain": "VLAN 间互通必须路由——三层交换机或路由器。"
+    },
+    {
+      "type": "single",
+      "q": "「三层交换机」启用路由功能的命令是：",
+      "options": {"A": "ip routing", "B": "router ospf 1", "C": "vlan 1", "D": "switchport mode access"},
+      "answer": "A",
+      "explain": "全局配置模式下 `ip routing` 启用交换机的三层路由功能。"
+    },
+    {
+      "type": "single",
+      "q": "「三层交换机」为 VLAN 接口配置 IP 的命令是：",
+      "options": {"A": "ip address x.x.x.x y.y.y.y", "B": "ip route 0.0.0.0", "C": "vlan database", "D": "switchport trunk"},
+      "answer": "A",
+      "explain": "`interface vlan N` + `ip address <IP> <mask>` 配置 VLAN 接口 IP（即 SVI）。"
+    },
+    {
+      "type": "single",
+      "q": "「三层交换」一次路由、多次交换的含义是：",
+      "options": {"A": "每次包都路由", "B": "首包路由，后续包硬件交换", "C": "永远不路由", "D": "软件转发所有包"},
+      "answer": "B",
+      "explain": "三层交换：首包走路由（CPU），后续包由 ASIC 硬件按缓存直接交换。"
+    },
+    {
+      "type": "single",
+      "q": "「VLAN 接口」IP 地址通常是该 VLAN 的：",
+      "options": {"A": "客户端地址", "B": "网关地址", "C": "DNS 地址", "D": "广播地址"},
+      "answer": "B",
+      "explain": "VLAN 接口 IP = 该 VLAN 内主机的默认网关。"
+    },
+    {
+      "type": "single",
+      "q": "在三层交换机上，跨 VLAN ping 测试**不**通的可能原因是：",
+      "options": {"A": "VLAN 间没有路由", "B": "PC 的网关没指向 VLAN 接口 IP", "C": "Trunk 配置错误", "D": "以上都可能"},
+      "answer": "D",
+      "explain": "三层交换、网关、Trunk 任一错误都会导致跨 VLAN 不通。"
+    },
+    {
+      "type": "single",
+      "q": "传统「路由器方案」做 VLAN 互通的主要问题是：",
+      "options": {"A": "功能不够", "B": "成本与瓶颈问题", "C": "协议不支持", "D": "管理复杂"},
+      "answer": "B",
+      "explain": "路由器 VLAN 间路由存在成本高、性能瓶颈；三层交换解决此问题。"
+    },
+    {
+      "type": "single",
+      "q": "「三层交换机」最常用于：",
+      "options": {"A": "家庭 SOHO", "B": "企业核心层", "C": "广域网边界", "D": "数据中心机房冷通道"},
+      "answer": "B",
+      "explain": "三层交换机主要用于企业核心层——VLAN 间路由与高速转发。"
+    },
+    {
+      "type": "single",
+      "q": "「三层交换机」配置 VLAN 路由的步骤顺序是：",
+      "options": {"A": "创建 VLAN → 配 Trunk → ip routing → 配 VLAN 接口 IP", "B": "ip routing → 配 IP → 创建 VLAN", "C": "直接配 IP 即可", "D": "重启交换机"},
+      "answer": "A",
+      "explain": "标准顺序：① 创建 VLAN + 分配端口；② 配 Trunk；③ `ip routing`；④ 配 VLAN 接口 IP。"
+    },
+    {
+      "type": "single",
+      "q": "「三层交换机」可以用 **show ip route** 看到的路由类型有：",
+      "options": {"A": "静态路由", "B": "直连路由（VLAN 接口）", "C": "动态路由（RIP/OSPF）", "D": "以上都是"},
+      "answer": "D",
+      "explain": "三层交换机可运行静态/动态路由；直连路由来自 VLAN 接口。"
+    },
+    {
+      "type": "single",
+      "q": "「SVI」在三层交换机中表示：",
+      "options": {"A": "物理接口", "B": "VLAN 虚拟接口（SVI）", "C": "Trunk 接口", "D": "路由协议标识"},
+      "answer": "B",
+      "explain": "SVI = Switched Virtual Interface，VLAN 的逻辑三层接口。"
+    },
+    {
+      "type": "single",
+      "q": "关于「三层交换」与「路由器」的区别，**错误**的是：",
+      "options": {"A": "三层交换硬件转发更快", "B": "路由器更适合广域网", "C": "三层交换 = 路由器", "D": "三层交换通常用于 LAN 内部"},
+      "answer": "C",
+      "explain": "三层交换 ≠ 路由器；三层交换专长 VLAN 间高速转发，路由器专长异构网络/WAN。"
+    },
+    {
+      "type": "multi",
+      "q": "「三层交换机的功能」包括：",
+      "options": {"A": "高速二层交换", "B": "VLAN 间路由", "C": "支持路由协议", "D": "替代防火墙"},
+      "answer": ["A", "B", "C"],
+      "explain": "三层交换机 = 高速交换 + VLAN 路由 + 路由协议；不替代防火墙。"
+    },
+    {
+      "type": "multi",
+      "q": "「VLAN 间互通」需要：",
+      "options": {"A": "每个 VLAN 一个 IP 网段", "B": "三层交换机启用 IP 路由", "C": "VLAN 接口配置网关 IP", "D": "客户端不需配置"},
+      "answer": ["A", "B", "C"],
+      "explain": "互通需要：① 划分网段；② 启用 IP routing；③ 配 VLAN 接口 IP（网关）；④ 客户端配网关。"
+    },
+    {
+      "type": "multi",
+      "q": "「三层交换」相较路由器的优势：",
+      "options": {"A": "硬件转发，速度更快", "B": "端口密度大", "C": "适合 LAN 内部 VLAN 间路由", "D": "更适合广域网互联"},
+      "answer": ["A", "B", "C"],
+      "explain": "三层交换硬件 ASIC 转发 + 高密度端口；WAN/异构网仍用路由器。"
+    },
+    {
+      "type": "multi",
+      "q": "「三层交换机的局限性」包括：",
+      "options": {"A": "广域网接口能力弱", "B": "高级路由特性有限", "C": "硬件成本高", "D": "不支持 VLAN"},
+      "answer": ["A", "B"],
+      "explain": "三层交换机在 LAN 内强；WAN/复杂路由特性上不如专用路由器；不支持 VLAN 不对。"
+    },
+    {
+      "type": "multi",
+      "q": "「三层交换机启用路由」相关命令：",
+      "options": {"A": "ip routing", "B": "interface vlan N", "C": "ip address x.x.x.x mask", "D": "no switchport"},
+      "answer": ["A", "B", "C"],
+      "explain": "启用 IP 路由（全局）→ 进 VLAN 接口 → 配 IP 地址。"
+    },
+    {
+      "type": "multi",
+      "q": "「配置 VLAN 间互通」的常见步骤：",
+      "options": {"A": "创建 VLAN", "B": "把端口划入 VLAN", "C": "配置 Trunk 端口", "D": "启用 ip routing"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "以上都是必要步骤；通常还需要配 VLAN 接口 IP、客户端网关。"
+    },
+    {
+      "type": "fill",
+      "text": "三层交换机的核心功能：「一次{{1}}，多次{{2}}」——首包路由，后续硬件交换。",
+      "answer": ["路由", "交换"],
+      "explain": "「一次路由，多次交换」——首包 CPU 路由，后续 ASIC 硬件交换。"
+    },
+    {
+      "type": "fill",
+      "text": "三层交换机启用路由的命令是 {{1}}；配 VLAN 接口 IP 的接口命令是 {{2}}。",
+      "answer": ["ip routing", "interface vlan"],
+      "explain": "`ip routing` 全局启用；`interface vlan N` 进 VLAN 接口。"
+    },
+    {
+      "type": "fill",
+      "text": "VLAN 接口 IP 通常作为该 VLAN 内主机的 {{1}}。",
+      "answer": ["默认网关"],
+      "explain": "VLAN 接口 IP = 该 VLAN 内主机的默认网关。"
+    },
+    {
+      "type": "fill",
+      "text": "「三层交换机」是 {{1}} 交换 + {{2}} 路由的结合体。",
+      "answer": ["二层", "三层"],
+      "explain": "三层交换机兼具二层高速交换与三层路由。"
+    },
+    {
+      "type": "fill",
+      "text": "传统「{{1}}」做 VLAN 路由时存在成本与瓶颈问题。",
+      "answer": ["路由器"],
+      "explain": "路由器方案：成本高、转发慢、易成瓶颈；催生了三层交换机。"
+    },
+    {
+      "type": "fill",
+      "text": "三层交换机的「SVI」是 {{1}} 接口，用于为 VLAN 提供 {{2}} 服务。",
+      "answer": ["VLAN 虚拟", "三层（路由）"],
+      "explain": "SVI = Switched Virtual Interface；为 VLAN 提供 IP 网关。"
+    },
+    {
+      "type": "fill",
+      "text": "「跨 VLAN 互通」配置中，必须把 VLAN 接口的 IP 配置成 {{1}}。",
+      "answer": ["对应 VLAN 的网关"],
+      "explain": "VLAN 接口 IP = 该 VLAN 内主机的默认网关。"
+    },
+    {
+      "type": "fill",
+      "text": "三层交换机的优势：硬件 {{1}} 转发、端口密度大、适合 LAN 内 VLAN 间路由。",
+      "answer": ["ASIC"],
+      "explain": "ASIC 硬件转发 = 接近线速的二层 + 三层处理。"
+    },
+    {
+      "type": "fill",
+      "text": "三层交换机通常部署在企业网的 {{1}} 层，承担 VLAN 间路由。",
+      "answer": ["核心"],
+      "explain": "核心层承担高速 VLAN 间路由——三层交换机的典型位置。"
+    }
+  ]
+}

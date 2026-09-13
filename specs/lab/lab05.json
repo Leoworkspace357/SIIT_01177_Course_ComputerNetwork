@@ -1,0 +1,233 @@
+{
+  "id": 5,
+  "chapter": "OSPF",
+  "title": "OSPF 单区域路由",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "brand": "实验 05",
+  "software": "Cisco Packet Tracer 6.2",
+  "duration": "2 学时",
+  "difficulty": "★★★★☆",
+  "lead": "掌握 OSPF 单区域配置、邻居建立过程、LSDB 与路由表观察，对比 OSPF 与 RIP 收敛速度。",
+  "slides": [
+    {
+      "layout": "goals",
+      "title": "实验目的",
+      "items": [
+        "掌握 **OSPF** 的基本配置（启动、宣告网络、区域划分）。",
+        "理解 OSPF **邻居建立**过程（Hello → 2-Way → Exstart → Exchange → Full）。",
+        "观察 OSPF **邻居表**、**拓扑表（LSDB）**、**路由表**的形成。",
+        "比较 OSPF 与 RIP 的差异（收敛速度、度量、层次化）。",
+        "学会 OSPF 排错命令（`show ip ospf neighbor`、`show ip ospf database`）。"
+      ]
+    },
+    {
+      "layout": "environment",
+      "title": "实验环境",
+      "items": [
+        ["路由器", "3 台（R1、R2、R3，Router-PT）"],
+        ["交换机", "3 台（每台路由器下挂 1 台 LAN 交换机）"],
+        ["PC", "3 台（PC1、PC2、PC3）"],
+        ["串口线", "2 根"],
+        ["软件", "Cisco Packet Tracer 6.2"]
+      ]
+    },
+    {
+      "layout": "topology",
+      "title": "实验拓扑",
+      "body": "        LAN1                LAN2                LAN3\n     192.168.1.0/24      192.168.2.0/24     192.168.3.0/24\n        │                    │                    │\n       SW1                  SW2                  SW3\n        │                    │                    │\n       PC1                 PC2                  PC3\n       │                    │                    │\n     Fa0/0                Fa0/0                Fa0/0\n      R1                   R2                  R3\n       │                    │                    │\n     S0/0/0 ─── S0/0/0    S0/0/1 ─── S0/0/0\n       │    10.1.0.0/24         │     10.2.0.0/24",
+      "desc": "所有接口都属于 OSPF Area 0（单区域实验）。"
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 01",
+      "title": "背景 · OSPF 概述",
+      "body": "**OSPF（Open Shortest Path First）**：基于「链路-状态」算法。\n\n- **度量**：Cost（默认基于接口带宽，参考 100 Mbps）\n- **层次化**：Area 0（Backbone）+ 其它 Area\n- **收敛**：远快于 RIP（秒级）\n- **管理距离**：110\n- **协议号**：OSPF 直接封装在 IP 中，IP 协议号 **89**"
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 02",
+      "title": "背景 · OSPF 五种报文",
+      "body": "| 报文 | 作用 |\n|---|---|\n| HELLO | 发现 / 维持邻居 |\n| DD | 描述本地 LSDB |\n| LSR | 请求 LSA |\n| LSU | 发送 LSA |\n| LSAck | 确认 LSA |"
+    },
+    {
+      "layout": "text",
+      "badge": "BG · 03",
+      "title": "背景 · OSPF 关键命令",
+      "body": "常用命令：",
+      "cli": "router ospf <process-id>           ! 启动 OSPF 进程\nnetwork <addr> <反掩码> area <id>  ! 宣告网络（用反掩码 + 区域）\nrouter-id <x.x.x.x>                ! 设置 Router-ID（可选）\npassive-interface Fa0/0            ! LAN 口不发 OSPF Hello\nauto-cost reference-bandwidth 1000  ! 改参考带宽\n\n! 排错命令\nshow ip ospf neighbor              ! 查看邻居\nshow ip ospf database              ! 查看 LSDB\nshow ip ospf interface             ! 查看 OSPF 接口"
+    },
+    {
+      "layout": "tip",
+      "body": "**反掩码（通配符掩码）**：与子网掩码相反。**0 = 必须匹配，1 = 任意**。例：`0.0.0.255` 表示前 24 位必须匹配，后 8 位任意（等价于 `/24` 子网）。"
+    },
+    {
+      "layout": "step_substeps",
+      "no": "01",
+      "title": "搭建拓扑",
+      "items": [
+        "PT 6.2 新建 `Lab5-OSPF.pkt`。",
+        "拖设备、连线（同 Lab 3/RIP）。",
+        "Serial DCE 端配 `clock rate 64000`。",
+        "PC 的 IP 与网关按地址规划表配置。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "02",
+      "title": "基本配置（同 Lab 3）",
+      "items": [
+        "每台路由器配置 hostname、密码、接口 IP。",
+        "DCE 端 Serial 配 `clock rate 64000`。",
+        "PC 设 IP、子网掩码、网关。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "03",
+      "title": "启动 OSPF 进程（R1）",
+      "items": [
+        "在 R1 CLI：",
+        "`enable` → `configure terminal`",
+        "`router ospf 1` — 启动 OSPF 进程",
+        "`router-id 1.1.1.1` — 设置 Router-ID",
+        "`network 192.168.1.0 0.0.0.255 area 0` — 宣告 LAN1",
+        "`network 10.1.0.0 0.0.0.255 area 0` — 宣告串口链路",
+        "`passive-interface FastEthernet0/0` — LAN 口不发 Hello",
+        "`end` → `write memory`"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "04",
+      "title": "R2 启动 OSPF",
+      "items": [
+        "`router ospf 1` → `router-id 2.2.2.2`。",
+        "`network 10.1.0.0 0.0.0.255 area 0`、`network 10.2.0.0 0.0.0.255 area 0`、`network 192.168.2.0 0.0.0.255 area 0`。",
+        "`passive-interface FastEthernet0/0`。",
+        "`end; write memory`。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "05",
+      "title": "R3 启动 OSPF",
+      "items": [
+        "`router ospf 1` → `router-id 3.3.3.3`。",
+        "`network 10.2.0.0 0.0.0.255 area 0`、`network 192.168.3.0 0.0.0.255 area 0`。",
+        "`passive-interface FastEthernet0/0`。",
+        "`end; write memory`。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "06",
+      "title": "验证邻居建立",
+      "items": [
+        "每台路由器：`show ip ospf neighbor`。",
+        "R1 应看到 R2（Neighbor ID 2.2.2.2, State FULL）。",
+        "R2 应看到 R1 和 R3 都为 FULL。",
+        "R3 应看到 R2（Neighbor ID 2.2.2.2, State FULL）。",
+        "状态机：DOWN → INIT → 2-WAY → EXSTART → EXCHANGE → LOADING → **FULL**。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "07",
+      "title": "观察 LSDB（链路-状态数据库）",
+      "items": [
+        "`show ip ospf database`。",
+        "应看到多种 LSA 类型：",
+        "**Router LSA（Type 1）**：每台路由器宣告自己的链路。",
+        "**Network LSA（Type 2）**：DR 在多路访问网段上宣告。",
+        "**Summary LSA（Type 3、4、5）**：ABR 汇总（单区域实验中较少）。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "08",
+      "title": "观察路由表",
+      "items": [
+        "`show ip route`。",
+        "应看到 O 条目：`O 192.168.2.0/24 [110/...] via 10.1.0.2`。",
+        "`show ip ospf interface brief` 查看 OSPF 接口。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "09",
+      "title": "连通性测试",
+      "items": [
+        "PC1 ping PC3：通；TTL ≈ 126（跨 2 跳 OSPF 路由器）。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "10",
+      "title": "观察 OSPF 收敛速度（关键对比）",
+      "items": [
+        "把 R2 的 S0/0/1 关闭 `shutdown`。",
+        "**几乎立即**（< 几秒），R3 的路由表中 192.168.1.0/24 切换到失效。",
+        "`show ip ospf neighbor` 中 R2 状态变为 DOWN。",
+        "重新 `no shutdown`——几秒内 FULL 状态恢复，路由同步完成。",
+        "对比 RIP：180 秒超时 → OSPF 仅几秒。"
+      ]
+    },
+    {
+      "layout": "step_substeps",
+      "no": "11",
+      "title": "进阶 · 修改 Cost 影响选路",
+      "items": [
+        "在 R1 上手动改 S0/0/0 的 Cost：",
+        "`interface Serial0/0/0` → `ip ospf cost 100`。",
+        "观察 R1 → 192.168.3.0 仍走 R2；如果有等价路径则会重新选路。"
+      ]
+    },
+    {
+      "layout": "verify_table",
+      "title": "验证结果对照",
+      "headers": ["测试", "期望", "实际"],
+      "rows": [
+        ["R1 show ip ospf neighbor", "Neighbor ID 2.2.2.2, State FULL", ""],
+        ["R2 show ip ospf neighbor", "R1 (1.1.1.1) + R3 (3.3.3.3), 都 FULL", ""],
+        ["R3 show ip ospf neighbor", "Neighbor ID 2.2.2.2, State FULL", ""],
+        ["PC1 ping PC3", "通, TTL≈126", ""],
+        ["关闭 R2 S0/0/1 后 R3 路由", "几秒内失效", ""],
+        ["恢复后 R3 路由", "几秒内 FULL", ""]
+      ]
+    },
+    {
+      "layout": "text",
+      "badge": "ERR · 01",
+      "title": "常见错误与排错",
+      "body": "**邻居卡在 INIT**\n\n单向 Hello → 检查 ACL / 接口 / 物理链路。\n\n**邻居卡在 EXSTART / EXCHANGE**\n\nMTU 不一致（生产环境常见，PT 6.2 一般无此问题）→ 调 MTU。\n\n**邻居卡在 2-WAY（多路访问网段）**\n\n需 DR 选举 → 等候或调整优先级。\n\n**邻居完全建不起**\n\narea 不匹配 → 检查 `show ip ospf interface` 的 area ID。"
+    },
+    {
+      "layout": "report",
+      "title": "实验报告要求",
+      "items": [
+        "**完整配置**：3 台路由器的 `show running-config | section ospf`。",
+        "**邻居表**：3 台的 `show ip ospf neighbor`。",
+        "**LSDB**：`show ip ospf database` 摘要（每台列 3-5 行即可）。",
+        "**路由表**：标出所有 O 条目。",
+        "**收敛对比实验**：同时跑 RIP 和 OSPF 两个版本（用不同进程号），关闭一条链路，分别观察恢复时间。",
+        "**故障分析**：把 R1 的 Router-ID 改为与 R2 相同，会发生什么？在 R1 和 R2 之间的链路上配不同 Area，会发生什么？"
+      ]
+    },
+    {
+      "layout": "think",
+      "title": "思考题",
+      "items": [
+        "OSPF 与 RIP 在收敛速度上的差异有多大？本质原因是什么？",
+        "同一链路上，两台 OSPF 路由器的 Hello / Dead 时间不匹配会怎样？",
+        "为什么 OSPF 使用「层次化」的 Area 设计？单区域有什么局限？",
+        "OSPF 的「反掩码」与子网掩码有何区别？"
+      ]
+    },
+    {
+      "layout": "end",
+      "title": "实验完毕",
+      "lead": "保存 `.pkt` 文件并撰写实验报告，下次实验课进入「综合实践」。"
+    }
+  ]
+}

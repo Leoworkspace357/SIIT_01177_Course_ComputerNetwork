@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 4 章  认识 IP 地址</title>
+<style>
+/* =====================================================================
+     LINEAR DARK · design tokens
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --status-good:#4cb782; --status-warning:#f2c94c;
+    --status-serious:#eb8c4a; --status-critical:#e34948;
+    --ease:cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-out:cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-soft:cubic-bezier(0.45, 0, 0.15, 1);
+    --dur-slide:900ms; --dur-frag:720ms;
+    --stagger:90ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{
+    --bg:#08080a; --bg-elev-1:#0d0d10; --bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f; --ink:#f7f8f8; --ink-2:#b4b8c0;
+    --ink-3:#8a8f98; --ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;
+  }
+  .deck[data-theme="light"]{
+    --bg:#fbfbfc; --bg-elev-1:#fff; --bg-elev-2:#f4f4f7;
+    --bg-elev-3:#ebebef; --ink:#0a0a0c; --ink-2:#4a4d57;
+    --ink-3:#6f727a; --ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:6vh 7vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(36px) scale(.985);
+    transition:opacity var(--dur-slide) var(--ease-soft),
+      transform var(--dur-slide) var(--ease-soft);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px) scale(.985);
+    transition:opacity 540ms var(--ease-soft),transform 540ms var(--ease-soft)}
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2);transition:border-color 400ms var(--ease)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6vw,5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h3{font-size:1.05rem;margin:1rem 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(.95rem,1.05vw,1.1rem);line-height:1.55;color:var(--ink-2)}
+  .lead{font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--ink-2);
+    max-width:60ch;margin-top:.3rem;line-height:1.5;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--accent)}
+  code,kbd{font-family:var(--font-mono);font-size:.86em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+  ul.clean{list-style:none;padding:0;margin:1.4rem 0 0;max-width:64ch}
+  ul.clean>li{padding:.9rem 0 .9rem 1.6rem;position:relative;
+    border-bottom:1px solid var(--hairline);
+    transition:border-color 300ms var(--ease)}
+  ul.clean>li:last-child{border-bottom:0}
+  ul.clean>li::before{content:"";position:absolute;left:0;top:1.4rem;
+    width:6px;height:6px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--accent-ring)}
+  ol.steps{counter-reset:step;list-style:none;padding:0;
+    margin:1.6rem 0 0;max-width:64ch}
+  ol.steps>li{counter-increment:step;padding:1.4rem 0 1.4rem 4rem;
+    position:relative;border-top:1px solid var(--hairline)}
+  ol.steps>li:last-child{border-bottom:1px solid var(--hairline)}
+  ol.steps>li::before{content:counter(step,decimal-leading-zero);
+    position:absolute;left:0;top:1.45rem;font-family:var(--font-mono);
+    font-size:.82rem;color:var(--accent);font-weight:500;letter-spacing:.04em}
+  .grid-2{display:grid;grid-template-columns:1.15fr 1fr;gap:2rem;
+    align-items:start;margin-top:1.4rem}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.4rem}
+  .card{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.4rem 1.5rem;background:var(--bg-elev-2);
+    transition:border-color 400ms var(--ease),transform 400ms var(--ease),
+      background 400ms var(--ease)}
+  .card:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .card.compact{padding:1rem 1.2rem}
+  .card h3{margin-top:.3rem}
+  .card .tag{display:inline-flex;align-items:center;gap:.35rem;
+    font-family:var(--font-mono);font-size:.68rem;letter-spacing:.04em;
+    color:var(--accent);margin-bottom:.6rem;font-weight:500}
+  .card .tag::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--accent)}
+  table.t{width:100%;border-collapse:collapse;margin-top:1.4rem;
+    font-variant-numeric:tabular-nums;
+    border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  table.t th,table.t td{text-align:left;padding:.85rem 1rem;
+    border-bottom:1px solid var(--hairline);font-size:.95rem;color:var(--ink-2);
+    background:var(--bg-elev-2)}
+  table.t th{color:var(--ink-3);font-weight:500;
+    border-bottom:1px solid var(--hairline-strong);
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--bg-elev-1)}
+  table.t tr:last-child td{border-bottom:0}
+  table.t tbody tr{transition:background 300ms var(--ease)}
+  table.t tbody tr:hover td{background:var(--bg-elev-3)}
+  blockquote{margin:1.4rem 0;padding:.4rem 0 .4rem 1.2rem;
+    border-left:2px solid var(--accent);color:var(--ink-2);font-style:normal;
+    font-size:clamp(1.05rem,1.25vw,1.22rem);line-height:1.55}
+  .callout{display:flex;gap:1.2rem;padding:1.1rem 1.3rem;border-radius:10px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    margin-top:1rem;transition:border-color 300ms var(--ease)}
+  .callout:hover{border-color:var(--accent-ring)}
+  .callout .ico{flex:none;font-family:var(--font-mono);font-weight:500;
+    font-size:.8rem;color:var(--accent);padding-top:.15rem}
+  .callout p{margin:0;color:var(--ink-2)}
+  .callout p+p{margin-top:.3rem}
+  .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    margin-top:1.8rem;position:relative}
+  .timeline::before{content:"";position:absolute;top:5px;left:0;right:0;
+    height:1px;background:var(--hairline)}
+  .timeline .era{padding:0 1rem 0 0;position:relative}
+  .timeline .era::before{content:"";position:absolute;left:0;top:1px;
+    width:9px;height:9px;border-radius:50%;background:var(--bg);
+    border:1.5px solid var(--accent);
+    transition:background 400ms var(--ease),box-shadow 400ms var(--ease)}
+  .slide.active .timeline .era.fragment.visible::before{
+    background:var(--accent);box-shadow:0 0 0 4px var(--accent-glow)}
+  .timeline .era .yr{margin:1.6rem 0 .3rem;font-family:var(--font-mono);
+    font-weight:500;color:var(--ink);font-size:.85rem;letter-spacing:.04em}
+  .timeline .era .lbl{color:var(--ink-3);font-size:.72rem;margin:0 0 .5rem;
+    font-family:var(--font-mono);letter-spacing:.04em}
+  .timeline .era p{font-size:.92rem;color:var(--ink-2);line-height:1.5;margin:0}
+  .timeline .era p strong{color:var(--ink);font-weight:600}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.4rem}
+  .chip{padding:.45rem .9rem;border-radius:999px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    font-size:.92rem;color:var(--ink);
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .chip:hover{border-color:var(--accent-ring);background:var(--accent-soft)}
+  /* ============ IP byte visual ============ */
+  .ip-bytes{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;
+    margin-top:1.6rem;max-width:680px}
+  .ip-byte{border:1px solid var(--hairline);border-radius:10px;
+    background:var(--bg-elev-2);padding:1rem .8rem;text-align:center;
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .ip-byte:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .ip-byte .binary{font-family:var(--font-mono);font-size:.78rem;
+    color:var(--ink-3);letter-spacing:.05em;margin-bottom:.4rem;
+    word-break:break-all}
+  .ip-byte .decimal{font-family:var(--font-mono);font-size:1.6rem;
+    color:var(--ink);font-weight:600;letter-spacing:.02em}
+  .ip-byte .label{font-family:var(--font-mono);font-size:.65rem;
+    color:var(--accent);margin-top:.4rem;letter-spacing:.04em}
+  .ip-result{font-family:var(--font-mono);font-size:clamp(1.4rem,1.8vw,1.9rem);
+    color:var(--ink);margin-top:1.2rem;letter-spacing:.05em}
+  .ip-result .dot{color:var(--accent);margin:0 .25rem}
+  /* ============ Class A/B/C bit visual ============ */
+  .ip-class-row{display:grid;grid-template-columns:140px 1fr;gap:1rem;
+    align-items:center;margin-top:1rem}
+  .ip-class-row .name{font-weight:600;color:var(--ink);font-size:1rem;
+    padding-right:1rem;border-right:1px solid var(--hairline)}
+  .ip-class-row .bits{font-family:var(--font-mono);font-size:.78rem;
+    letter-spacing:.02em;display:flex;flex-wrap:wrap;gap:0}
+  .ip-class-row .bits span{padding:.35rem .4rem;border:1px solid var(--hairline);
+    background:var(--bg-elev-2);color:var(--ink-2);
+    transition:border-color 300ms var(--ease),background 300ms var(--ease)}
+  .ip-class-row .bits span.net{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  .ip-class-row .bits span.host{color:var(--status-good);border-color:rgba(76,183,130,.4);
+    background:rgba(76,183,130,.08)}
+  .ip-class-row .bits .legend{margin-left:1rem;color:var(--ink-3);font-size:.7rem;
+    border:none;background:none;padding:.35rem 0}
+  /* ============ Network diagram ============ */
+  .net-diagram{display:flex;gap:1.4rem;align-items:flex-start;
+    margin-top:1.6rem;flex-wrap:wrap}
+  .net-cloud{border:2px dashed var(--accent-ring);border-radius:14px;
+    padding:1rem;background:var(--accent-soft);
+    transition:border-color 300ms var(--ease)}
+  .net-cloud .title{font-family:var(--font-mono);font-size:.7rem;
+    color:var(--accent);margin-bottom:.6rem;letter-spacing:.04em}
+  .net-cloud .host{display:inline-block;padding:.35rem .55rem;margin:.15rem;
+    border-radius:6px;background:var(--bg-elev-2);
+    font-family:var(--font-mono);font-size:.78rem;color:var(--ink);
+    border:1px solid var(--hairline)}
+  /* ============ Case box ============ */
+  .case-box{border:1px solid var(--accent-ring);border-radius:10px;
+    padding:1.2rem 1.4rem;background:var(--bg-elev-2);
+    margin-top:1.4rem;transition:border-color 300ms var(--ease)}
+  .case-box .case-title{font-family:var(--font-mono);font-size:.7rem;
+    color:var(--accent);margin-bottom:.6rem;letter-spacing:.04em}
+  .case-box p{margin:.4rem 0;color:var(--ink-2);font-size:.98rem}
+  .fragment{opacity:0;transform:translateY(22px) scale(.97);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .fragment.visible{opacity:1;transform:translateY(0) scale(1);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.72rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:3px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;overflow-y:auto}
+  .sidebar .nav-dot{width:3px;height:3px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;flex:none;
+    transition:opacity 300ms var(--ease),transform 300ms var(--ease),
+      background 300ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 6px var(--accent-ring);transform:scale(1.4)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
+    letter-spacing:.02em;transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  .deck.overview .stage{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+    padding:80px 28px 80px 72px;overflow:auto;height:100vh;inset:0}
+  .deck.overview .slide{position:relative;inset:auto;aspect-ratio:16/9;
+    padding:1rem;border:1px solid var(--hairline);border-radius:10px;
+    background:var(--bg-elev-1);cursor:pointer;overflow:hidden;
+    transform:none!important;opacity:1!important}
+  .deck.overview .slide.active{border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent),0 0 16px var(--accent-glow)}
+  .deck.overview .slide>*{transform:scale(.18);transform-origin:top left}
+  .help{position:fixed;inset:0;background:rgba(8,8,10,.65);
+    backdrop-filter:blur(8px);display:none;align-items:center;
+    justify-content:center;z-index:40}
+  .help.open{display:flex;animation:helpFade 280ms var(--ease)}
+  @keyframes helpFade{from{opacity:0}to{opacity:1}}
+  .help .panel{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:12px;padding:1.8rem 2.2rem;max-width:520px;min-width:380px;
+    box-shadow:0 24px 80px rgba(0,0,0,.5);animation:helpIn 380ms var(--ease)}
+  @keyframes helpIn{from{opacity:0;transform:translateY(20px) scale(.97)}
+    to{opacity:1;transform:translateY(0) scale(1)}}
+  .help h3{margin-top:0}
+  .help .row{display:flex;justify-content:space-between;
+    padding:.55rem 0;border-bottom:1px solid var(--hairline)}
+  .help .row:last-child{border-bottom:0}
+  .help .row span:last-child{font-family:var(--font-mono);font-size:.82em;color:var(--ink-3)}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.chip,.card,.toolbar button,
+    .help,.help .panel,.progress,.nav-dot{transition-duration:0ms!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">第 4 章  认识 IP 地址  <strong>|  Leonard F. Li</strong></div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">33</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide title active">
+      <p class="eyebrow">Chapter 04  |  IP Addresses</p>
+      <h1 class="title-h">认识<br><span class="accent">IP 地址</span></h1>
+      <p class="lead">互联网中<strong>每台设备的「门牌号」</strong>——32 位二进制、点分十进制、五类划分、特殊地址……</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        Instructor · Leonard F. Li　　·　　Period · 04　　·　　Spring 2026
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Objectives</p>
+      <h2>通过本次课，你将能够：</h2>
+      <ol class="steps">
+        <li class="fragment">解释 <strong>IP 地址的作用</strong>与层次结构</li>
+        <li class="fragment">把<strong>二进制与点分十进制</strong>互相转换</li>
+        <li class="fragment">掌握 <strong>A / B / C / D / E</strong> 五类地址的划分</li>
+        <li class="fragment">识别<strong>网络地址、广播地址、回送地址</strong>等特殊地址</li>
+        <li class="fragment">用<strong>案例</strong>判断两台主机是否在同一网络</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Agenda</p>
+      <h2>本章内容</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>为什么需要 IP 地址</strong>　——MAC 不够用了</li>
+        <li class="fragment"><strong>二进制与点分十进制</strong>　——人类能看懂的形式</li>
+        <li class="fragment"><strong>IP 地址的五类划分</strong>　——A / B / C / D / E</li>
+        <li class="fragment"><strong>特殊 IP 地址</strong>　——网络、广播、回送、私有</li>
+        <li class="fragment"><strong>实战案例</strong>　——判断「同一网络」</li>
+      </ul>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 01</p>
+      <h2>为什么需要 IP 地址？</h2>
+      <p class="lead">MAC 地址已经能唯一标识网卡，为什么还要 IP？</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Problem</p>
+      <h2>MAC 地址不够用</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">问题</span>
+          <h3>物理地址各异</h3>
+          <p class="muted">每种物理网络都有各自的技术特点，<strong>MAC 地址各不相同</strong>——以太网、Wi-Fi、令牌环……</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">困境</span>
+          <h3>难以统一</h3>
+          <p class="muted">统一物理地址的表示方法<strong>不现实</strong>——历史包袱 + 各厂商利益。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">方案</span>
+          <h3>IP 层统一</h3>
+          <p class="muted">在 IP 层<strong>用统一的地址方案</strong>屏蔽底层物理差异。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">本质</span>
+          <h3>逻辑地址</h3>
+          <p class="muted">IP 地址是<strong>面向网络</strong>的逻辑地址，与具体硬件无关。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Function</p>
+      <h2>IP 地址的 4 个作用</h2>
+      <ul class="clean">
+        <li class="fragment">指定计算机到互联网的<strong>一个连接</strong></li>
+        <li class="fragment">多接口设备（路由器、多宿主主机）具有<strong>多个 IP</strong></li>
+        <li class="fragment">多个 IP 可以<strong>绑定到一条物理连接</strong>上</li>
+        <li class="fragment">IP 地址本质上标识<strong>网络接口</strong>，而不是机器本身</li>
+      </ul>
+      <div class="case-box fragment">
+        <div class="case-title">CASE · 多接口设备的 IP 数量</div>
+        <p>一台家用路由器通常有 <strong>2 个接口</strong>：WAN 口（公网 IP，比如 110.242.68.66）和 LAN 口（私网 IP，比如 192.168.1.1）。它<strong>同时拥有两个 IP</strong>。</p>
+        <p>一台服务器绑定了多个网站？可以用<strong>同一个网卡的不同 IP</strong>，对外呈现多个站点。</p>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 02</p>
+      <h2>32 位二进制与点分十进制</h2>
+      <p class="lead">人类读不懂 32 位连续 0/1，所以发明了<strong>点分十进制</strong>。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">32-bit</p>
+      <h2>IP 地址 = 32 位二进制</h2>
+      <div class="ip-bytes">
+        <div class="ip-byte fragment">
+          <div class="binary">11001010</div>
+          <div class="decimal">202</div>
+          <div class="label">字节 1 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">01011101</div>
+          <div class="decimal">93</div>
+          <div class="label">字节 2 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">01111000</div>
+          <div class="decimal">120</div>
+          <div class="label">字节 3 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">00101100</div>
+          <div class="decimal">44</div>
+          <div class="label">字节 4 · 8 bit</div>
+        </div>
+      </div>
+      <p class="ip-result fragment">
+        <span>11001010</span><span class="dot">.</span><span>01011101</span><span class="dot">.</span><span>01111000</span><span class="dot">.</span><span>00101100</span>
+      </p>
+      <p class="ip-result fragment" style="margin-top:.6rem;color:var(--accent)">
+        202<span class="dot">.</span>93<span class="dot">.</span>120<span class="dot">.</span>44
+      </p>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.9rem">
+        每 8 bit 转换为 0–255 的十进制，用「.」隔开——这叫<strong>点分十进制</strong>（dotted-decimal）。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Range</p>
+      <h2>为什么是 0–255？</h2>
+      <ul class="clean">
+        <li class="fragment">8 位二进制最大 = <code>11111111</code> = 十进制 <strong>255</strong></li>
+        <li class="fragment">最小 = <code>00000000</code> = <strong>0</strong></li>
+        <li class="fragment">范围 <strong>0–255</strong>，共 256 个值</li>
+        <li class="fragment">所以 <code>192.168.1.256</code> 是<strong>非法</strong>的（256 越界）</li>
+        <li class="fragment">常见合法范围：家庭 <code>192.168.1.1</code>–<code>192.168.1.254</code></li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Conversion</p>
+      <h2>二进制 ↔ 十进制 转换表</h2>
+      <table class="t">
+        <thead><tr><th>二进制</th><th>十进制</th><th>记忆技巧</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td><code>10000000</code></td><td>128</td><td>2⁷</td></tr>
+          <tr class="fragment"><td><code>11000000</code></td><td>192</td><td>128 + 64</td></tr>
+          <tr class="fragment"><td><code>11100000</code></td><td>224</td><td>128 + 64 + 32</td></tr>
+          <tr class="fragment"><td><code>11110000</code></td><td>240</td><td>+ 16</td></tr>
+          <tr class="fragment"><td><code>11111111</code></td><td>255</td><td>全部位都置 1</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.9rem">
+        口诀：<strong>128、64、32、16、8、4、2、1</strong>——对应位权。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Examples</p>
+      <h2>常见 IP 的二进制形态</h2>
+      <table class="t">
+        <thead><tr><th>点分十进制</th><th>二进制（32 位）</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>202.93.120.44</td><td><code>11001010 01011101 01111000 00101100</code></td></tr>
+          <tr class="fragment"><td>126.1.1.1</td><td><code>01111110 00000001 00000001 00000001</code></td></tr>
+          <tr class="fragment"><td>172.16.0.1</td><td><code>10101100 00010000 00000000 00000001</code></td></tr>
+          <tr class="fragment"><td>192.168.1.1</td><td><code>11000000 10101000 00000001 00000001</code></td></tr>
+          <tr class="fragment"><td>0.0.0.0</td><td><code>00000000 00000000 00000000 00000000</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 03</p>
+      <h2>IP 地址的五类划分</h2>
+      <p class="lead">32 位中前几位决定类别——这是历史遗留的「分蛋糕」方式。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Hierarchy</p>
+      <h2>netid + hostid 的两层结构</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">netid</span>
+          <h3>网络号</h3>
+          <p class="muted">标识互联网中一个<strong>特定的网络</strong>。由<em>上级机构（IANA / 区域注册机构）</em>分配。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">hostid</span>
+          <h3>主机号</h3>
+          <p class="muted">标识该网络中的一个<strong>特定连接</strong>（网络接口）。由<em>网络管理员</em>分配。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">类比</span>
+          <h3>楼号 + 房间号</h3>
+          <p class="muted">netid = <strong>楼号</strong>；hostid = <strong>房间号</strong>——同一个网络就像同一栋楼。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">好处</span>
+          <h3>路由聚合</h3>
+          <p class="muted">路由器只记<strong>楼号</strong>就能转发，不必为每个房间单独建表。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Hierarchy</p>
+      <h2>互联网的三层结构</h2>
+      <div class="layer-stack" style="max-width:520px;margin-top:2rem">
+        <div class="layer-row fragment"><span class="num">顶层</span><span class="name">互联网 Internet</span><span class="en">若干自治系统</span></div>
+        <div class="layer-row fragment"><span class="num">中层</span><span class="name">自治系统 / 网络</span><span class="en">若干子网</span></div>
+        <div class="layer-row fragment"><span class="num">底层</span><span class="name">子网 / 物理网络</span><span class="en">若干主机</span></div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        IP 地址的<strong>网络号</strong>对应上面两层，<strong>主机号</strong>对应最底层的主机。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Classes</p>
+      <h2>A / B / C / D / E 五类地址</h2>
+      <p class="muted">前几位的不同，决定地址类别。</p>
+      <div class="ip-class-row fragment">
+        <span class="name">A 类</span>
+        <span class="bits">
+          <span class="net">0</span>
+          <span class="net">网络号 8 位</span>
+          <span class="host">主机号 24 位</span>
+        </span>
+      </div>
+      <div class="ip-class-row fragment">
+        <span class="name">B 类</span>
+        <span class="bits">
+          <span class="net">10</span>
+          <span class="net">网络号 16 位</span>
+          <span class="host">主机号 16 位</span>
+        </span>
+      </div>
+      <div class="ip-class-row fragment">
+        <span class="name">C 类</span>
+        <span class="bits">
+          <span class="net">110</span>
+          <span class="net">网络号 24 位</span>
+          <span class="host">主机号 8 位</span>
+        </span>
+      </div>
+      <div class="ip-class-row fragment">
+        <span class="name">D 类</span>
+        <span class="bits">
+          <span class="net">1110</span>
+          <span class="muted">组播地址</span>
+        </span>
+      </div>
+      <div class="ip-class-row fragment">
+        <span class="name">E 类</span>
+        <span class="bits">
+          <span class="net">1111</span>
+          <span class="muted">实验保留</span>
+        </span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Ranges</p>
+      <h2>五类地址的数值范围</h2>
+      <table class="t">
+        <thead><tr><th>类别</th><th>范围</th><th>网络数</th><th>每网主机数</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>A</td><td>1.0.0.0 – 126.255.255.255</td><td>2⁷ = 128</td><td>2²⁴ ≈ 1677 万</td></tr>
+          <tr class="fragment"><td>B</td><td>128.0.0.0 – 191.255.255.255</td><td>2¹⁴ = 16 384</td><td>65 534</td></tr>
+          <tr class="fragment"><td>C</td><td>192.0.0.0 – 223.255.255.255</td><td>2²¹ ≈ 209 万</td><td>254</td></tr>
+          <tr class="fragment"><td>D</td><td>224.0.0.0 – 239.255.255.255</td><td colspan="2"><em>组播专用</em></td></tr>
+          <tr class="fragment"><td>E</td><td>240.0.0.0 – 255.255.255.255</td><td colspan="2"><em>实验保留</em></td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.9rem">
+        记忆口诀：<strong>首字节 1–126 是 A，128–191 是 B，192–223 是 C，224–239 是 D，240 以上是 E</strong>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Class A</p>
+      <h2>A 类地址 · 巨型网络</h2>
+      <div class="ip-bytes">
+        <div class="ip-byte fragment">
+          <div class="binary">0xxxxxxx</div>
+          <div class="decimal">1 – 126</div>
+          <div class="label">网络号 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">xxxxxxxx</div>
+          <div class="decimal">0 – 255</div>
+          <div class="label">主机号 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">xxxxxxxx</div>
+          <div class="decimal">0 – 255</div>
+          <div class="label">主机号 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">xxxxxxxx</div>
+          <div class="decimal">0 – 255</div>
+          <div class="label">主机号 · 8 bit</div>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        例子：<code>10.0.0.1</code>　·　<strong>10</strong> 是网络号，<strong>0.0.1</strong> 是主机号——同一栋楼可以有 1677 万台主机。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Class B</p>
+      <h2>B 类地址 · 中型网络</h2>
+      <div class="ip-bytes">
+        <div class="ip-byte fragment">
+          <div class="binary">10xxxxxx</div>
+          <div class="decimal">128 – 191</div>
+          <div class="label">网络号 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">xxxxxxxx</div>
+          <div class="decimal">0 – 255</div>
+          <div class="label">网络号 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">xxxxxxxx</div>
+          <div class="decimal">0 – 255</div>
+          <div class="label">主机号 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">xxxxxxxx</div>
+          <div class="decimal">0 – 255</div>
+          <div class="label">主机号 · 8 bit</div>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        例子：<code>172.16.5.10</code>　·　<strong>172.16</strong> 是网络号，<strong>5.10</strong> 是主机号——6.5 万台主机的容量。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Class C</p>
+      <h2>C 类地址 · 小型网络</h2>
+      <div class="ip-bytes">
+        <div class="ip-byte fragment">
+          <div class="binary">110xxxxx</div>
+          <div class="decimal">192 – 223</div>
+          <div class="label">网络号 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">xxxxxxxx</div>
+          <div class="decimal">0 – 255</div>
+          <div class="label">网络号 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">xxxxxxxx</div>
+          <div class="decimal">0 – 255</div>
+          <div class="label">网络号 · 8 bit</div>
+        </div>
+        <div class="ip-byte fragment">
+          <div class="binary">xxxxxxxx</div>
+          <div class="decimal">0 – 255</div>
+          <div class="label">主机号 · 8 bit</div>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        例子：<code>192.168.1.5</code>　·　<strong>192.168.1</strong> 是网络号，<strong>5</strong> 是主机号——最多 254 台主机，家庭/小型办公室常用。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Why Classes</p>
+      <h2>为什么要分类？</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">优点</span>
+          <h3>适应不同规模</h3>
+          <p class="muted">A 类 1677 万 / B 类 6.5 万 / C 类 254 —— 大中小网络各有归属，避免浪费。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">优点</span>
+          <h3>路由简单</h3>
+          <p class="muted">路由器读 netid 就能判断往哪转，<em>不必关心主机号</em>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">优点</span>
+          <h3>聚合能力强</h3>
+          <p class="muted">路由表中<strong>只记网络号</strong>，可聚合大量主机到一条路由。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">缺点</span>
+          <h3>不够灵活</h3>
+          <p class="muted">C 类只有 254 台——不够？B 类又能给 6.5 万台——太大；<em>「中间没合适的」</em>。</p>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        这个问题的解决：<strong>子网划分 + CIDR</strong>——下一章讨论。
+      </p>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 04</p>
+      <h2>特殊的 IP 地址</h2>
+      <p class="lead">除了普通主机地址，IP 还有一些<strong>具有特殊含义</strong>的地址。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Special · Net</p>
+      <h2>网络地址 · 标识整个网络</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">构成</span>
+          <h3>全「0」主机号</h3>
+          <p class="muted">一个有效的<strong>网络号</strong> + 全「0」的<strong>主机号</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">含义</span>
+          <h3>代表一整个网络</h3>
+          <p class="muted"><em>「这一整个网络」</em>——不分配给任何主机。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">举例</span>
+          <h3>202.93.120.0</h3>
+          <p class="muted">主机 202.93.120.44 所在的网络地址就是 <strong>202.93.120.0</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">用法</span>
+          <h3>路由表项</h3>
+          <p class="muted">网络地址出现在路由表中——<em>「到这一网络的路径」</em>。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Special · Broadcast</p>
+      <h2>广播地址 · 一呼百应</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">直接广播</span>
+          <h3>网络号 + 全「1」</h3>
+          <p class="muted">主机向<strong>其他网络的所有节点</strong>广播信息。需要知道目的网络的网络号。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">例</span>
+          <h3>202.93.120.255</h3>
+          <p class="muted">向 <strong>202.93.120.0</strong> 网络上的所有主机发送数据。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">有限广播</span>
+          <h3>255.255.255.255</h3>
+          <p class="muted"><strong>不需</strong>知道网络号，广播被限制在<em>本地物理网络</em>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">用途</span>
+          <h3>DHCP · ARP</h3>
+          <p class="muted"><strong>DHCP</strong> 自动获取 IP、<strong>ARP</strong> 解析 MAC 都依赖广播。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Special · Loopback</p>
+      <h2>回送地址 · 127.0.0.0/8</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">范围</span>
+          <h3>127.0.0.0 – 127.255.255.255</h3>
+          <p class="muted">整个 <strong>127.0.0.0/8</strong> 网段都被保留为回送地址，<em>最常用 127.0.0.1</em>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">作用</span>
+          <h3>协议栈测试</h3>
+          <p class="muted">用于测试本机的 <strong>TCP/IP 协议栈</strong>是否正常工作。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">作用</span>
+          <h3>本机进程通信</h3>
+          <p class="muted">同一台机器上的<strong>客户端 / 服务端</strong>可通过 127.0.0.1 通信——数据库、Web 开发常用。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">特性</span>
+          <h3>不出现在网络上</h3>
+          <p class="muted">任何含网络号 127 的数据报<strong>永远不会</strong>出现在真实网络中。</p>
+        </div>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">CASE · 启动 Web 服务器</div>
+        <p>开发 Node.js / Python Flask 时，你访问 <code>http://localhost:3000</code>——其实就是在访问 <code>127.0.0.1:3000</code>。数据<em>根本不会离开你的电脑</em>。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Special · Private</p>
+      <h2>私有 IP · 内网专用</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">10.0.0.0/8</span>
+          <h3>A 类私有</h3>
+          <p class="muted">1 个 A 类网段，<strong>1677 万</strong> 个地址——大企业内网。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">172.16.0.0/12</span>
+          <h3>B 类私有</h3>
+          <p class="muted">16 个 B 类网段，约 <strong>104 万</strong> 个地址——中型企业。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">192.168.0.0/16</span>
+          <h3>C 类私有</h3>
+          <p class="muted">256 个 C 类网段，<strong>6.5 万</strong> 个地址——家庭、小公司。</p>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.9rem">
+        这些地址<strong>不会出现在公网</strong>，通过 NAT 共享一个公网 IP 上网。
+      </p>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 05</p>
+      <h2>案例 · 判断「同一网络」</h2>
+      <p class="lead">动手算一算——两台主机的<strong>网络号</strong>相同，就在同一个网络。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 01</p>
+      <h2>案例 1 · 同一 C 类网段</h2>
+      <div class="case-box">
+        <div class="case-title">题目</div>
+        <p><code>222.1.1.111</code> 与 <code>222.1.1.89</code>　属于同一个网络吗？属于哪一类？</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">分析</div>
+        <p>① 首字节 <strong>222</strong> ∈ [192, 223] → <strong>C 类</strong></p>
+        <p>② C 类网络号 24 位 → 网络号是 <code>222.1.1</code>，主机号是最后一段</p>
+        <p>③ 两台主机的网络号都是 <strong>222.1.1</strong> → <strong>同一网络</strong></p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-good)">
+        <div class="case-title" style="color:var(--status-good)">结论</div>
+        <p>✅ 同属 C 类，同一网络 <code>222.1.1.0</code>，可直接通信。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 02</p>
+      <h2>案例 2 · 同一 B 类网段</h2>
+      <div class="case-box">
+        <div class="case-title">题目</div>
+        <p><code>136.0.20.5</code> 与 <code>136.0.30.11</code>　同一网络？属于哪一类？</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">分析</div>
+        <p>① 首字节 <strong>136</strong> ∈ [128, 191] → <strong>B 类</strong></p>
+        <p>② B 类网络号 16 位 → 网络号是前两段 <code>136.0</code></p>
+        <p>③ 两台主机的网络号都是 <strong>136.0</strong> → <strong>同一网络</strong></p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-good)">
+        <div class="case-title" style="color:var(--status-good)">结论</div>
+        <p>✅ 同属 B 类，同一网络 <code>136.0.0.0</code>，无需路由器转发。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 03</p>
+      <h2>案例 3 · 跨类比较</h2>
+      <div class="case-box">
+        <div class="case-title">题目</div>
+        <p><code>128.36.199.3</code> 与 <code>21.12.240.17</code>　分别属于哪一类？同一网络吗？</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">分析</div>
+        <p>① <code>128.36.199.3</code>：首字节 <strong>128</strong> → <strong>B 类</strong>，网络号 <code>128.36</code></p>
+        <p>② <code>21.12.240.17</code>：首字节 <strong>21</strong> → <strong>A 类</strong>，网络号 <code>21</code></p>
+        <p>③ 网络号完全不同 → <strong>不同网络</strong></p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-warning)">
+        <div class="case-title" style="color:var(--status-warning)">结论</div>
+        <p>⚠️ 必须通过<strong>路由器</strong>才能通信——A 与 B 之间没有共同前缀。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 04</p>
+      <h2>案例 4 · 合法性检查</h2>
+      <div class="case-box">
+        <div class="case-title">题目</div>
+        <p><code>183.194.330.253</code>　合法吗？为什么？</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">分析</div>
+        <p>① 第三段是 <strong>330</strong>——超出 0–255 范围</p>
+        <p>② 每段最大只能是 255（8 位二进制全 1）</p>
+        <p>③ <code>183.194.330.253</code> <strong>不合法</strong>——典型的"输入错误"</p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-critical)">
+        <div class="case-title" style="color:var(--status-critical)">结论</div>
+        <p>❌ 非法 IP——配置时一定要校验每段 ≤ 255。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Recap</p>
+      <h2>本章小结</h2>
+      <ol class="steps">
+        <li class="fragment"><strong>IP 地址</strong>屏蔽物理地址差异，标识<em>网络接口</em></li>
+        <li class="fragment"><strong>32 位二进制</strong> → <strong>点分十进制</strong>（4 段 0–255）</li>
+        <li class="fragment"><strong>netid + hostid</strong> 两层结构，路由器按 netid 转发</li>
+        <li class="fragment"><strong>A / B / C / D / E</strong> 五类，netid 长度 8 / 16 / 24 位</li>
+        <li class="fragment"><strong>特殊 IP</strong>：网络地址、广播地址、<em>回送 127.0.0.0/8</em>、<em>私有 10/8 · 172.16/12 · 192.168/16</em></li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Homework</p>
+      <h2>练习</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>填空</strong></p>
+          <p class="muted" style="margin-top:.3rem">IP 地址由<strong>网络号</strong>和<strong>主机号</strong>两部分组成，前者表示 ______，后者表示 ______。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>计算</strong></p>
+          <p class="muted" style="margin-top:.3rem">IP <code>205.140.36.88</code>　·　网络地址是多少？直接广播地址是多少？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>计算</strong></p>
+          <p class="muted" style="margin-top:.3rem">IP <code>129.66.51.37</code>　·　属于哪一类？网络号？直接广播地址？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">04</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>判断</strong></p>
+          <p class="muted" style="margin-top:.3rem"><code>192.12.69.248</code>、<code>89.3.0.1</code>、<code>89.4.0.2</code>　——哪些在同一网络？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">05</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>思考</strong></p>
+          <p class="muted" style="margin-top:.3rem">为什么 <code>127.0.0.1</code> 常被用来测试本机的网络协议栈？<code>ping 127.0.0.1</code> 能成功，说明了什么？</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide title">
+      <p class="eyebrow">End of Chapter 04</p>
+      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">子网编址</span></h1>
+      <p class="lead" style="margin-top:1.4rem">分类地址太死板——<strong>子网掩码 + CIDR</strong> 让 IP 划分更灵活。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        End · 32 slides · Chapter 04
+      </p>
+    </section>
+
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-help" title="键盘帮助 (?)">Help</button>
+    <button id="b-overview" title="总览 (Esc)">Overview</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+
+  <div class="help" id="help">
+    <div class="panel">
+      <h3>Keyboard | Mouse</h3>
+      <div class="row"><span>Next slide</span><span>→ / Space / PageDown</span></div>
+      <div class="row"><span>Prev slide</span><span>← / PageUp</span></div>
+      <div class="row"><span>First / Last</span><span>Home / End</span></div>
+      <div class="row"><span>Overview (click to jump)</span><span>Esc</span></div>
+      <div class="row"><span>Toggle theme</span><span>T</span></div>
+      <div class="row"><span>Fullscreen</span><span>F</span></div>
+      <div class="row"><span>Help</span><span>?</span></div>
+      <p class="muted" style="margin-top:.8rem;font-size:.82rem">
+        Click empty area to advance; press <kbd>?</kbd> to dismiss.
+      </p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  const help=document.getElementById('help');
+  let i=0;
+  let fragIdx=0;
+  function slideFrags(slide){ return slide.querySelectorAll('.fragment'); }
+  function revealFragments(){
+    const frags=slideFrags(slides[i]);
+    for(let k=0;k<frags.length;k++){
+      if(k<fragIdx){
+        frags[k].classList.add('visible');
+        frags[k].style.setProperty('--frag-stagger',(k*90)+'ms');
+      } else {
+        frags[k].classList.remove('visible');
+        frags[k].style.setProperty('--frag-stagger','0ms');
+      }
+    }
+  }
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>d.classList.toggle('active',k===i))}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    if(next===i)return;
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    setTimeout(()=>{out.classList.remove('active','leaving')},600);
+    i=next;
+    fragIdx=0;
+    revealFragments();
+    now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot()}
+  function next(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx<frags.length){
+      fragIdx++;revealFragments();
+    } else if(i<slides.length-1){
+      show(i+1);
+    }
+  }
+  function prev(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx>1){
+      fragIdx--;revealFragments();
+    } else if(fragIdx===1){
+      fragIdx=0;revealFragments();
+    } else if(i>0){
+      const prevIdx=i-1;
+      const inn=slides[prevIdx];
+      const prevFrags=slideFrags(inn);
+      inn.classList.add('active');
+      const out=slides[i];
+      out.classList.add('leaving');
+      setTimeout(()=>{out.classList.remove('active','leaving')},600);
+      i=prevIdx;
+      fragIdx=prevFrags.length;
+      revealFragments();
+      now.textContent=String(i+1).padStart(2,'0');
+      progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+      history.replaceState(null,'','#'+(i+1));setActiveDot();
+    }
+  }
+  function toggleOverview(){
+    const on=deck.classList.toggle('overview');
+    if(on){
+      stage.style.display='grid';
+      stage.style.gridTemplateColumns='repeat(4, 1fr)';
+      stage.style.gap='14px';
+      stage.style.padding='80px 28px 80px 72px';
+      stage.style.overflow='auto';
+      slides.forEach((s)=>{
+        s.style.display='flex';
+        s.style.position='relative';
+        s.style.inset='auto';
+        s.style.aspectRatio='16/9';
+        s.style.padding='1rem';
+        s.style.border='1px solid var(--hairline)';
+        s.style.borderRadius='10px';
+        s.style.background='var(--bg-elev-1)';
+        s.style.cursor='pointer';
+        s.style.overflow='hidden';
+        s.style.transform='none';
+        s.style.opacity='1';
+        Array.from(s.children).forEach((c)=>{
+          c.style.transform='scale(.18)';
+          c.style.transformOrigin='top left';
+        });
+      });
+    } else {
+      stage.style.display='';
+      slides.forEach((s)=>{s.style.display='';});
+      show(i);
+    }
+  }
+  function toggleTheme(){
+    const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light');
+  }
+  function toggleHelp(){help.classList.toggle('open')}
+  document.addEventListener('keydown',(e)=>{
+    if(help.classList.contains('open')){
+      if(e.key==='Escape'||e.key==='?'){toggleHelp();e.preventDefault()}
+      return;
+    }
+    if(deck.classList.contains('overview')){
+      if(e.key==='Escape'){toggleOverview();e.preventDefault()}
+      return;
+    }
+    switch(e.key){
+      case'ArrowRight':case'PageDown':case' ':case'Spacebar':
+        next();e.preventDefault();break;
+      case'ArrowLeft':case'PageUp':prev();e.preventDefault();break;
+      case'Home':show(0);e.preventDefault();break;
+      case'End':show(slides.length-1);e.preventDefault();break;
+      case'Escape':toggleOverview();e.preventDefault();break;
+      case't':case'T':toggleTheme();break;
+      case'f':case'F':if(document.fullscreenElement)document.exitFullscreen();
+        else deck.requestFullscreen&&deck.requestFullscreen();break;
+      case'?':case'/':toggleHelp();e.preventDefault();break;
+    }
+  });
+  stage.addEventListener('click',(e)=>{
+    if(deck.classList.contains('overview')){
+      const s=e.target.closest('.slide');
+      if(!s)return;
+      const idx=slides.indexOf(s);
+      if(idx>=0){toggleOverview();show(idx)}
+    } else {
+      const x=e.clientX/window.innerWidth;
+      if(x>0.5)next();else prev();
+    }
+  });
+  document.getElementById('b-theme').addEventListener('click',toggleTheme);
+  document.getElementById('b-help').addEventListener('click',toggleHelp);
+  document.getElementById('b-overview').addEventListener('click',toggleOverview);
+  document.getElementById('b-print').addEventListener('click',()=>window.print());
+
+  fragIdx=0;
+  revealFragments();
+})();
+</script>
+</body>
+</html>

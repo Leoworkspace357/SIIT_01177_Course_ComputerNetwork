@@ -1,0 +1,198 @@
+{
+  "chapter": 6,
+  "title": "常见的网络协议及网络命令",
+  "questions": [
+    {
+      "type": "single",
+      "q": "「ICMP」属于 TCP/IP 哪一层？",
+      "options": {"A": "应用层", "B": "传输层", "C": "互联层", "D": "网络接口层"},
+      "answer": "C",
+      "explain": "ICMP 在互联层，封装在 IP 数据报中，用于差错报告与诊断。"
+    },
+    {
+      "type": "single",
+      "q": "`ping` 命令基于哪种协议？",
+      "options": {"A": "TCP", "B": "UDP", "C": "ICMP", "D": "ARP"},
+      "answer": "C",
+      "explain": "ping 用 ICMP 回应请求/应答。"
+    },
+    {
+      "type": "single",
+      "q": "`ping 127.0.0.1` 的主要作用是：",
+      "options": {"A": "测试到网关的连通", "B": "测试本机协议栈", "C": "测试外网", "D": "测试 DNS"},
+      "answer": "B",
+      "explain": "127.0.0.1 = 回送地址；ping 它验证本机 TCP/IP 协议栈是否正常。"
+    },
+    {
+      "type": "single",
+      "q": "`tracert`（Windows）的功能是：",
+      "options": {"A": "测速", "B": "显示到目的地的路由路径", "C": "DNS 查询", "D": "扫描端口"},
+      "answer": "B",
+      "explain": "tracert 显示从本机到目的地的逐跳路由。"
+    },
+    {
+      "type": "single",
+      "q": "`arp -a` 命令的作用是：",
+      "options": {"A": "查看路由表", "B": "查看本机 ARP 缓存", "C": "测试连通性", "D": "查看 DNS 缓存"},
+      "answer": "B",
+      "explain": "arp -a 显示本机的 IP–MAC 映射缓存。"
+    },
+    {
+      "type": "single",
+      "q": "「ARP」的作用是：",
+      "options": {"A": "域名解析", "B": "IP → MAC", "C": "路由选择", "D": "动态 IP 分配"},
+      "answer": "B",
+      "explain": "ARP 把 IP 解析为 MAC 地址，仅在本地局域网生效。"
+    },
+    {
+      "type": "single",
+      "q": "在 Windows 中查看本机完整 TCP/IP 配置的命令是：",
+      "options": {"A": "ipconfig", "B": "ipconfig /all", "C": "ifconfig", "D": "netstat"},
+      "answer": "B",
+      "explain": "ipconfig /all 显示完整 TCP/IP 配置；ipconfig 仅显示简要信息。"
+    },
+    {
+      "type": "single",
+      "q": "`nslookup` 命令的主要功能是：",
+      "options": {"A": "测试连通性", "B": "查询 DNS 解析", "C": "显示路由", "D": "查看 ARP 表"},
+      "answer": "B",
+      "explain": "nslookup 查询 DNS 域名解析记录。"
+    },
+    {
+      "type": "single",
+      "q": "「Ping 不通」时，**最先**应该检查的是：",
+      "options": {"A": "更换电脑", "B": "物理连接（指示灯/网线）", "C": "重装系统", "D": "换 DNS"},
+      "answer": "B",
+      "explain": "故障排查先物理后逻辑——先看网线与指示灯。"
+    },
+    {
+      "type": "single",
+      "q": "「ping」时出现「Destination host unreachable」通常意味着：",
+      "options": {"A": "对方关机", "B": "本机无路由到目标", "C": "DNS 故障", "D": "电缆断开"},
+      "answer": "B",
+      "explain": "目标不可达：本机无路由、网络号错、网关配置错。"
+    },
+    {
+      "type": "single",
+      "q": "「Ping」返回「Request timed out」可能**不**意味着：",
+      "options": {"A": "物理断开", "B": "防火墙过滤", "C": "对端关机", "D": "本机 CPU 太忙"},
+      "answer": "D",
+      "explain": "Ping 超时与本机 CPU 无关；主要是网络层问题。"
+    },
+    {
+      "type": "single",
+      "q": "「Traceroute」（Linux）默认使用哪种协议与端口？",
+      "options": {"A": "ICMP", "B": "TCP 80", "C": "UDP 33434", "D": "TCP 443"},
+      "answer": "C",
+      "explain": "Linux traceroute 默认发送 UDP 33434；TTL 递增触发 ICMP 超时报文。"
+    },
+    {
+      "type": "multi",
+      "q": "下列命令中，可用于「测试连通性」的有：",
+      "options": {"A": "ping", "B": "tracert", "C": "ipconfig", "D": "nslookup"},
+      "answer": ["A", "B"],
+      "explain": "ping 测试连通；tracert 同时显示路径；ipconfig 看本机配置；nslookup 查 DNS。"
+    },
+    {
+      "type": "multi",
+      "q": "「ICMP 报文」的常见类型包括：",
+      "options": {"A": "回应请求（Echo Request）", "B": "回应应答（Echo Reply）", "C": "目标不可达", "D": "TTL 超时"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "ping 用回应请求/应答；traceroute 用 TTL 超时；目标不可达是差错报告。"
+    },
+    {
+      "type": "multi",
+      "q": "「网络故障排查」应遵循的原则包括：",
+      "options": {"A": "由近及远", "B": "由软到硬", "C": "先看物理连接", "D": "立即更换设备"},
+      "answer": ["A", "B", "C"],
+      "explain": "排查应「由近及远、由软到硬」；D 不合理——盲目更换是浪费时间。"
+    },
+    {
+      "type": "multi",
+      "q": "Windows 下可用的网络配置命令包括：",
+      "options": {"A": "ipconfig /all", "B": "arp -a", "C": "route print", "D": "ifconfig"},
+      "answer": ["A", "B", "C"],
+      "explain": "ifconfig 是 Linux 命令；Windows 用 ipconfig。"
+    },
+    {
+      "type": "multi",
+      "q": "「ARP 协议」的工作机制包括：",
+      "options": {"A": "广播 ARP 请求", "B": "目标主机单播回应", "C": "每台主机维护 ARP 缓存", "D": "支持跨网段解析"},
+      "answer": ["A", "B", "C"],
+      "explain": "ARP 仅在本地局域网内；通过广播请求 + 单播应答；缓存减少广播。"
+    },
+    {
+      "type": "multi",
+      "q": "「ping 命令」常用参数包括：",
+      "options": {"A": "-t 持续 ping", "B": "-n count 指定次数", "C": "-l size 包大小", "D": "-i TTL 设置 TTL"},
+      "answer": ["A", "B", "C", "D"],
+      "explain": "这些都是 Windows ping 命令的常用参数。"
+    },
+    {
+      "type": "fill",
+      "text": "ping 命令基于 {{1}} 协议；ARP 协议把 {{2}} 解析为 MAC 地址。",
+      "answer": ["ICMP", "IP 地址"],
+      "explain": "ping 用 ICMP 回应请求/应答；ARP 把 IP 解析为 MAC。"
+    },
+    {
+      "type": "fill",
+      "text": "`ping 127.0.0.1` 测试{{1}}；`ping 网关 IP` 测试{{2}}。",
+      "answer": ["本机协议栈", "到网关的连通性"],
+      "explain": "先 127 → 本机协议栈；再网关 → 出局域网能力；最后外网。"
+    },
+    {
+      "type": "fill",
+      "text": "Windows 中查看本机 IP 配置的命令是 {{1}}；查看完整配置是 {{2}}。",
+      "answer": ["ipconfig", "ipconfig /all"],
+      "explain": "ipconfig 显示简要；ipconfig /all 显示全部（含 MAC、DNS、DHCP）。"
+    },
+    {
+      "type": "fill",
+      "text": "`arp -a` 命令用于查看{{1}}；`route print` 命令用于查看{{2}}。",
+      "answer": ["ARP 缓存", "路由表"],
+      "explain": "ARP 缓存：IP ↔ MAC；路由表：目的网络 ↔ 下一跳。"
+    },
+    {
+      "type": "fill",
+      "text": "ping 时返回「Request timed out」可能原因：物理断开、防火墙过滤、或对端{{1}}。",
+      "answer": ["未开机/未启用 ICMP"],
+      "explain": "对端关机、关闭 ICMP、防火墙过滤都会导致超时。"
+    },
+    {
+      "type": "fill",
+      "text": "ping 时返回「Destination unreachable」说明本机{{1}}。",
+      "answer": ["无路由到目标"],
+      "explain": "无路由到目标：网关配置错、目标网络号错、路由表缺失。"
+    },
+    {
+      "type": "fill",
+      "text": "ARP 协议仅在{{1}}内有效；跨网段需要借助{{2}}。",
+      "answer": ["本地局域网", "路由器"],
+      "explain": "ARP 仅查本局域网；跨网段需路由器的代理 ARP 或默认网关。"
+    },
+    {
+      "type": "fill",
+      "text": "tracert 命令通过发送不同 {{1}} 值的探测包来发现每一跳路由器。",
+      "answer": ["TTL"],
+      "explain": "TTL 从 1 开始递增；中途路由器超时返回 ICMP 报文暴露自己的 IP。"
+    },
+    {
+      "type": "fill",
+      "text": "网络故障排查常用三步走：① ping {{1}} ② ping {{2}} ③ ping 外网。",
+      "answer": ["127.0.0.1", "网关 IP"],
+      "explain": "先本机协议栈；再网关；最后外网。"
+    },
+    {
+      "type": "fill",
+      "text": "ipconfig /release 命令释放当前 IP；ipconfig /{{1}} 命令重新申请 DHCP 地址。",
+      "answer": ["renew"],
+      "explain": "/release 释放；/renew 重新申请。"
+    },
+    {
+      "type": "fill",
+      "text": "ping 命令默认发送 {{1}} 个字节的 ICMP 回应请求；常见包大小 32/64/1500。",
+      "answer": ["32"],
+      "explain": "Windows 默认 32 字节；Linux 默认 56 字节（加 IP 头 64）。"
+    }
+  ]
+}

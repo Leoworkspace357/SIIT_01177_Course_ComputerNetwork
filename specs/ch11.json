@@ -1,0 +1,143 @@
+{
+  "chapter": 11,
+  "title": "VLAN 互通",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "period": "11",
+  "term": "Spring 2026",
+  "eyebrow": "Chapter 11 · 计算机网络",
+  "lead": "用三层交换让不同的 VLAN 互通——兼得「隔离」与「可控通信」。",
+  "slides": [
+    {
+      "layout": "callouts",
+      "eyebrow": "Scenario",
+      "title": "应用场景 · 跨 VLAN 互通",
+      "items": [
+        {"ico":"01","title":"网段与 VLAN",
+         "body":"划分两个 VLAN：VLAN2 = 192.168.1.0/24，VLAN3 = 192.168.2.0/24。"},
+        {"ico":"02","title":"网关",
+         "body":"为交换机上的两个 VLAN 配置 IP 地址，作为各自网段的**网关**。"},
+        {"ico":"03","title":"互通诉求",
+         "body":"VLAN2 内主机需要访问 VLAN3 内的服务器——需要**路由**来打通。"},
+        {"ico":"04","title":"方案",
+         "body":"**三层交换**——用交换机自身完成 VLAN 间路由，性能高、成本低。"}
+      ]
+    },
+    {
+      "layout": "paragraphs",
+      "eyebrow": "Solution",
+      "title": "解决方案",
+      "paragraphs": [
+        "VLAN 可以把一个大的广播域划分成几个小的广播域，**提高网络效率、保障网络安全**。",
+        "**做法**：先划分 IP 网段；将不同网段地址分配给不同 VLAN；为交换机上的 VLAN 配置 IP 地址——两个 VLAN 的 IP 地址就是各自网段的**网关**；最后启用交换机的**三层路由功能**，完成 VLAN 间转发。"
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Steps",
+      "title": "具体实现 · 五步走",
+      "items": [
+        {"ico":"01","title":"搭建实验环境",
+         "body":"一台三层交换机 + 两台 PC；PC1 在 VLAN2、PC2 在 VLAN3，分别接 F0/3、F0/6。"},
+        {"ico":"02","title":"设置 IP 地址",
+         "body":"PC1 = 192.168.1.1/24，PC2 = 192.168.2.1/24；网关暂不设。"},
+        {"ico":"03","title":"划分 VLAN",
+         "body":"创建 VLAN2、VLAN3；把 F0/3 划入 VLAN2，F0/6 划入 VLAN3。"},
+        {"ico":"04","title":"启用三层交换",
+         "body":"`ip routing` 开启路由；为 VLAN2、VLAN3 配置 IP 作为网关。"},
+        {"ico":"05","title":"测试",
+         "body":"先 ping 网关验证，再 ping 跨 VLAN 主机——应当全部通。"}
+      ]
+    },
+    {
+      "layout": "bullets",
+      "eyebrow": "CLI",
+      "title": "启用三层交换 · 关键命令",
+      "items": [
+        "`Switch(config)# ip routing`　**启动交换机的路由功能**",
+        "`Switch(config)# interface vlan 2`　切换到 VLAN 2 接口",
+        "`Switch(config-if)# ip address 192.168.1.254 255.255.255.0`　配置 VLAN 2 的网关 IP",
+        "同理为 VLAN 3 配置 `192.168.2.254 255.255.255.0`",
+        "`end` 退出，`show ip route` 查看路由表确认直连路由"
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Test",
+      "title": "测试 · 从 PC1 ping 网关与跨 VLAN",
+      "items": [
+        {"ico":"01","title":"ping 网关",
+         "body":"`ping 192.168.1.254` —— 验证本机到网关连通。"},
+        {"ico":"02","title":"ping 跨 VLAN",
+         "body":"`ping 192.168.2.1` —— 验证跨 VLAN 主机连通。"},
+        {"ico":"03","title":"观察 TTL",
+         "body":"跨 VLAN 转发后 TTL 通常从 128 减为 127，说明**经过了一跳路由**。"},
+        {"ico":"04","title":"结论",
+         "body":"三层交换成功扮演**VLAN 间路由器**——互通性能远高于外部路由器。"}
+      ]
+    },
+    {
+      "layout": "section",
+      "eyebrow": "Background",
+      "title": "相关知识 · 三层交换的引入",
+      "lead": "为什么需要三层交换？"
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Why L3",
+      "title": "三层交换机的引入背景",
+      "cards": [
+        {"tag":"问题","title":"VLAN 间的转发",
+         "body":"划分 VLAN 后需要为 VLAN 之间提供**转发能力**。"},
+        {"tag":"传统","title":"路由器方案",
+         "body":"传统 LAN 用路由器完成 VLAN 间转发——但存在**成本**和**瓶颈**问题。"},
+        {"tag":"演进","title":"三层交换",
+         "body":"三层交换技术初步解决了这一问题，并迅速普及应用。"},
+        {"tag":"优势","title":"兼具两者之长",
+         "body":"既保持交换机的高性能，又具有**路由能力**——是 VLAN 间通信的标配。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Use Case",
+      "title": "三层交换机的应用场景",
+      "cards": [
+        {"tag":"定位","title":"企业核心",
+         "body":"主要用于**企业网核心层**——承担 VLAN 间路由与高速转发。"},
+        {"tag":"能力","title":"完整路由功能",
+         "body":"能够实现**路由器的全部功能**：静态路由、RIP、OSPF、ACL 等。"},
+        {"tag":"对比","title":"vs 路由器",
+         "body":"三层交换 = 交换机速度 + 路由器智能；专用路由器更适合广域网与边界。"},
+        {"tag":"演进","title":"多层交换",
+         "body":"现代园区网核心已演进到**多层交换**——融合路由、策略、QoS、安全。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Principle",
+      "title": "三层交换的工作原理 · 一次路由，多次交换",
+      "items": [
+        {"ico":"01","title":"首包",
+         "body":"第一个数据包走**路由**（CPU 查表、转发）；同时缓存「MAC + 出接口」映射。"},
+        {"ico":"02","title":"后续",
+         "body":"同一流的后续包直接由**硬件 ASIC** 按缓存的映射**交换**转发，**不再经过路由**。"},
+        {"ico":"03","title":"效果",
+         "body":"**速度接近二层交换**，又具备三层路由的智能——这就是「一次路由，多次交换」。"},
+        {"ico":"04","title":"要点",
+         "body":"三层交换机在**内部**完成路由决策，对外仍呈现交换机的形态与速度。"}
+      ]
+    },
+    {
+      "layout": "objectives",
+      "eyebrow": "Recap",
+      "title": "本章小结",
+      "items": [
+        "**VLAN 互通**　用三层交换替代外部路由器完成 VLAN 间转发",
+        "**配置要点**　`ip routing` + VLAN 接口 IP = 网关",
+        "**工作原理**　一次路由、多次交换；首包路由，后续硬件交换",
+        "**适用场景**　企业核心、VLAN 互通、园区骨干",
+        "**下一章**　DHCP 服务器——自动给主机分配 IP，告别手工配置"
+      ]
+    }
+  ]
+}

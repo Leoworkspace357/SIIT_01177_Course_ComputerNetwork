@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>综合实践：企业网 VLAN + DHCP + 路由 · 实验任务 · Linear Theme</title>
+<style>
+/* =====================================================================
+     LINEAR DARK · lab tutorial theme
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --status-good:#4cb782; --status-warning:#f2c94c;
+    --status-serious:#eb8c4a; --status-critical:#e34948;
+    --code:#1baf7a; --code-soft:rgba(76,183,130,.10);
+    --warn:#f2c94c; --warn-soft:rgba(242,201,76,.10);
+    --ease:cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out:cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-slide:720ms; --dur-frag:520ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{--bg:#08080a;--bg-elev-1:#0d0d10;--bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f;--ink:#f7f8f8;--ink-2:#b4b8c0;
+    --ink-3:#8a8f98;--ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;}
+  .deck[data-theme="light"]{--bg:#fbfbfc;--bg-elev-1:#fff;
+    --bg-elev-2:#f4f4f7;--bg-elev-3:#ebebef;--ink:#0a0a0c;
+    --ink-2:#4a4d57;--ink-3:#6f727a;--ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:5vh 6vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(48px);
+    transition:opacity var(--dur-slide) var(--ease),
+      transform var(--dur-slide) var(--ease);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px);
+    transition:opacity 380ms var(--ease),transform 380ms var(--ease)}
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2);transition:border-color 400ms var(--ease)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6vw,5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h3{font-size:1.05rem;margin:1rem 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(.95rem,1.05vw,1.1rem);line-height:1.55;color:var(--ink-2)}
+  .lead{font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--ink-2);
+    max-width:60ch;margin-top:.3rem;line-height:1.5;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--accent)}
+  code,kbd{font-family:var(--font-mono);font-size:.86em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+  /* lab-specific layout */
+  .content{max-width:1100px;margin:0 auto;width:100%}
+  .step-no{font-family:var(--font-mono);font-size:.78rem;
+    color:var(--accent);background:var(--bg-elev-2);
+    padding:.3rem .8rem;border-radius:6px;
+    border:1px solid var(--accent-ring);font-weight:600;
+    letter-spacing:.04em;display:inline-block}
+  .step-h{display:flex;align-items:center;gap:.8rem;margin-bottom:1rem}
+  .step-h h3{margin:0;font-size:1.2rem;color:var(--ink)}
+  /* code blocks */
+  .codeblock{background:var(--code-bg);border:1px solid var(--hairline);
+    border-radius:10px;padding:1rem 1.2rem;margin:1rem 0;
+    font-family:var(--font-mono);font-size:.88rem;
+    color:var(--ink-2);line-height:1.55;overflow-x:auto;
+    white-space:pre}
+  .codeblock .comment{color:var(--ink-3);font-style:italic}
+  .codeblock .kw{color:var(--accent)}
+  .codeblock .str{color:var(--code)}
+  .codeblock .num{color:var(--warn)}
+  /* topology diagram */
+  .topo{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:10px;padding:1.4rem 2rem;margin:1rem 0;
+    font-family:var(--font-mono);font-size:.92rem;
+    color:var(--ink-2);line-height:1.55;white-space:pre;
+    overflow-x:auto;letter-spacing:.01em}
+  /* tables */
+  table.t{width:100%;border-collapse:collapse;margin:.8rem 0;
+    font-variant-numeric:tabular-nums;
+    border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  table.t th,table.t td{text-align:left;padding:.7rem .9rem;
+    border-bottom:1px solid var(--hairline);font-size:.92rem;color:var(--ink-2);
+    background:var(--bg-elev-2)}
+  table.t th{color:var(--ink-3);font-weight:500;
+    border-bottom:1px solid var(--hairline-strong);
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--bg-elev-1)}
+  table.t tr:last-child td{border-bottom:0}
+  /* lists */
+  ul.clean,ol.steps{list-style:none;padding:0;margin:.8rem 0;max-width:80ch}
+  ul.clean>li{padding:.6rem 0 .6rem 1.4rem;position:relative;
+    border-bottom:1px solid var(--hairline);color:var(--ink-2)}
+  ul.clean>li:last-child{border-bottom:0}
+  ul.clean>li::before{content:"▸";position:absolute;left:0;top:.7rem;
+    color:var(--accent);font-weight:600}
+  ol.steps{counter-reset:labstep}
+  ol.steps>li{counter-increment:labstep;
+    padding:.8rem 0 .8rem 3rem;position:relative;
+    border-bottom:1px solid var(--hairline);color:var(--ink-2)}
+  ol.steps>li:last-child{border-bottom:0}
+  ol.steps>li::before{content:counter(labstep,decimal-leading-zero);
+    position:absolute;left:0;top:.85rem;
+    font-family:var(--font-mono);font-size:.85rem;color:var(--accent);
+    font-weight:600}
+  ol.steps>li strong{color:var(--ink)}
+  /* callout panels */
+  .tip,.warn,.err{display:flex;gap:1rem;padding:.9rem 1.1rem;
+    border-radius:10px;margin:.8rem 0;border:1px solid var(--hairline);
+    background:var(--bg-elev-2);transition:border-color 300ms var(--ease)}
+  .tip{border-left:3px solid var(--code)}
+  .warn{border-left:3px solid var(--warn)}
+  .err{border-left:3px solid var(--status-critical)}
+  .tip .lbl,.warn .lbl,.err .lbl{font-family:var(--font-mono);
+    font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:600;flex:none;width:4rem}
+  .tip .lbl{color:var(--code)}
+  .warn .lbl{color:var(--warn)}
+  .err .lbl{color:var(--status-critical)}
+  .tip p,.warn p,.err p{margin:0;color:var(--ink-2);font-size:.95rem}
+  /* fragments */
+  .fragment{opacity:0;transform:translateY(14px);
+    transition:opacity var(--dur-frag) var(--ease-out),
+      transform var(--dur-frag) var(--ease-out)}
+  .fragment.visible{opacity:1;transform:translateY(0)}
+  /* chrome */
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.65rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:4px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;
+    overflow:hidden;max-height:calc(100vh - 80px)}
+  .sidebar .nav-dot{width:4px;height:4px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;
+    transition:opacity 200ms var(--ease),transform 200ms var(--ease),
+      background 200ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 4px var(--accent-ring);transform:scale(1.6)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);
+    letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
+    letter-spacing:.02em;transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.toolbar button,.progress,.nav-dot,
+    .tip,.warn,.err{transition-duration:0ms!important}}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar{display:none!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">实验 06  <strong>·  综合实践：企业网 VLAN + DHCP + 路由</strong>  ·  Leonard F. Li</div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">30</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">PART 01</span><h3>实验目的</h3></div>
+        <ol class="steps">
+        <li class="fragment">综合运用：<strong>VLAN 划分、Trunk、三层交换或单臂路由</strong>实现 VLAN 互通。</li>
+        <li class="fragment">配置 <strong>DHCP 服务器</strong>自动分配 IP 给各 VLAN 主机。</li>
+        <li class="fragment">配置<strong>静态路由</strong>实现跨网段互通。</li>
+        <li class="fragment">验证多 VLAN、多子网环境下的端到端连通性。</li>
+        <li class="fragment">培养企业级网络的设计与排错能力。</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">PART 02</span><h3>实验环境</h3></div>
+        <table class="t">
+          <thead><tr><th>项目</th><th>规格 / 数量</th></tr></thead>
+          <tbody>
+        <tr><td>路由器</td><td>1 台（Router-PT，做单臂路由或出口）</td></tr>
+        <tr><td>三层交换机</td><td>1 台（3560-24PS）</td></tr>
+        <tr><td>二层交换机</td><td>2 台（2960-24TT）</td></tr>
+        <tr><td>服务器</td><td>1 台（Server-PT）</td></tr>
+        <tr><td>PC</td><td>6 台（每 VLAN 2 台）</td></tr>
+        <tr><td>直连双绞线</td><td>若干</td></tr>
+        <tr><td>软件</td><td>Cisco Packet Tracer 6.2</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">BG · 01</span><h3>实验背景</h3></div>
+        <p class="fragment">某公司有 3 个部门：<strong>销售部（Sales）</strong>、<strong>研发部（RD）</strong>、<strong>财务部（Finance）</strong>。</p>
+<p class="fragment"><strong>公司网络要求</strong>：
+- 每部门一个 VLAN，互相隔离广播域。
+- 每部门用一段独立子网，由 <strong>DHCP</strong> 自动分配 IP。
+- 部门间必须能互相通信（<strong>VLAN 间路由</strong>）。
+- 公司出口通过一台<strong>路由器</strong>连接「外网模拟网段」。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">PART 03</span><h3>实验拓扑</h3></div>
+        <div class="topo">  Sales VLAN 10   RD VLAN 20        Finance VLAN 30   外网 200.0.0.0/24
+  192.168.10.0/24 192.168.20.0/24   192.168.30.0/24
+       │                │                  │                  │
+      SW0──┐           SW1──┐            SW2──┐          │
+       │   │            │   │             │   │       Router R0
+       │   └────────────┘   └─────────────┘   │     Fa0/0
+       │                  Trunk             │     Gi0/0/0
+       └──────────────┬────────────────────┘       │
+                   Switch3 (3560 三层) ─────────────┘
+                   Gi0/1 (Trunk 上行)            Fa0/1
+                      │
+                   Server (DHCP)                  
+                   192.168.100.10/24 (VLAN 100 管理) </div>
+        <p class="muted" style="margin-top:.6rem;font-size:.92rem">用 3560 三层交换机做 VLAN 间路由；R0 通过 Fa0/1 连接 3560 的 Gi0/2，模拟到「外网」的连接。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 01</span><h3>IP 与 VLAN 规划</h3></div>
+        
+        <table class="t">
+          <thead><tr></tr></thead>
+          <tbody>
+<tr><td>VLAN 10</td><td>Sales</td><td>192.168.10.0/24</td><td>255.255.255.0</td><td>192.168.10.1</td><td>192.168.10.100–.200</td></tr><tr><td>VLAN 20</td><td>RD</td><td>192.168.20.0/24</td><td>255.255.255.0</td><td>192.168.20.1</td><td>192.168.20.100–.200</td></tr><tr><td>VLAN 30</td><td>Finance</td><td>192.168.30.0/24</td><td>255.255.255.0</td><td>192.168.30.1</td><td>192.168.30.100–.200</td></tr><tr><td>VLAN 100</td><td>Management</td><td>192.168.100.0/24</td><td>255.255.255.0</td><td>192.168.100.1</td><td>—</td></tr><tr><td>—</td><td>外网</td><td>200.0.0.0/24</td><td>255.255.255.0</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">BG · 02</span><h3>背景 · 设备 IP</h3></div>
+        <p class="fragment"><strong>路由器 R0</strong>：
+- Fa0/0: <code>200.0.0.1/24</code>（外网）
+- Fa0/1: <code>10.0.0.2/24</code>（接 3560 Gi0/2）</p>
+<p class="fragment"><strong>三层交换机 Switch3 (3560)</strong>：
+- VLAN 10 SVI: <code>192.168.10.1/24</code>
+- VLAN 20 SVI: <code>192.168.20.1/24</code>
+- VLAN 30 SVI: <code>192.168.30.1/24</code>
+- VLAN 100 SVI: <code>192.168.100.1/24</code>
+- Gi0/2: <code>10.0.0.1/24</code>
+- 默认路由: <code>0.0.0.0/0 → 10.0.0.2</code></p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 02</span><h3>搭建基础拓扑</h3></div>
+        
+        <ul class='clean'><li>PT 6.2 新建 <code>Lab6-Enterprise.pkt</code>。</li><li>拖出：1 × 3560-24PS、3 × 2960、1 × Router-PT、1 × Server-PT、6 × PC。</li><li><strong>连线</strong>：SW0/SW1/SW2 各有 2 台 PC（Fa0/1、Fa0/2）。</li><li>SW0/SW1/SW2 的 Gi0/1 → 三层交换机 Switch3 的 Gi0/1（Trunk）。</li><li>Switch3 的 Fa0/24 → Server。</li><li>Switch3 的 Gi0/2 → Router R0 的 Fa0/1。</li><li>R0 的 Fa0/0 → 模拟外网（拖一台额外的 PC 当 Internet 主机）。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 03</span><h3>三层交换机基本配置 + VLAN + SVI</h3></div>
+        <p>Switch3 CLI 关键配置：</p>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 03.1</span><h3>Switch3 配置步骤概览</h3></div>
+        
+        <ul class='clean'><li>进入全局配置 <code>configure terminal</code></li><li>创建 VLAN 10/20/30/100 并命名</li><li>Gi0/1 配置为 Trunk（接 SW0/SW1/SW2 上行）</li><li>Fa0/24 配置为 VLAN 100 的 access（接 Server）</li><li>启用 IP 路由：<code>ip routing</code>（关键步骤）</li><li>为每个 VLAN 配置 SVI（VLAN 接口 IP = 各 VLAN 网关）</li><li>Gi0/2 设为路由口（no switchport + IP）</li><li>配置默认路由指向 R0</li><li><code>end; write memory</code> 保存</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 03.2</span><h3>Switch3 完整 CLI</h3></div>
+        
+        <div class="codeblock"><span class=<span class="str">"kw"</span>>enable</span>
+<span class=<span class="str">"kw"</span>>configure</span> <span class=<span class="str">"kw"</span>>terminal</span>
+<span class=<span class="str">"kw"</span>>hostname</span> SW3
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 创建 VLAN</span>
+<span class=<span class="str">"kw"</span>>vlan</span> 10
+ name Sales
+<span class=<span class="str">"kw"</span>>vlan</span> 20
+ name RD
+<span class=<span class="str">"kw"</span>>vlan</span> 30
+ name Finance
+<span class=<span class="str">"kw"</span>>vlan</span> 100
+ name Management
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! Trunk 上行端口</span>
+<span class=<span class="str">"kw"</span>>interface</span> GigabitEthernet0/1
+ <span class=<span class="str">"kw"</span>>switchport</span> <span class=<span class="str">"kw"</span>>trunk</span> encapsulation dot1q
+ <span class=<span class="str">"kw"</span>>switchport</span> <span class=<span class="str">"kw"</span>>mode</span> <span class=<span class="str">"kw"</span>>trunk</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! Server 接入端口</span>
+<span class=<span class="str">"kw"</span>>interface</span> FastEthernet0/24
+ <span class=<span class="str">"kw"</span>>switchport</span> <span class=<span class="str">"kw"</span>>mode</span> <span class=<span class="str">"kw"</span>>access</span>
+ <span class=<span class="str">"kw"</span>>switchport</span> <span class=<span class="str">"kw"</span>>access</span> <span class=<span class="str">"kw"</span>>vlan</span> 100
+ spanning-tree portfast
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 启用 IP 路由（关键步骤）</span>
+<span class=<span class="str">"kw"</span>>ip</span> routing
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! SVI（VLAN 网关）</span>
+<span class=<span class="str">"kw"</span>>interface</span> <span class=<span class="str">"kw"</span>>vlan</span> 10
+ <span class=<span class="str">"kw"</span>>ip</span> address 192.168.10.1 255.255.255.0
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"kw"</span>>interface</span> <span class=<span class="str">"kw"</span>>vlan</span> 20
+ <span class=<span class="str">"kw"</span>>ip</span> address 192.168.20.1 255.255.255.0
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"kw"</span>>interface</span> <span class=<span class="str">"kw"</span>>vlan</span> 30
+ <span class=<span class="str">"kw"</span>>ip</span> address 192.168.30.1 255.255.255.0
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"kw"</span>>interface</span> <span class=<span class="str">"kw"</span>>vlan</span> 100
+ <span class=<span class="str">"kw"</span>>ip</span> address 192.168.100.1 255.255.255.0
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 上联路由器口</span>
+<span class=<span class="str">"kw"</span>>interface</span> GigabitEthernet0/2
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>switchport</span>
+ <span class=<span class="str">"kw"</span>>ip</span> address 10.0.0.1 255.255.255.0
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 默认路由</span>
+<span class=<span class="str">"kw"</span>>ip</span> <span class=<span class="str">"kw"</span>>route</span> 0.0.0.0 0.0.0.0 10.0.0.2
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"kw"</span>>end</span>
+<span class=<span class="str">"kw"</span>>write</span> <span class=<span class="str">"kw"</span>>memory</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 04</span><h3>二层交换机 VLAN + Trunk（以 SW0 为例）</h3></div>
+        <p>完整配置：</p>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 04.1</span><h3>SW0/SW1/SW2 配置步骤</h3></div>
+        
+        <ul class='clean'><li>进入全局配置 <code>configure terminal</code></li><li>设主机名 <code>hostname SW0</code>（SW1 / SW2 同理）</li><li>创建对应 VLAN 并 <code>exit</code></li><li>上行 Gi0/1 配为 trunk</li><li>接入端口 Fa0/1-24 配为 access + 加入对应 VLAN</li><li>加上 <code>spanning-tree portfast</code>（可选，加速收敛）</li><li><code>end; write memory</code></li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 04.2</span><h3>SW0 完整 CLI</h3></div>
+        
+        <div class="codeblock"><span class=<span class="str">"kw"</span>>enable</span>
+<span class=<span class="str">"kw"</span>>configure</span> <span class=<span class="str">"kw"</span>>terminal</span>
+<span class=<span class="str">"kw"</span>>hostname</span> SW0
+<span class=<span class="str">"kw"</span>>vlan</span> 10
+ name Sales
+<span class=<span class="str">"kw"</span>>exit</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"kw"</span>>interface</span> GigabitEthernet0/1
+ <span class=<span class="str">"kw"</span>>switchport</span> <span class=<span class="str">"kw"</span>>mode</span> <span class=<span class="str">"kw"</span>>trunk</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"kw"</span>>interface</span> range FastEthernet0/1-24
+ <span class=<span class="str">"kw"</span>>switchport</span> <span class=<span class="str">"kw"</span>>mode</span> <span class=<span class="str">"kw"</span>>access</span>
+ <span class=<span class="str">"kw"</span>>switchport</span> <span class=<span class="str">"kw"</span>>access</span> <span class=<span class="str">"kw"</span>>vlan</span> 10
+ spanning-tree portfast
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"kw"</span>>end</span>
+<span class=<span class="str">"kw"</span>>write</span> <span class=<span class="str">"kw"</span>>memory</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 04.3</span><h3>SW1 与 SW2 的 VLAN 分配</h3></div>
+        <p>SW1 用 VLAN 20（研发部），SW2 用 VLAN 30（财务部）。<strong>其它配置同 SW0</strong>，只需替换：</p>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 04.4</span><h3>三台二层交换机的 VLAN 与端口分配</h3></div>
+        
+        <table class="t">
+          <thead><tr></tr></thead>
+          <tbody>
+<tr><td>SW0</td><td>VLAN 10（Sales）</td><td>Gi0/1 = trunk</td><td>Fa0/1–Fa0/24 → VLAN 10</td></tr><tr><td>SW1</td><td>VLAN 20（RD）</td><td>Gi0/1 = trunk</td><td>Fa0/1–Fa0/24 → VLAN 20</td></tr><tr><td>SW2</td><td>VLAN 30（Finance）</td><td>Gi0/1 = trunk</td><td>Fa0/1–Fa0/24 → VLAN 30</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 05</span><h3>路由器 R0 配置</h3></div>
+        <p>完整脚本：</p>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 05.1</span><h3>R0 接口与静态路由配置</h3></div>
+        
+        <ul class='clean'><li>Fa0/0 = 外网接口 <code>200.0.0.1/24</code>，no shutdown</li><li>Fa0/1 = 上联 3560 接口 <code>10.0.0.2/24</code>，no shutdown</li><li>配置 4 条静态路由到内网（Sales / RD / Finance / Management）</li><li>下一跳统一为 <code>10.0.0.1</code>（3560 的 Gi0/2）</li><li><code>end; write memory</code></li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 05.2</span><h3>R0 完整 CLI</h3></div>
+        
+        <div class="codeblock"><span class=<span class="str">"kw"</span>>enable</span>
+<span class=<span class="str">"kw"</span>>configure</span> <span class=<span class="str">"kw"</span>>terminal</span>
+<span class=<span class="str">"kw"</span>>hostname</span> R0
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"kw"</span>>interface</span> FastEthernet0/0
+ <span class=<span class="str">"kw"</span>>ip</span> address 200.0.0.1 255.255.255.0
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"kw"</span>>interface</span> FastEthernet0/1
+ <span class=<span class="str">"kw"</span>>ip</span> address 10.0.0.2 255.255.255.0
+ <span class=<span class="str">"kw"</span>>no</span> <span class=<span class="str">"kw"</span>>shutdown</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 静态路由：到内网各 VLAN</span>
+<span class=<span class="str">"kw"</span>>ip</span> <span class=<span class="str">"kw"</span>>route</span> 192.168.10.0 255.255.255.0 10.0.0.1
+<span class=<span class="str">"kw"</span>>ip</span> <span class=<span class="str">"kw"</span>>route</span> 192.168.20.0 255.255.255.0 10.0.0.1
+<span class=<span class="str">"kw"</span>>ip</span> <span class=<span class="str">"kw"</span>>route</span> 192.168.30.0 255.255.255.0 10.0.0.1
+<span class=<span class="str">"kw"</span>>ip</span> <span class=<span class="str">"kw"</span>>route</span> 192.168.100.0 255.255.255.0 10.0.0.1
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"kw"</span>>end</span>
+<span class=<span class="str">"kw"</span>>write</span> <span class=<span class="str">"kw"</span>>memory</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 06</span><h3>DHCP 服务器配置（SW3）</h3></div>
+        <p>在三层交换机 SW3 上配置 DHCP 服务（最简方案）：</p>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 06.1</span><h3>DHCP 完整 CLI</h3></div>
+        
+        <div class="codeblock"><span class=<span class="str">"kw"</span>>enable</span>
+<span class=<span class="str">"kw"</span>>configure</span> <span class=<span class="str">"kw"</span>>terminal</span>
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 排除网关地址</span>
+<span class=<span class="str">"kw"</span>>ip</span> dhcp excluded-address 192.168.10.1
+<span class=<span class="str">"kw"</span>>ip</span> dhcp excluded-address 192.168.20.1
+<span class=<span class="str">"kw"</span>>ip</span> dhcp excluded-address 192.168.30.1
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"comment"</span>>! 三个地址池</span>
+<span class=<span class="str">"kw"</span>>ip</span> dhcp pool Sales
+ <span class=<span class="str">"kw"</span>>network</span> 192.168.10.0 255.255.255.0
+ default-<span class=<span class="str">"kw"</span>>router</span> 192.168.10.1
+ dns-server 8.8.8.8
+ lease 7
+<span class=<span class="str">"kw"</span>>ip</span> dhcp pool RD
+ <span class=<span class="str">"kw"</span>>network</span> 192.168.20.0 255.255.255.0
+ default-<span class=<span class="str">"kw"</span>>router</span> 192.168.20.1
+ dns-server 8.8.8.8
+ lease 7
+<span class=<span class="str">"kw"</span>>ip</span> dhcp pool Finance
+ <span class=<span class="str">"kw"</span>>network</span> 192.168.30.0 255.255.255.0
+ default-<span class=<span class="str">"kw"</span>>router</span> 192.168.30.1
+ dns-server 8.8.8.8
+ lease 7
+<span class=<span class="str">"comment"</span>>!</span>
+<span class=<span class="str">"kw"</span>>end</span>
+<span class=<span class="str">"kw"</span>>write</span> <span class=<span class="str">"kw"</span>>memory</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 07</span><h3>PC 配置为 DHCP 客户端</h3></div>
+        
+        <ul class='clean'><li>每台 PC → Desktop → IP Configuration → <strong>DHCP</strong>。</li><li>约 5-10 秒后 <code>ipconfig</code> 查看分配的 IP。</li><li>应得到对应 VLAN 的 IP（不含 .1 网关）。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">VERIFY</span><h3>验证结果对照</h3></div>
+        <table class="t">
+          <thead><tr></tr></thead>
+          <tbody>
+<tr><td>Sales → Sales 网关</td><td>ping 192.168.10.1</td><td>通</td></tr><tr><td>Sales → RD PC</td><td>ping <RD-IP></td><td>通</td></tr><tr><td>RD → Finance PC</td><td>ping <Finance-IP></td><td>通</td></tr><tr><td>任意内网 PC → 200.0.0.1 (外网)</td><td>ping 200.0.0.1</td><td>通</td></tr><tr><td>外网 PC → 任意内网 PC</td><td>ping <内网-IP></td><td>通（如默认路由配好）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 09</span><h3>抓包观察 DHCP</h3></div>
+        
+        <ul class='clean'><li>切到 Simulation 模式。</li><li>把一台 PC 重新设为 DHCP（Static → DHCP）。</li><li>观察四步过程：<strong>Discover → Offer → Request → ACK</strong>。</li><li>DHCP 服务器是 SW3（SVI 的 IP Helper 转发 DHCP 广播）。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 10</span><h3>观察 Trunk 标签</h3></div>
+        
+        <ul class='clean'><li>Simulation 模式：让 Sales PC1 ping RD PC1。</li><li>单步跟踪数据帧。</li><li>在 SW0 → SW3 之间的链路上，帧带 <strong>802.1Q VLAN 标签</strong>。</li><li>SW3 上去掉 VLAN 标签、按 VLAN 路由转发。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 11</span><h3>进阶 · ACL 隔离 VLAN</h3></div>
+        
+        <ul class='clean'><li>用 ACL 阻止 Sales → Finance：</li><li><code>access-list 100 deny ip 192.168.10.0 0.0.0.255 192.168.30.0 0.0.0.255</code></li><li><code>access-list 100 permit ip any any</code></li><li><code>interface vlan 10</code> → <code>ip access-group 100 in</code></li><li>验证：Sales → Finance 不通，但 Sales → RD 仍通。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">STEP 12</span><h3>进阶 · 故障排查演练</h3></div>
+        
+        <ul class='clean'><li>故意制造几种故障，让学员排错：</li><li>关闭三层交换机 VLAN 10 SVI → Sales 主机全断</li><li>把 SW0 的 Gi0/1 改为 access 模式 → Sales 主机全断（Trunk 失效）</li><li>改错默认路由 → 内网无法访问外网</li><li>DHCP 池中 default-router 错 → PC 拿到 IP 但跨 VLAN 不通</li><li>用 <code>show ip interface brief</code> / <code>show vlan brief</code> / <code>show interfaces trunk</code> 排错。</li></ul>
+        
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">VERIFY</span><h3>完整排错命令清单</h3></div>
+        <table class="t">
+          <thead><tr><th>设备</th><th>命令</th><th>作用</th></tr></thead>
+          <tbody>
+<tr><td>三层交换机</td><td>show ip interface brief</td><td>看所有接口 up/down</td></tr><tr><td>三层交换机</td><td>show ip route</td><td>看路由表</td></tr><tr><td>三层交换机</td><td>show vlan brief</td><td>看 VLAN 列表</td></tr><tr><td>三层交换机</td><td>show interfaces trunk</td><td>看 Trunk 端口</td></tr><tr><td>三层交换机</td><td>show ip dhcp binding</td><td>看 DHCP 已分配</td></tr><tr><td>二层交换机</td><td>show interfaces trunk</td><td>看 Trunk 端口</td></tr><tr><td>二层交换机</td><td>show mac-address-table</td><td>看 MAC 表</td></tr><tr><td>PC</td><td>ipconfig / ipconfig /renew</td><td>看 / 重获 IP</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">REPORT</span><h3>实验报告要求</h3></div>
+        <ol class="steps">
+<li class="fragment"><strong>拓扑图</strong>（PT 截图），标注 VLAN、IP、网关。</li>
+<li class="fragment"><strong>完整配置脚本</strong>：三层交换机 + 3 台二层交换机 + 路由器 + DHCP。</li>
+<li class="fragment"><strong>测试矩阵</strong>：所有 PC 对的连通性、ping 输出、TTL。</li>
+<li class="fragment"><strong>DHCP 分配记录</strong>：6 台 PC 的 IP 分配截图。</li>
+<li class="fragment"><strong>VLAN 间路由证据</strong>：<code>show ip route</code> 标出所有 C 和 S 条目。</li>
+<li class="fragment"><strong>抓包分析</strong>：DHCP 四步过程的截图。</li>
+<li class="fragment"><strong>故障分析与排错报告</strong>：3 个故意制造故障的现象、原因、解决。</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="content">
+        <div class="step-h"><span class="step-no">思考题</span><h3>思考题</h3></div>
+        <ol class="steps">
+<li class="fragment">为什么 DHCP 广播能跨 VLAN 到达三层交换机的 DHCP 服务？</li>
+<li class="fragment">三层交换机与单臂路由的优劣对比。</li>
+<li class="fragment">Trunk 上为什么要用 802.1Q 标签？本实验没有 VLAN 标签会怎样？</li>
+<li class="fragment">ACL 放在 VLAN 10 SVI 的 <code>in</code> 方向，过滤的是哪个方向的流量？</li>
+<li class="fragment">如果公司增加一个新部门「HR」（VLAN 40, 192.168.40.0/24），需要修改哪些配置？</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">END · 实验完成</p>
+      <h2>实验完毕</h2>
+      <p class="lead">保存 <code>.pkt</code> 文件并撰写实验报告。本实验是本课程<strong>最综合</strong>的实践项目，覆盖 VLAN / DHCP / 三层交换 / 静态路由等核心技能。</p>
+    </section>
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  let i=0;
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>d.classList.toggle('active',k===i))}
+  function currentSlide(){return slides.find(s=>s.classList.contains('active'))||slides[i]}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    setTimeout(()=>{out.classList.remove('active','leaving')},460);
+    i=next;now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot();
+    // Reveal fragments on the new active slide
+    inn.querySelectorAll('.fragment').forEach((f,idx)=>{
+      setTimeout(()=>f.classList.add('visible'),100+idx*60);
+    });
+  }
+  function next(){if(i<slides.length-1)show(i+1)}
+  function prev(){if(i>0)show(i-1)}
+  function toggleTheme(){const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light')}
+  document.addEventListener('keydown',e=>{
+    switch(e.key){
+      case'ArrowRight':case'PageDown':case' ':next();e.preventDefault();break;
+      case'ArrowLeft':case'PageUp':prev();e.preventDefault();break;
+      case'Home':show(0);e.preventDefault();break;
+      case'End':show(slides.length-1);e.preventDefault();break;
+      case't':case'T':toggleTheme();break;
+      case'f':case'F':if(document.fullscreenElement)document.exitFullscreen();
+        else deck.requestFullscreen&&deck.requestFullscreen();break;
+    }
+  });
+  stage.addEventListener('click',e=>{
+    if(e.target.closest('.sidebar'))return;
+    const x=e.clientX/window.innerWidth;
+    if(x>0.5)next();else prev();
+  });
+  document.getElementById('b-theme')?.addEventListener('click',toggleTheme);
+  document.getElementById('b-print')?.addEventListener('click',()=>window.print());
+  const start=Math.max(0,parseInt(location.hash.replace('#',''),10)-1)||0;
+  show(start);
+})();
+</script>
+</body>
+</html>

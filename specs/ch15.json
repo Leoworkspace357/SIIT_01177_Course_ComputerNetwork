@@ -1,0 +1,186 @@
+{
+  "chapter": 15,
+  "title": "动态路由 - RIP",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "period": "15",
+  "term": "Spring 2026",
+  "eyebrow": "Chapter 15 · 计算机网络",
+  "lead": "让路由器自动交换路由信息——RIP 的原理、配置、RIPv1 与 RIPv2 的差异。",
+  "slides": [
+    {
+      "layout": "callouts",
+      "eyebrow": "Topic",
+      "title": "动态路由协议 · RIP",
+      "items": [
+        {"ico":"从哪来","title":"前面学的静态",
+         "body":"前面我们用**静态路由**手工配置每一条路径——简单但维护重。"},
+        {"ico":"本节","title":"RIP",
+         "body":"本节学习 **RIP（Routing Information Protocol）**——经典的距离向量动态路由协议。"},
+        {"ico":"做什么","title":"自动学习",
+         "body":"让路由器之间**自动交换路由信息**，彼此学习对方的路由。"},
+        {"ico":"适用","title":"小型到中型",
+         "body":"适合小型到中型互联网（10–50 个网络）——简单、广泛部署。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Principle",
+      "title": "RIP 的工作原理 · 三句话",
+      "cards": [
+        {"tag":"01","title":"邻居互换",
+         "body":"路由器**邻居之间**互换路由信息——定期将**整个路由表**复制给相邻路由器。"},
+        {"tag":"02","title":"矢量堆加",
+         "body":"邻居收到路由表后**进行矢量堆加**——距离加 1。"},
+        {"tag":"03","title":"传闻路由",
+         "body":"路由信息**来自邻居的传闻**，正确性不能保证——容易形成**路由环路**。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Update",
+      "title": "RIP 的路由更新 · 周期广播",
+      "items": [
+        {"ico":"周期","title":"30 秒",
+         "body":"每 **30 秒**向相邻路由器发送**整个路由表**的副本。"},
+        {"ico":"即使无变化","title":"依然发送",
+         "body":"**网络没有变化也会**周期性发送更新——这是 RIP 的「笨」之处。"},
+        {"ico":"度量","title":"跳数",
+         "body":"距离以**跳数**衡量——最多 15 跳，16 跳即不可达。"},
+        {"ico":"结果","title":"收敛慢",
+         "body":"收敛较慢——大型网络会因为周期广播消耗大量带宽。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Step by Step",
+      "title": "RIP 更新过程 · 四步走",
+      "items": [
+        {"ico":"01","title":"直接相连",
+         "body":"路由器启动时，把**直连网络**加入路由表——距离 = 0。"},
+        {"ico":"02","title":"接收更新",
+         "body":"每 30 秒**接收**邻居的路由更新报文。"},
+        {"ico":"03","title":"矢量相加",
+         "body":"把邻居报来的「目的网络 + 跳数 N」**加 1**——变成「到 N+1」。"},
+        {"ico":"04","title":"决策更新",
+         "body":"如果新路径**更短**（跳数更少）或**没有该条目**——则更新本地路由表。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "CLI",
+      "title": "RIP 配置 · 三步命令",
+      "cards": [
+        {"tag":"01","title":"进入 RIP 进程",
+         "body":"`Router(config)# router rip`　**激活 RIP 协议**。"},
+        {"tag":"02","title":"宣告网络",
+         "body":"`Router(config-router)# network <network-number>`　选择所能到达的网络。"},
+        {"tag":"注意","title":"直连主类网络",
+         "body":"**只宣告直连的网络**，并且**只宣告主类网络**——不带子网掩码。"},
+        {"tag":"03","title":"验证",
+         "body":"`show ip protocols` 查看运行的协议；`show ip route rip` 查看 RIP 路由。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Properties",
+      "title": "RIP 的特性",
+      "cards": [
+        {"tag":"周期性","title":"每 30s 全表广播",
+         "body":"**周期性**发送整个路由表给邻居——即使网络**没变化**也会发送。"},
+        {"tag":"来源","title":"传闻路由",
+         "body":"根据**传闻**（邻居告知）获得路由信息——**正确性得不到保证**。"},
+        {"tag":"风险","title":"路由环路",
+         "body":"容易形成**路由环路**——收敛慢、跳数可能无限累加。"},
+        {"tag":"开销","title":"消耗带宽",
+         "body":"周期广播完整路由表——**消耗大量带宽**，对大型网络不友好。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "RIPv1 Issues",
+      "title": "RIPv1 存在的主要问题",
+      "cards": [
+        {"tag":"问题","title":"不带子网掩码",
+         "body":"更新时不传递**子网掩码**——属于**有类**路由协议。"},
+        {"tag":"问题","title":"不支持 VLSM",
+         "body":"不支持**可变长子网掩码（VLSM）**——主类网络边界是硬限制。"},
+        {"tag":"问题","title":"汇总不灵活",
+         "body":"自动在主网边界创建汇总路由，但**主网内不能**自动汇总。"},
+        {"tag":"结论","title":"需要升级",
+         "body":"RIPv2 解决了以上问题——支持 VLSM、CIDR、无类更新。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "RIPv2",
+      "title": "RIPv2 · 升级要点",
+      "cards": [
+        {"tag":"继承","title":"RIPv1 的全部",
+         "body":"**保留** RIPv1 的所有功能——距离向量、跳数度量、30 秒更新。"},
+        {"tag":"新增","title":"无类 + VLSM + CIDR",
+         "body":"**支持 VLSM 和 CIDR**——路由更新携带子网掩码。"},
+        {"tag":"新增","title":"身份验证",
+         "body":"**支持身份验证**（明文 / MD5）——防止路由欺骗。"},
+        {"tag":"新增","title":"组播更新",
+         "body":"使用**组播 224.0.0.9** 而非广播——降低无关主机的负担。"}
+      ]
+    },
+    {
+      "layout": "table",
+      "eyebrow": "Compare",
+      "title": "RIPv1 vs RIPv2 · 一览",
+      "headers": ["特性", "RIPv1", "RIPv2"],
+      "rows": [
+        ["子网掩码", "不携带", "携带"],
+        ["VLSM / CIDR", "不支持", "支持"],
+        ["身份验证", "无", "明文 / MD5"],
+        ["更新方式", "广播 255.255.255.255", "组播 224.0.0.9"],
+        ["路由标记", "不使用", "使用"],
+        ["边界自动汇总", "不可关闭", "可以关闭"]
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "RIPv2 Config",
+      "title": "配置 RIPv2 · 两步关键命令",
+      "items": [
+        {"ico":"01","title":"声明版本",
+         "body":"`Router(config-router)# version 2`　**启用 RIPv2**。"},
+        {"ico":"02","title":"关闭自动汇总",
+         "body":"`Router(config-router)# no auto-summary`　禁止主类网络边界自动汇总。"},
+        {"ico":"!","title":"何时关闭",
+         "body":"当**连续的子网在接口间被分割**时必须关闭汇总——否则路由不通。"},
+        {"ico":"03","title":"触发更新（可选）",
+         "body":"`Router(config-if)# ip rip triggered`　为避免环路，可在接口上启用触发更新。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Classful vs Classless",
+      "title": "相关知识 · 有类 vs 无类",
+      "cards": [
+        {"tag":"有类","title":"Classful Routing",
+         "body":"路由更新中**不发送子网掩码**——典型代表 **RIPv1**。"},
+        {"tag":"无类","title":"Classless Routing",
+         "body":"路由更新中**同时包括网络地址与子网掩码**——典型代表 **RIPv2、OSPF**。"},
+        {"tag":"区别","title":"是否支持 VLSM",
+         "body":"无类协议**天然支持 VLSM 与 CIDR**——地址规划更灵活。"},
+        {"tag":"趋势","title":"无类为主流",
+         "body":"现代网络基本只部署**无类**路由协议——有类协议已逐渐被淘汰。"}
+      ]
+    },
+    {
+      "layout": "objectives",
+      "eyebrow": "Recap",
+      "title": "本章小结",
+      "items": [
+        "**RIP**　距离向量、跳数度量、30 秒全表广播",
+        "**RIPv1**　有类、不带掩码、不支持 VLSM",
+        "**RIPv2**　无类、组播、支持 VLSM 与身份验证",
+        "**配置要点**　`router rip` + `network` + `version 2` + `no auto-summary`",
+        "**下一章**　OSPF——链路-状态协议，更适合大型网络"
+      ]
+    }
+  ]
+}

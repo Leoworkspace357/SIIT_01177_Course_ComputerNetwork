@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 6 章 测验  ·  常见的网络协议及网络命令</title>
+<style>
+/* =====================================================================
+     LINEAR DARK · quiz theme
+     ===================================================================== */
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --correct:#4cb782; --correct-soft:rgba(76,183,130,.10);
+    --wrong:#e66767;  --wrong-soft:rgba(230,103,103,.10);
+    --ease:cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out:cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-slide:720ms; --dur-frag:520ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{--bg:#08080a;--bg-elev-1:#0d0d10;--bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f;--ink:#f7f8f8;--ink-2:#b4b8c0;
+    --ink-3:#8a8f98;--ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --hairline-strong:rgba(255,255,255,.14);
+    --code-bg:#141418;}
+  .deck[data-theme="light"]{--bg:#fbfbfc;--bg-elev-1:#fff;
+    --bg-elev-2:#f4f4f7;--bg-elev-3:#ebebef;--ink:#0a0a0c;
+    --ink-2:#4a4d57;--ink-3:#6f727a;--ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --hairline-strong:rgba(10,10,12,.16);
+    --code-bg:#f0f0f3;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    font-feature-settings:"kern","liga","calt","ss01","cv11"}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+    transition:background 600ms var(--ease)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:6vh 7vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(48px);
+    transition:opacity var(--dur-slide) var(--ease),
+      transform var(--dur-slide) var(--ease);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px);
+    transition:opacity 380ms var(--ease),transform 380ms var(--ease)}
+  /* section / title variants (same as PPT) */
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+
+  /* quiz-specific */
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6.4vw,5.5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.5rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink);
+    max-width:90%}
+  h3{font-size:1rem;margin:0 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(1rem,1.15vw,1.18rem);line-height:1.6;color:var(--ink-2)}
+  .lead{font-size:clamp(1.15rem,1.45vw,1.45rem);color:var(--ink-2);
+    max-width:56ch;margin-top:.4rem;line-height:1.55;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  code,kbd{font-family:var(--font-mono);font-size:.88em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+
+  /* question card */
+  .q-card{max-width:920px;margin:0 auto;width:100%}
+  .q-head{display:flex;align-items:center;gap:.8rem;
+    margin-bottom:1.4rem;flex-wrap:wrap}
+  .q-tag{font-family:var(--font-mono);font-size:.7rem;
+    padding:.25rem .65rem;border-radius:6px;
+    background:var(--bg-elev-2);border:1px solid var(--hairline);
+    color:var(--ink-2);letter-spacing:.04em;font-weight:500}
+  .q-tag.single{color:var(--accent);border-color:var(--accent-ring)}
+  .q-tag.multi{color:var(--status-warning,#f2c94c);border-color:rgba(242,201,76,.3)}
+  .q-tag.fill{color:var(--correct);border-color:rgba(76,183,130,.3)}
+  .q-progress{margin-left:auto;font-family:var(--font-mono);
+    font-size:.72rem;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  .q-text{font-size:clamp(1.1rem,1.45vw,1.45rem);line-height:1.45;
+    color:var(--ink);font-weight:500;margin:0 0 1.6rem;
+    letter-spacing:-.01em}
+  .q-text .blank{display:inline-block;min-width:2.5em;
+    border-bottom:2px solid var(--accent);margin:0 .15em;
+    text-align:center;padding:0 .4em;color:var(--ink-2);
+    font-family:var(--font-mono)}
+  /* options */
+  .opts{display:flex;flex-direction:column;gap:.6rem;
+    margin:0 0 1.6rem;max-width:780px}
+  .opt{display:flex;align-items:flex-start;gap:.9rem;
+    padding:.85rem 1.1rem;border:1px solid var(--hairline);
+    border-radius:10px;background:var(--bg-elev-2);
+    cursor:pointer;transition:all 300ms var(--ease);
+    font-size:clamp(.98rem,1.1vw,1.12rem);color:var(--ink-2);
+    user-select:none}
+  .opt:hover{border-color:var(--accent-ring);
+    background:var(--bg-elev-3);color:var(--ink)}
+  .opt .lbl{flex:none;width:1.8rem;height:1.8rem;border-radius:50%;
+    border:1px solid var(--hairline-strong);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-mono);font-size:.78rem;color:var(--ink-2);
+    background:var(--bg-elev-1)}
+  /* reveal states */
+  .opt.correct{border-color:var(--correct);background:var(--correct-soft)}
+  .opt.correct .lbl{background:var(--correct);color:#fff;border-color:var(--correct)}
+  .opt.wrong-reveal{border-color:var(--wrong);background:var(--wrong-soft);
+    opacity:.55}
+  .opt.wrong-reveal .lbl{background:var(--wrong);color:#fff;border-color:var(--wrong)}
+  /* fill-blank reveal */
+  .q-text .blank.reveal{border-bottom-color:var(--correct);
+    color:var(--ink);background:var(--correct-soft);border-radius:4px}
+  /* answer/explain panel */
+  .ans{display:none;margin-top:.4rem;padding:1rem 1.2rem;
+    border:1px solid var(--correct);border-radius:10px;
+    background:var(--correct-soft)}
+  .slide.revealed .ans{display:block;animation:ansFade 360ms var(--ease)}
+  @keyframes ansFade{from{opacity:0;transform:translateY(8px)}
+    to{opacity:1;transform:translateY(0)}}
+  .ans-label{font-family:var(--font-mono);font-size:.7rem;
+    color:var(--correct);letter-spacing:.08em;
+    text-transform:uppercase;font-weight:600;margin:0 0 .3rem}
+  .ans-body{font-size:clamp(.95rem,1.1vw,1.1rem);color:var(--ink);
+    line-height:1.55}
+  .explain{margin-top:.6rem;font-size:clamp(.9rem,1vw,1.02rem);
+    color:var(--ink-2);line-height:1.55;font-style:italic}
+  .explain .lbl{color:var(--ink-3);font-style:normal;font-weight:500;
+    margin-right:.4em}
+  /* hint to click */
+  .hint{margin-top:.4rem;font-family:var(--font-mono);font-size:.7rem;
+    color:var(--ink-mute);letter-spacing:.04em;
+    display:flex;align-items:center;gap:.4rem;
+    transition:opacity 300ms var(--ease)}
+  .slide.revealed .hint{opacity:0}
+  .hint::before{content:"◎";color:var(--accent);
+    font-size:.9rem}
+
+  /* chrome */
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);
+    transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.68rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:4px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;
+    overflow:hidden;max-height:calc(100vh - 80px)}
+  .sidebar .nav-dot{width:4px;height:4px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;
+    transition:opacity 200ms var(--ease),transform 200ms var(--ease),
+      background 200ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 4px var(--accent-ring);transform:scale(1.6)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3);
+    letter-spacing:.02em}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
+    letter-spacing:.02em;transition:all 300ms var(--ease)}
+  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
+    background:var(--accent-soft)}
+  /* end screen */
+  .end-card{max-width:560px;margin:0 auto;text-align:center}
+  .end-stat{display:inline-flex;align-items:baseline;gap:.4rem;
+    padding:.8rem 1.4rem;border:1px solid var(--hairline);
+    border-radius:12px;background:var(--bg-elev-2);margin:.4rem}
+  .end-stat .v{font-size:2rem;font-weight:600;color:var(--accent);
+    font-family:var(--font-mono)}
+  .end-stat .k{font-size:.78rem;color:var(--ink-3);
+    font-family:var(--font-mono);letter-spacing:.04em}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.opt,.ans,.toolbar button,.progress,.nav-dot,
+    .slide,.help,.help .panel{transition-duration:0ms!important}}
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">第 6 章 测验  <strong>·  常见的网络协议及网络命令</strong>  ·  Leonard F. Li</div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">31</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide title active">
+      <p class="eyebrow">Chapter 6 · 章节测验</p>
+      <h1 class="title-h">常见的网络协议及网络命令<br><span class="accent">章节测验</span></h1>
+      <p class="lead">检验本章知识掌握情况。每页一题，单击显示答案与解析；按 <code>R</code> 切换显示/隐藏。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        单选 12 题 · 多选 6 题 · 填空 11 题 · 共 29 题
+      </p>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">1 / 29</span>
+        </div>
+        <p class="q-text">「ICMP」属于 TCP/IP 哪一层？</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>应用层</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">B</div><div>传输层</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>互联层</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>网络接口层</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C. 互联层</p>
+          <p class="explain"><span class="lbl">解析</span>ICMP 在互联层，封装在 IP 数据报中，用于差错报告与诊断。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">2 / 29</span>
+        </div>
+        <p class="q-text"><code>ping</code> 命令基于哪种协议？</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>TCP</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">B</div><div>UDP</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>ICMP</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>ARP</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C. ICMP</p>
+          <p class="explain"><span class="lbl">解析</span>ping 用 ICMP 回应请求/应答。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">3 / 29</span>
+        </div>
+        <p class="q-text"><code>ping 127.0.0.1</code> 的主要作用是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>测试到网关的连通</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>测试本机协议栈</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>测试外网</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>测试 DNS</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 测试本机协议栈</p>
+          <p class="explain"><span class="lbl">解析</span>127.0.0.1 = 回送地址；ping 它验证本机 TCP/IP 协议栈是否正常。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">4 / 29</span>
+        </div>
+        <p class="q-text"><code>tracert</code>（Windows）的功能是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>测速</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>显示到目的地的路由路径</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>DNS 查询</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>扫描端口</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 显示到目的地的路由路径</p>
+          <p class="explain"><span class="lbl">解析</span>tracert 显示从本机到目的地的逐跳路由。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">5 / 29</span>
+        </div>
+        <p class="q-text"><code>arp -a</code> 命令的作用是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>查看路由表</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>查看本机 ARP 缓存</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>测试连通性</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>查看 DNS 缓存</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 查看本机 ARP 缓存</p>
+          <p class="explain"><span class="lbl">解析</span>arp -a 显示本机的 IP–MAC 映射缓存。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">6 / 29</span>
+        </div>
+        <p class="q-text">「ARP」的作用是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>域名解析</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>IP → MAC</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>路由选择</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>动态 IP 分配</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. IP → MAC</p>
+          <p class="explain"><span class="lbl">解析</span>ARP 把 IP 解析为 MAC 地址，仅在本地局域网生效。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">7 / 29</span>
+        </div>
+        <p class="q-text">在 Windows 中查看本机完整 TCP/IP 配置的命令是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>ipconfig</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>ipconfig /all</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>ifconfig</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>netstat</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. ipconfig /all</p>
+          <p class="explain"><span class="lbl">解析</span>ipconfig /all 显示完整 TCP/IP 配置；ipconfig 仅显示简要信息。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">8 / 29</span>
+        </div>
+        <p class="q-text"><code>nslookup</code> 命令的主要功能是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>测试连通性</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>查询 DNS 解析</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>显示路由</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>查看 ARP 表</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 查询 DNS 解析</p>
+          <p class="explain"><span class="lbl">解析</span>nslookup 查询 DNS 域名解析记录。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">9 / 29</span>
+        </div>
+        <p class="q-text">「Ping 不通」时，<strong>最先</strong>应该检查的是：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>更换电脑</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>物理连接（指示灯/网线）</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>重装系统</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>换 DNS</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 物理连接（指示灯/网线）</p>
+          <p class="explain"><span class="lbl">解析</span>故障排查先物理后逻辑——先看网线与指示灯。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">10 / 29</span>
+        </div>
+        <p class="q-text">「ping」时出现「Destination host unreachable」通常意味着：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>对方关机</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>本机无路由到目标</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>DNS 故障</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>电缆断开</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">B. 本机无路由到目标</p>
+          <p class="explain"><span class="lbl">解析</span>目标不可达：本机无路由、网络号错、网关配置错。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">11 / 29</span>
+        </div>
+        <p class="q-text">「Ping」返回「Request timed out」可能<strong>不</strong>意味着：</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>物理断开</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">B</div><div>防火墙过滤</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>对端关机</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">D</div><div>本机 CPU 太忙</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">D. 本机 CPU 太忙</p>
+          <p class="explain"><span class="lbl">解析</span>Ping 超时与本机 CPU 无关；主要是网络层问题。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag single">SINGLE CHOICE</span>
+          <span class="q-progress">12 / 29</span>
+        </div>
+        <p class="q-text">「Traceroute」（Linux）默认使用哪种协议与端口？</p>
+        <div class="opts">
+        <div class="opt" data-correct="false"><div class="lbl">A</div><div>ICMP</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">B</div><div>TCP 80</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>UDP 33434</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>TCP 443</div></div>
+        </div>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C. UDP 33434</p>
+          <p class="explain"><span class="lbl">解析</span>Linux traceroute 默认发送 UDP 33434；TTL 递增触发 ICMP 超时报文。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">13 / 29</span>
+        </div>
+        <p class="q-text">下列命令中，可用于「测试连通性」的有：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>ping</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>tracert</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">C</div><div>ipconfig</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>nslookup</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">A、B  ·  ping；tracert</p>
+          <p class="explain"><span class="lbl">解析</span>ping 测试连通；tracert 同时显示路径；ipconfig 看本机配置；nslookup 查 DNS。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">14 / 29</span>
+        </div>
+        <p class="q-text">「ICMP 报文」的常见类型包括：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>回应请求（Echo Request）</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>回应应答（Echo Reply）</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>目标不可达</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">D</div><div>TTL 超时</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C、A、D、B  ·  目标不可达；回应请求（Echo Request）；TTL 超时；回应应答（Echo Reply）</p>
+          <p class="explain"><span class="lbl">解析</span>ping 用回应请求/应答；traceroute 用 TTL 超时；目标不可达是差错报告。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">15 / 29</span>
+        </div>
+        <p class="q-text">「网络故障排查」应遵循的原则包括：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>由近及远</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>由软到硬</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>先看物理连接</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>立即更换设备</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C、A、B  ·  先看物理连接；由近及远；由软到硬</p>
+          <p class="explain"><span class="lbl">解析</span>排查应「由近及远、由软到硬」；D 不合理——盲目更换是浪费时间。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">16 / 29</span>
+        </div>
+        <p class="q-text">Windows 下可用的网络配置命令包括：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>ipconfig /all</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>arp -a</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>route print</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>ifconfig</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C、A、B  ·  route print；ipconfig /all；arp -a</p>
+          <p class="explain"><span class="lbl">解析</span>ifconfig 是 Linux 命令；Windows 用 ipconfig。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">17 / 29</span>
+        </div>
+        <p class="q-text">「ARP 协议」的工作机制包括：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>广播 ARP 请求</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>目标主机单播回应</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>每台主机维护 ARP 缓存</div></div>
+        <div class="opt" data-correct="false"><div class="lbl">D</div><div>支持跨网段解析</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C、A、B  ·  每台主机维护 ARP 缓存；广播 ARP 请求；目标主机单播回应</p>
+          <p class="explain"><span class="lbl">解析</span>ARP 仅在本地局域网内；通过广播请求 + 单播应答；缓存减少广播。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag multi">MULTIPLE CHOICE</span>
+          <span class="q-progress">18 / 29</span>
+        </div>
+        <p class="q-text">「ping 命令」常用参数包括：</p>
+        <div class="opts">
+        <div class="opt" data-correct="true"><div class="lbl">A</div><div>-t 持续 ping</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">B</div><div>-n count 指定次数</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">C</div><div>-l size 包大小</div></div>
+        <div class="opt" data-correct="true"><div class="lbl">D</div><div>-i TTL 设置 TTL</div></div>
+        </div>
+        <p class="hint">单击显示答案（多选）</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">C、A、D、B  ·  -l size 包大小；-t 持续 ping；-i TTL 设置 TTL；-n count 指定次数</p>
+          <p class="explain"><span class="lbl">解析</span>这些都是 Windows ping 命令的常用参数。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">19 / 29</span>
+        </div>
+        <p class="q-text">ping 命令基于 <span class="blank" data-answer="ICMP" style="min-width:5.1em"></span> 协议；ARP 协议把 <span class="blank" data-answer="IP 地址" style="min-width:6.0em"></span> 解析为 MAC 地址。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　ICMP　·　IP 地址</p>
+          <p class="explain"><span class="lbl">解析</span>ping 用 ICMP 回应请求/应答；ARP 把 IP 解析为 MAC。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">20 / 29</span>
+        </div>
+        <p class="q-text">`ping 127.0.0.1` 测试<span class="blank" data-answer="本机协议栈" style="min-width:6.0em"></span>；`ping 网关 IP` 测试<span class="blank" data-answer="到网关的连通性" style="min-width:7.6em"></span>。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　本机协议栈　·　到网关的连通性</p>
+          <p class="explain"><span class="lbl">解析</span>先 127 → 本机协议栈；再网关 → 出局域网能力；最后外网。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">21 / 29</span>
+        </div>
+        <p class="q-text">Windows 中查看本机 IP 配置的命令是 <span class="blank" data-answer="ipconfig" style="min-width:8.5em"></span>；查看完整配置是 <span class="blank" data-answer="ipconfig /all" style="min-width:12.8em"></span>。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　ipconfig　·　ipconfig /all</p>
+          <p class="explain"><span class="lbl">解析</span>ipconfig 显示简要；ipconfig /all 显示全部（含 MAC、DNS、DHCP）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">22 / 29</span>
+        </div>
+        <p class="q-text">`arp -a` 命令用于查看<span class="blank" data-answer="ARP 缓存" style="min-width:6.8em"></span>；`route print` 命令用于查看<span class="blank" data-answer="路由表" style="min-width:4.2em"></span>。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　ARP 缓存　·　路由表</p>
+          <p class="explain"><span class="lbl">解析</span>ARP 缓存：IP ↔ MAC；路由表：目的网络 ↔ 下一跳。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">23 / 29</span>
+        </div>
+        <p class="q-text">ping 时返回「Request timed out」可能原因：物理断开、防火墙过滤、或对端<span class="blank" data-answer="未开机/未启用 ICMP" style="min-width:11.9em"></span>。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　未开机/未启用 ICMP</p>
+          <p class="explain"><span class="lbl">解析</span>对端关机、关闭 ICMP、防火墙过滤都会导致超时。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">24 / 29</span>
+        </div>
+        <p class="q-text">ping 时返回「Destination unreachable」说明本机<span class="blank" data-answer="无路由到目标" style="min-width:6.8em"></span>。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　无路由到目标</p>
+          <p class="explain"><span class="lbl">解析</span>无路由到目标：网关配置错、目标网络号错、路由表缺失。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">25 / 29</span>
+        </div>
+        <p class="q-text">ARP 协议仅在<span class="blank" data-answer="本地局域网" style="min-width:6.0em"></span>内有效；跨网段需要借助<span class="blank" data-answer="路由器" style="min-width:4.2em"></span>。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　本地局域网　·　路由器</p>
+          <p class="explain"><span class="lbl">解析</span>ARP 仅查本局域网；跨网段需路由器的代理 ARP 或默认网关。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">26 / 29</span>
+        </div>
+        <p class="q-text">tracert 命令通过发送不同 <span class="blank" data-answer="TTL" style="min-width:4.2em"></span> 值的探测包来发现每一跳路由器。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　TTL</p>
+          <p class="explain"><span class="lbl">解析</span>TTL 从 1 开始递增；中途路由器超时返回 ICMP 报文暴露自己的 IP。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">27 / 29</span>
+        </div>
+        <p class="q-text">网络故障排查常用三步走：① ping <span class="blank" data-answer="127.0.0.1" style="min-width:9.3em"></span> ② ping <span class="blank" data-answer="网关 IP" style="min-width:6.0em"></span> ③ ping 外网。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　127.0.0.1　·　网关 IP</p>
+          <p class="explain"><span class="lbl">解析</span>先本机协议栈；再网关；最后外网。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">28 / 29</span>
+        </div>
+        <p class="q-text">ipconfig /release 命令释放当前 IP；ipconfig /<span class="blank" data-answer="renew" style="min-width:6.0em"></span> 命令重新申请 DHCP 地址。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　renew</p>
+          <p class="explain"><span class="lbl">解析</span>/release 释放；/renew 重新申请。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="q-card">
+        <div class="q-head">
+          <span class="q-tag fill">FILL IN THE BLANK</span>
+          <span class="q-progress">29 / 29</span>
+        </div>
+        <p class="q-text">ping 命令默认发送 <span class="blank" data-answer="32" style="min-width:3.4em"></span> 个字节的 ICMP 回应请求；常见包大小 32/64/1500。</p>
+        <p class="hint">单击显示答案</p>
+        <div class="ans">
+          <p class="ans-label">参考答案</p>
+          <p class="ans-body">　→　32</p>
+          <p class="explain"><span class="lbl">解析</span>Windows 默认 32 字节；Linux 默认 56 字节（加 IP 头 64）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">End of Quiz</p>
+      <h2 style="font-size:clamp(1.8rem,3.2vw,2.6rem)">答题完毕</h2>
+      <p class="lead">本章测验共 <strong>29</strong> 题。</p>
+      <div class="end-card">
+        <div>
+          <div class="end-stat"><span class="v">12</span><span class="k">单选</span></div>
+          <div class="end-stat"><span class="v">6</span><span class="k">多选</span></div>
+          <div class="end-stat"><span class="v">11</span><span class="k">填空</span></div>
+        </div>
+        <p class="muted" style="margin-top:1.6rem;font-size:.92rem">
+          建议把所有题做完后再用 <code>←</code> 回看错题。
+        </p>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  let i=0, revealed=new Set();
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>
+      d.classList.toggle('active',k===i))}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    if(revealed.has(next)) inn.classList.add('revealed');
+    setTimeout(()=>{out.classList.remove('active','leaving')},460);
+    i=next;now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot()}
+  function currentSlide(){
+    // find currently visible slide
+    return slides.find(s => s.classList.contains('active')) || slides[i];
+  }
+  function currentIdx(){
+    return slides.indexOf(currentSlide());
+  }
+  function revealCurrent(){
+    const s = currentSlide();
+    if(!s) return;
+    const idx = slides.indexOf(s);
+    s.classList.add('revealed');
+    revealed.add(idx);
+    s.querySelectorAll('.opt[data-correct="true"]')
+      .forEach(o=>o.classList.add('correct'));
+    s.querySelectorAll('.opt[data-correct="false"]')
+      .forEach(o=>o.classList.add('wrong-reveal'));
+    s.querySelectorAll('.blank').forEach(b=>{
+      const ans=b.getAttribute('data-answer');
+      if(ans){b.textContent=ans;b.classList.add('reveal');}
+    });
+  }
+  function unrevealCurrent(){
+    const s = currentSlide();
+    if(!s) return;
+    const idx = slides.indexOf(s);
+    s.classList.remove('revealed');
+    revealed.delete(idx);
+    s.querySelectorAll('.opt').forEach(o=>{
+      o.classList.remove('correct','wrong-reveal');
+    });
+    s.querySelectorAll('.blank').forEach(b=>{
+      const ans=b.getAttribute('data-answer');
+      if(ans){b.textContent='';b.classList.remove('reveal');}
+    });
+  }
+  function next(){if(i<slides.length-1)show(i+1)}
+  function prev(){if(i>0)show(i-1)}
+  function toggleTheme(){const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light')}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){
+      e.preventDefault();next()}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){
+      e.preventDefault();prev()}
+    else if(e.key==='Home'){e.preventDefault();show(0)}
+    else if(e.key==='End'){e.preventDefault();show(slides.length-1)}
+    else if(e.key==='t'||e.key==='T'){toggleTheme()}
+    else if(e.key==='f'||e.key==='F'){
+      if(document.fullscreenElement)document.exitFullscreen();
+      else deck.requestFullscreen&&deck.requestFullscreen()}
+    else if(e.key==='r'||e.key==='R'){
+      const cidx = currentIdx();
+      if(revealed.has(cidx)) unrevealCurrent();
+      else revealCurrent();
+    }
+  });
+  stage.addEventListener('click',e=>{
+    if(e.target.closest('.sidebar')) return;
+    const cur = currentSlide();
+    const cidx = slides.indexOf(cur);
+    if(e.target.closest('.opt')){
+      if(!revealed.has(cidx)) revealCurrent();
+      return;
+    }
+    if(revealed.has(cidx)) next();
+    else revealCurrent();
+  });
+  document.getElementById('b-theme').addEventListener('click',toggleTheme);
+  document.getElementById('b-overview')?.addEventListener('click',()=>{
+    alert('总览暂未启用，请用键盘 ←/→ 翻页');
+  });
+  document.getElementById('b-print')?.addEventListener('click',()=>window.print());
+  const start=Math.max(0,parseInt(location.hash.replace('#',''),10)-1)||0;
+  slides[0].classList.add('active');
+  if(revealed.has(start)) slides[start].classList.add('revealed');
+  show(start);
+  // rebuild revealed set from already-active slides on init (none)
+})();
+</script>
+</body>
+</html>

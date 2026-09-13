@@ -1,0 +1,171 @@
+{
+  "chapter": 16,
+  "title": "使用 OSPF 实现单区域内网络互通",
+  "mark": "JN",
+  "instructor": "Leonard F. Li",
+  "period": "16",
+  "term": "Spring 2026",
+  "eyebrow": "Chapter 16 · 计算机网络",
+  "lead": "链路-状态路由协议 OSPF——通过 LSA 描绘全网拓扑，用 SPF 算法算出最短路径。",
+  "slides": [
+    {
+      "layout": "callouts",
+      "eyebrow": "Topic",
+      "title": "OSPF · 开放最短路径优先",
+      "items": [
+        {"ico":"全称","title":"Open Shortest Path First",
+         "body":"**开放最短路径优先**——基于开放标准的链路-状态路由协议。"},
+        {"ico":"地位","title":"企业 / 运营商骨干",
+         "body":"目前**企业网与运营商骨干**最常用的内部网关协议（IGP）之一。"},
+        {"ico":"替代","title":"RIP 的升级",
+         "body":"克服了 RIP 的「慢收敛、传闻路由、跳数限制」等问题。"},
+        {"ico":"优势","title":"收敛快 + 大型网络",
+         "body":"支持大型网络、收敛快、支持 VLSM/CIDR。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "What",
+      "title": "OSPF 协议概述",
+      "cards": [
+        {"tag":"类型","title":"链路-状态",
+         "body":"**OSPF 是一种链路-状态路由选择协议**。"},
+        {"tag":"链路状态","title":"接口状态",
+         "body":"所谓「**链路状态**」是指路由器接口的状态：UP / DOWN、IP、网络类型、开销等。"},
+        {"tag":"发布","title":"LSA",
+         "body":"链路状态信息通过**链路状态公告（LSA）**发布到网上每台路由器。"},
+        {"tag":"汇总","title":"LSDB",
+         "body":"每台路由器通过 LSA 建立**链路-状态数据库（LSDB）**——全网拓扑的「地图」。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Why OSPF",
+      "title": "OSPF 的优点",
+      "cards": [
+        {"tag":"开放","title":"国际标准",
+         "body":"基于国际标准，**开放性强**，被众多网络设备厂商支持。"},
+        {"tag":"灵活","title":"支持 VLSM",
+         "body":"**支持 VLSM** 与 CIDR——地址规划无限制。"},
+        {"tag":"快速","title":"触发更新",
+         "body":"使用**触发的路由更新**——快速反应网络变化，减小协议流量。"},
+        {"tag":"高效","title":"稳定后再算",
+         "body":"**直接转发**路由更新，待路由稳定后再计算——效率更高。"},
+        {"tag":"大型","title":"千台规模",
+         "body":"**支持大型网络**——最多 1024 台路由器联合工作，并能优化路由更新。"}
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Area",
+      "title": "OSPF 区域 · 层次化设计",
+      "cards": [
+        {"tag":"概念","title":"区域",
+         "body":"OSPF 用**区域（Area）**为自治系统分段——一种**层次化**的路由选择协议。"},
+        {"tag":"主干","title":"Area 0",
+         "body":"**区域 0** 是 OSPF 网络中**必须**具有的区域——**主干区域（Backbone）**。"},
+        {"tag":"互联","title":"必须通过 0",
+         "body":"其他所有区域**必须通过区域 0 互连到一起**——非骨干区域不能直接相连。"},
+        {"tag":"价值","title":"可扩展性",
+         "body":"层次化设计**降低 LSDB 规模**、**减少 SPF 计算开销**、**提高可扩展性**。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "L-S Algo",
+      "title": "链路-状态路由算法 · 三步走",
+      "items": [
+        {"ico":"01","title":"发现邻居",
+         "body":"每台路由器**发现**与之相邻的路由器，并了解对方链路的状态。"},
+        {"ico":"02","title":"交换 LSA",
+         "body":"每台路由器构造自己的 **LSA**，并向全网**泛洪**——最终所有路由器的 **LSDB 一致**。"},
+        {"ico":"03","title":"算 SPF",
+         "body":"以自己为根，利用 **SPF（Dijkstra）算法**算出到达各网络的最短路径，生成路由表。"}
+      ]
+    },
+    {
+      "layout": "table",
+      "eyebrow": "5 Packets",
+      "title": "OSPF 的五种协议报文",
+      "headers": ["报文", "作用"],
+      "rows": [
+        ["HELLO",  "**发现及维持邻居关系**"],
+        ["DD",     "**Database Description**　向邻居描述本地 LSDB 的概要"],
+        ["LSR",    "**Link-State Request**　向对端请求本端没有或更新的 LSA"],
+        ["LSU",    "**Link-State Update**　向对端发送所需的 LSA"],
+        ["LSAck",  "**Link-State Acknowledgment**　对收到的 LSU 进行确认"]
+      ]
+    },
+    {
+      "layout": "cards",
+      "eyebrow": "Operation",
+      "title": "OSPF 操作 · 四个阶段",
+      "cards": [
+        {"tag":"01","title":"建立邻接关系",
+         "body":"通过 **HELLO** 报文发现邻居 → 建立**邻接（Adjacency）**关系。"},
+        {"tag":"02","title":"同步 LSDB",
+         "body":"通过 **DD / LSR / LSU / LSAck** 完成**链路-状态数据库同步**。"},
+        {"tag":"03","title":"选择路由",
+         "body":"用 **SPF 算法**算出到达各网络的最短路径，生成**路由表**。"},
+        {"tag":"04","title":"维护路由",
+         "body":"持续收发 HELLO 与 LSU——链路状态变化时**触发更新**。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Basic Config",
+      "title": "OSPF 基本配置 · 两步命令",
+      "items": [
+        {"ico":"01","title":"启动路由进程",
+         "body":"`Router(config)# router ospf <process-id>`　**process-id** 本地有效，1–65535。"},
+        {"ico":"02","title":"宣告网络",
+         "body":"`Router(config-router)# network <address> <inverse-mask> area <area-id>`。"},
+        {"ico":"!","title":"反掩码",
+         "body":"**inverse-mask** 是**反掩码**（通配符掩码）——与子网掩码「相反」，0 = 必须匹配，1 = 任意。"},
+        {"ico":"!","title":"区域 ID",
+         "body":"**area-id** 可以是十进制（0、1）或点分十进制（0.0.0.0、0.0.0.1）。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Example",
+      "title": "OSPF 配置实例 · 单区域 Area 0",
+      "items": [
+        {"ico":"RTA","title":"进程 1",
+         "body":"`router ospf 1`\n`network 10.64.0.0 0.0.0.255 area 0`"},
+        {"ico":"RTB","title":"进程 50",
+         "body":"`router ospf 50`\n`network 10.2.1.0 0.0.0.255 area 0`\n`network 10.64.0.0 0.0.0.255 area 0`"},
+        {"ico":"验证","title":"show 命令",
+         "body":"`show ip ospf neighbor`　查看邻居；\n`show ip route ospf`　查看 OSPF 路由。"}
+      ]
+    },
+    {
+      "layout": "callouts",
+      "eyebrow": "Notes",
+      "title": "OSPF 配置注意事项",
+      "items": [
+        {"ico":"!","title":"进程 ID 独立",
+         "body":"**process-id** 仅本地有效——同一路由器可启动多个 OSPF 进程，但**不推荐**。"},
+        {"ico":"!","title":"区域必须匹配",
+         "body":"同一链路两端接口的 **area-id 必须相同**——否则无法建立邻居。"},
+        {"ico":"!","title":"反掩码精确",
+         "body":"反掩码写错会导致**接口不参与 OSPF** 或**错误地匹配过多接口**。"},
+        {"ico":"!","title":"Hello / Dead",
+         "body":"默认 **Hello 10s / Dead 40s**；可按需调整但两端必须一致。"}
+      ]
+    },
+    {
+      "layout": "objectives",
+      "eyebrow": "Recap",
+      "title": "本章小结",
+      "items": [
+        "**OSPF**　链路-状态路由协议；基于国际标准",
+        "**核心机制**　LSA 泛洪 → LSDB 同步 → SPF 计算 → 路由表",
+        "**5 种报文**　HELLO / DD / LSR / LSU / LSAck",
+        "**区域**　层次化设计；区域 0 是主干，所有非骨干区域必须接入",
+        "**配置**　`router ospf <id>` + `network ... area <id>`",
+        "**下一章**　WWW 与 DNS 服务——应用层最贴近用户的两大服务"
+      ]
+    }
+  ]
+}

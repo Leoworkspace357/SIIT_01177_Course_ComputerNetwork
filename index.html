@@ -1,36 +1,592 @@
-
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>Page Index</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SIIT 42160 计算机网络 · 课程主页</title>
+<meta name="description" content="苏州工业职业技术学院 计算机网络 课程交互式演示文稿。17 章 + 6 实验，从网络基础到 VLAN/OSPF/DNS 的完整链路。">
+<meta name="author" content="苏州工业职业技术学院">
+<style>
+/* =====================================================================
+   LINEAR DARK · design tokens (与章节页保持一致)
+   ===================================================================== */
+:root{
+  --accent:#5e6ad2; --accent-strong:#7170ff;
+  --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+  --accent-ring:rgba(94,106,210,.30);
+  --status-good:#4cb782; --status-warning:#f2c94c;
+  --status-serious:#eb8c4a; --status-critical:#e34948;
+  --ease:cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out:cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-soft:cubic-bezier(0.45, 0, 0.15, 1);
+  --dur:600ms; --dur-fast:320ms;
+  --stagger:90ms;
+  --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+    "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+    "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+    "SFMono-Regular","Menlo","Consolas",monospace;
+  --bg:#08080a; --bg-elev-1:#0d0d10; --bg-elev-2:#141417;
+  --bg-elev-3:#1c1c1f;
+  --ink:#f7f8f8; --ink-2:#b4b8c0; --ink-3:#8a8f98; --ink-mute:#62666d;
+  --hairline:rgba(255,255,255,.08); --hairline-strong:rgba(255,255,255,.14);
+  --code-bg:#141418;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font-sans);-webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;font-feature-settings:"kern","liga","calt"}
+body{
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,
+    rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
+  min-height:100vh;line-height:1.6;
+}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent-strong)}
+img{max-width:100%}
+
+/* ====== 顶部导航栏 ====== */
+.nav{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:rgba(8,8,10,.78);border-bottom:1px solid var(--hairline);
+}
+.nav-inner{
+  max-width:1200px;margin:0 auto;padding:18px 28px;
+  display:flex;align-items:center;gap:24px;justify-content:space-between;
+}
+.brand{display:flex;align-items:center;gap:12px;font-weight:600;letter-spacing:.02em}
+.brand-logo{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+  display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;
+  box-shadow:0 4px 16px rgba(94,106,210,.35);
+}
+.brand-name{display:flex;flex-direction:column;line-height:1.15}
+.brand-name small{color:var(--ink-3);font-weight:400;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.nav-links{display:flex;gap:6px;align-items:center}
+.nav-link{
+  padding:7px 14px;border-radius:8px;color:var(--ink-2);
+  font-size:14px;font-weight:500;transition:all var(--dur-fast) var(--ease);
+}
+.nav-link:hover{color:var(--ink);background:var(--accent-soft)}
+.nav-cta{
+  padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;
+  background:var(--accent);color:#fff;border:1px solid var(--accent);
+  transition:all var(--dur-fast) var(--ease);
+}
+.nav-cta:hover{background:var(--accent-strong);border-color:var(--accent-strong);
+  box-shadow:0 4px 14px rgba(94,106,210,.4);color:#fff}
+
+/* ====== Hero 区域 ====== */
+.hero{
+  max-width:1200px;margin:0 auto;padding:80px 28px 56px;
+  position:relative;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 14px;border-radius:999px;
+  background:var(--accent-soft);border:1px solid var(--accent-ring);
+  color:var(--accent-strong);font-size:12px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:24px;
+}
+.hero-tag-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent-strong);
+  box-shadow:0 0 12px var(--accent-strong);
+  animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:.6;transform:scale(1)}
+  50%{opacity:1;transform:scale(1.2)}
+}
+.hero h1{
+  font-size:clamp(36px,5.6vw,64px);font-weight:700;line-height:1.08;
+  letter-spacing:-.02em;margin:0 0 22px;max-width:18ch;
+}
+.hero h1 .accent{
+  background:linear-gradient(120deg,var(--accent) 0%,var(--accent-strong) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-sub{
+  font-size:18px;color:var(--ink-2);max-width:62ch;
+  margin:0 0 36px;line-height:1.7;
+}
+.hero-meta{
+  display:flex;flex-wrap:wrap;gap:32px 48px;margin-top:8px;
+  border-top:1px solid var(--hairline);padding-top:28px;
+}
+.hero-meta-item{display:flex;flex-direction:column;gap:4px}
+.hero-meta-item .label{
+  font-size:11px;color:var(--ink-3);text-transform:uppercase;
+  letter-spacing:.1em;font-weight:600;
+}
+.hero-meta-item .value{
+  font-size:20px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;
+}
+.hero-meta-item .value small{color:var(--ink-3);font-weight:400;font-size:13px;margin-left:4px}
+
+/* ====== 模块卡片网格 ====== */
+.modules-section{
+  max-width:1200px;margin:0 auto;padding:24px 28px 56px;
+}
+.section-head{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  margin-bottom:28px;gap:24px;flex-wrap:wrap;
+}
+.section-head h2{
+  font-size:28px;font-weight:700;margin:0;letter-spacing:-.01em;
+}
+.section-head p{color:var(--ink-2);font-size:15px;margin:6px 0 0}
+.section-head .count{color:var(--ink-3);font-size:13px;font-variant-numeric:tabular-nums}
+
+.modules-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:18px;margin-bottom:48px;
+}
+.module-card{
+  position:relative;padding:28px 24px;border-radius:14px;
+  background:var(--bg-elev-1);border:1px solid var(--hairline);
+  transition:all var(--dur) var(--ease);overflow:hidden;
+  display:flex;flex-direction:column;gap:12px;
+}
+.module-card::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 100% 0%,var(--accent-glow) 0%,transparent 60%);
+  opacity:0;transition:opacity var(--dur) var(--ease);
+  pointer-events:none;
+}
+.module-card:hover{border-color:var(--accent-ring);transform:translateY(-2px)}
+.module-card:hover::before{opacity:1}
+.module-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:9px;
+  background:var(--accent-soft);color:var(--accent-strong);
+  font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;
+  border:1px solid var(--accent-ring);
+}
+.module-card h3{font-size:18px;font-weight:600;margin:0;letter-spacing:-.005em}
+.module-card .mod-desc{font-size:14px;color:var(--ink-2);line-height:1.6;margin:0}
+.module-card .mod-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:8px}
+.tag{
+  display:inline-flex;padding:3px 9px;border-radius:999px;
+  font-size:11px;font-weight:600;letter-spacing:.04em;
+  background:var(--bg-elev-3);color:var(--ink-3);
+  border:1px solid var(--hairline);
+}
+.tag.accent{background:var(--accent-soft);color:var(--accent-strong);border-color:var(--accent-ring)}
+
+/* ====== 章节列表区（带 tab 切换） ====== */
+.tabs{
+  display:flex;gap:6px;border-bottom:1px solid var(--hairline);
+  margin-bottom:28px;
+}
+.tab{
+  padding:10px 18px;border-radius:8px 8px 0 0;
+  font-size:14px;font-weight:600;color:var(--ink-3);
+  border:1px solid transparent;border-bottom:none;
+  cursor:pointer;transition:all var(--dur-fast) var(--ease);
+  background:transparent;
+}
+.tab:hover{color:var(--ink-2)}
+.tab.active{
+  color:var(--ink);background:var(--bg-elev-1);
+  border-color:var(--hairline);
+}
+.tab .badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:18px;padding:0 6px;border-radius:6px;
+  background:var(--bg-elev-3);color:var(--ink-2);
+  font-size:11px;font-weight:600;margin-left:6px;font-variant-numeric:tabular-nums;
+}
+.tab.active .badge{background:var(--accent-soft);color:var(--accent-strong)}
+
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeUp var(--dur) var(--ease)}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.chapters-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));
+  gap:14px;
+}
+.chapter{
+  display:flex;align-items:center;gap:16px;padding:18px 18px;
+  border-radius:11px;background:var(--bg-elev-1);
+  border:1px solid var(--hairline);
+  transition:all var(--dur-fast) var(--ease);
+  position:relative;
+}
+.chapter:hover{
+  border-color:var(--accent-ring);background:var(--bg-elev-2);
+  transform:translateY(-1px);
+}
+.chapter .num{
+  flex:0 0 auto;width:32px;height:32px;border-radius:8px;
+  background:var(--bg-elev-3);color:var(--ink-2);
+  display:grid;place-items:center;font-weight:700;font-size:13px;
+  font-variant-numeric:tabular-nums;
+}
+.chapter:hover .num{background:var(--accent);color:#fff}
+.chapter .info{flex:1;min-width:0}
+.chapter .info h4{
+  margin:0;font-size:15px;font-weight:600;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.chapter .info p{
+  margin:3px 0 0;font-size:12px;color:var(--ink-3);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.chapter .arrow{
+  flex:0 0 auto;color:var(--ink-mute);font-size:18px;
+  transition:transform var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease);
+}
+.chapter:hover .arrow{color:var(--accent-strong);transform:translateX(4px)}
+
+/* 实验章卡片稍作区分 */
+.chapter.lab .num{background:var(--accent-soft);color:var(--accent-strong);border:1px solid var(--accent-ring)}
+.chapter.lab:hover .num{background:var(--accent);color:#fff;border-color:transparent}
+
+/* ====== 使用说明（README 摘要） ====== */
+.usage{
+  max-width:1200px;margin:0 auto;padding:24px 28px 80px;
+}
+.usage-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:18px;margin-top:24px;
+}
+.usage-card{
+  padding:22px 24px;border-radius:14px;
+  background:var(--bg-elev-1);border:1px solid var(--hairline);
+}
+.usage-card h4{
+  margin:0 0 12px;font-size:14px;color:var(--accent-strong);
+  text-transform:uppercase;letter-spacing:.08em;font-weight:700;
+}
+.usage-card ul{list-style:none;padding:0;margin:0;font-size:14px;color:var(--ink-2)}
+.usage-card ul li{padding:5px 0;display:flex;gap:10px;align-items:flex-start}
+.kbd{
+  display:inline-block;padding:1px 7px;border-radius:5px;
+  background:var(--bg-elev-3);border:1px solid var(--hairline-strong);
+  color:var(--ink);font-family:var(--font-mono);font-size:11px;
+  box-shadow:0 1px 0 var(--hairline);
+  flex:0 0 auto;min-width:24px;text-align:center;
+}
+
+/* ====== 页脚 ====== */
+.footer{
+  border-top:1px solid var(--hairline);margin-top:32px;
+  padding:32px 28px;text-align:center;
+  color:var(--ink-3);font-size:13px;
+}
+.footer a{color:var(--ink-2);border-bottom:1px dotted var(--hairline-strong)}
+.footer a:hover{color:var(--accent-strong);border-color:var(--accent-strong)}
+
+/* ====== 响应式 ====== */
+@media (max-width:720px){
+  .nav-inner{padding:14px 18px}
+  .nav-links .nav-link{display:none}
+  .hero{padding:48px 18px 32px}
+  .modules-section,.usage{padding-left:18px;padding-right:18px}
+  .hero-meta{gap:18px 28px}
+  .section-head{flex-direction:column;align-items:flex-start;gap:8px}
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tab{padding:9px 14px;font-size:13px}
+  .chapters-grid{grid-template-columns:1fr}
+  .footer{padding:24px 18px}
+}
+
+/* ====== 进入动画 ====== */
+.fade-in{opacity:0;transform:translateY(12px);animation:fadeUp var(--dur) var(--ease) forwards}
+.delay-1{animation-delay:.1s}
+.delay-2{animation-delay:.2s}
+.delay-3{animation-delay:.3s}
+.delay-4{animation-delay:.4s}
+</style>
 </head>
 <body>
-<h1>Page Index</h1>
-<ul>
-<li><a href="01-计算机网络基础知识.html">01-计算机网络基础知识.html</a></li>
-<li><a href="02-网络协议与分层.html">02-网络协议与分层.html</a></li>
-<li><a href="03-TCPIP.html">03-TCPIP.html</a></li>
-<li><a href="04-认识IP地址.html">04-认识IP地址.html</a></li>
-<li><a href="05-子网编址.html">05-子网编址.html</a></li>
-<li><a href="06-常见的网络协议及网络命令.html">06-常见的网络协议及网络命令.html</a></li>
-<li><a href="07-网线制作.html">07-网线制作.html</a></li>
-<li><a href="08-认识局域网.html">08-认识局域网.html</a></li>
-<li><a href="09-小型办公网络构建.html">09-小型办公网络构建.html</a></li>
-<li><a href="10-配置VLAN.html">10-配置VLAN.html</a></li>
-<li><a href="11-VLAN互通.html">11-VLAN互通.html</a></li>
-<li><a href="12-DHCP服务器的配置.html">12-DHCP服务器的配置.html</a></li>
-<li><a href="13-路由配置.html">13-路由配置.html</a></li>
-<li><a href="14-使用静态路由实现网络互通.html">14-使用静态路由实现网络互通.html</a></li>
-<li><a href="15-动态路由-RIP.html">15-动态路由-RIP.html</a></li>
-<li><a href="16-使用OSPFf实现单区域内网络互通.html">16-使用OSPFf实现单区域内网络互通.html</a></li>
-<li><a href="17-WWW和DNS服务.html">17-WWW和DNS服务.html</a></li>
-<li><a href="实验01-小型交换式局域网.html">实验01-小型交换式局域网.html</a></li>
-<li><a href="实验02-子网规划.html">实验02-子网规划.html</a></li>
-<li><a href="实验03-静态路由配置.html">实验03-静态路由配置.html</a></li>
-<li><a href="实验04-RIP动态路由.html">实验04-RIP动态路由.html</a></li>
-<li><a href="实验05-OSPF单区域.html">实验05-OSPF单区域.html</a></li>
-<li><a href="实验06-综合实践-VLAN与路由.html">实验06-综合实践-VLAN与路由.html</a></li>
-</ul>
+
+<!-- ============ 顶部导航 ============ -->
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#" class="brand" aria-label="SIIT 计算机网络课程主页">
+      <div class="brand-logo">SI</div>
+      <div class="brand-name">
+        <span>计算机网络</span>
+        <small>SIIT · 42160 · 课程主页</small>
+      </div>
+    </a>
+    <nav class="nav-links">
+      <a class="nav-link" href="#modules">课程模块</a>
+      <a class="nav-link" href="#chapters">章节目录</a>
+      <a class="nav-link" href="#usage">使用说明</a>
+      <a class="nav-cta" href="01-计算机网络基础知识.html">开始学习 →</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ Hero ============ -->
+<section class="hero">
+  <div class="hero-tag fade-in">
+    <span class="hero-tag-dot"></span>
+    <span>苏州工业职业技术学院 · 交互式演示文稿</span>
+  </div>
+  <h1 class="fade-in delay-1">从 <span class="accent">网络协议</span> 到 <span class="accent">VLAN 与 OSPF</span>，系统掌握计算机网络。</h1>
+  <p class="hero-sub fade-in delay-2">
+    本课程通过 17 章课堂演示 + 6 个实验项目，覆盖计算机网络的核心概念、协议分层、IP 地址与子网、VLAN、DHCP、静态/动态路由（OSPF/RIP）、DNS/WWW 服务等关键内容。配套浏览器内幻灯片放映，支持键盘快捷键与动画演示。
+  </p>
+  <div class="hero-meta fade-in delay-3">
+    <div class="hero-meta-item">
+      <span class="label">课程章节</span>
+      <span class="value">17 <small>主课</small></span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="label">实验项目</span>
+      <span class="value">6 <small>实训</small></span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="label">课程模块</span>
+      <span class="value">4 <small>知识域</small></span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="label">课程代号</span>
+      <span class="value">42160</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 模块卡片 ============ -->
+<section class="modules-section" id="modules">
+  <div class="section-head">
+    <div>
+      <h2>课程模块</h2>
+      <p>按照"基础概念 → 协议分层 → 协议详解 → 网络架构与设备"的认知顺序组织。</p>
+    </div>
+    <span class="count">4 个模块</span>
+  </div>
+  <div class="modules-grid">
+    <article class="module-card fade-in delay-1">
+      <div class="module-num">01</div>
+      <h3>基础概念篇</h3>
+      <p class="mod-desc">介绍网络协议的历史发展脉络，从 1970 年代到现代的重要里程碑事件，理解协议诞生的背景与标准化进程。</p>
+      <div class="mod-tags">
+        <span class="tag accent">第 1 章</span>
+        <span class="tag">协议历史</span>
+      </div>
+    </article>
+    <article class="module-card fade-in delay-2">
+      <div class="module-num">02</div>
+      <h3>协议分层模型</h3>
+      <p class="mod-desc">深入讲解 TCP/IP 四层模型与 OSI 七层模型，每一层都配有详细的协议说明和功能介绍，包括以太网、IP、TCP、UDP 等核心协议。</p>
+      <div class="mod-tags">
+        <span class="tag accent">第 2 章</span>
+        <span class="tag">TCP/IP</span>
+        <span class="tag">OSI</span>
+      </div>
+    </article>
+    <article class="module-card fade-in delay-3">
+      <div class="module-num">03</div>
+      <h3>网络协议详解</h3>
+      <p class="mod-desc">涵盖网络层、传输层、应用层各类重要协议的原理和应用场景，包括 IP 地址分类与子网划分、TCP 三次握手、HTTP/HTTPS、DNS 解析等。</p>
+      <div class="mod-tags">
+        <span class="tag accent">第 3 ~ 7 章</span>
+        <span class="tag">IP / TCP / HTTP</span>
+        <span class="tag">DNS</span>
+      </div>
+    </article>
+    <article class="module-card fade-in delay-4">
+      <div class="module-num">04</div>
+      <h3>网络架构与设备</h3>
+      <p class="mod-desc">介绍集线器、交换机、路由器等设备的工作原理和在协议栈中的层次定位，配套 VLAN / DHCP / 静态路由 / OSPF 等实战配置章节。</p>
+      <div class="mod-tags">
+        <span class="tag accent">第 8 ~ 17 章</span>
+        <span class="tag">VLAN</span>
+        <span class="tag">OSPF</span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ 章节列表 ============ -->
+<section class="modules-section" id="chapters">
+  <div class="section-head">
+    <div>
+      <h2>章节目录</h2>
+      <p>点击任意章节进入课堂演示。实验章节配套真实拓扑与配置演练。</p>
+    </div>
+    <span class="count">23 个文档</span>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-target="panel-main" role="tab">主课 <span class="badge">17</span></button>
+    <button class="tab" data-target="panel-lab" role="tab">实验 <span class="badge">6</span></button>
+  </div>
+
+  <!-- 主课面板 -->
+  <div id="panel-main" class="tab-panel active" role="tabpanel">
+    <div class="chapters-grid">
+      <a class="chapter fade-in" href="01-计算机网络基础知识.html">
+        <span class="num">01</span><span class="info"><h4>计算机网络基础知识</h4><p>网络协议发展脉络与历史里程碑</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="02-网络协议与分层.html">
+        <span class="num">02</span><span class="info"><h4>网络协议与分层</h4><p>TCP/IP 四层模型与 OSI 七层模型</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="03-TCPIP.html">
+        <span class="num">03</span><span class="info"><h4>TCP/IP 协议族</h4><p>核心协议簇的工作原理与封装结构</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="04-认识IP地址.html">
+        <span class="num">04</span><span class="info"><h4>认识 IP 地址</h4><p>IPv4 编址、分类与公有/私有地址</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="05-子网编址.html">
+        <span class="num">05</span><span class="info"><h4>子网编址</h4><p>子网划分、可变长子网掩码 VLSM</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="06-常见的网络协议及网络命令.html">
+        <span class="num">06</span><span class="info"><h4>常见协议与网络命令</h4><p>ping / traceroute / netstat 等诊断工具</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="07-网线制作.html">
+        <span class="num">07</span><span class="info"><h4>网线制作</h4><p>双绞线 T568A / T568B 标准与制作流程</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="08-认识局域网.html">
+        <span class="num">08</span><span class="info"><h4>认识局域网</h4><p>LAN 拓扑、介质访问控制与以太网</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="09-小型办公网络构建.html">
+        <span class="num">09</span><span class="info"><h4>小型办公网络构建</h4><p>小型办公场景的网络规划与设备选型</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="10-配置VLAN.html">
+        <span class="num">10</span><span class="info"><h4>配置 VLAN</h4><p>虚拟局域网划分与 Trunk 接口</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="11-VLAN互通.html">
+        <span class="num">11</span><span class="info"><h4>VLAN 互通</h4><p>三层交换 / 单臂路由实现 VLAN 间通信</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="12-DHCP服务器的配置.html">
+        <span class="num">12</span><span class="info"><h4>DHCP 服务器的配置</h4><p>动态主机配置协议与地址池管理</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="13-路由配置.html">
+        <span class="num">13</span><span class="info"><h4>路由配置</h4><p>路由器基本配置与路由表工作原理</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="14-使用静态路由实现网络互通.html">
+        <span class="num">14</span><span class="info"><h4>使用静态路由实现网络互通</h4><p>静态路由配置与多跳网络场景</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="15-动态路由-RIP.html">
+        <span class="num">15</span><span class="info"><h4>动态路由 · RIP</h4><p>距离向量协议与 RIP v1/v2 配置</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="16-使用OSPFf实现单区域内网络互通.html">
+        <span class="num">16</span><span class="info"><h4>使用 OSPF 实现单区域内网络互通</h4><p>链路状态协议与 OSPF 单区域配置</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter fade-in" href="17-WWW和DNS服务.html">
+        <span class="num">17</span><span class="info"><h4>WWW 和 DNS 服务</h4><p>Web 服务器部署与 DNS 域名解析流程</p></span><span class="arrow">→</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 实验面板 -->
+  <div id="panel-lab" class="tab-panel" role="tabpanel">
+    <div class="chapters-grid">
+      <a class="chapter lab fade-in" href="实验01-小型交换式局域网.html">
+        <span class="num">01</span><span class="info"><h4>小型交换式局域网</h4><p>交换机基础配置与 VLAN 入门实验</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter lab fade-in" href="实验02-子网规划.html">
+        <span class="num">02</span><span class="info"><h4>子网规划</h4><p>给定需求完成 VLSM 子网划分</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter lab fade-in" href="实验03-静态路由配置.html">
+        <span class="num">03</span><span class="info"><h4>静态路由配置</h4><p>多路由器场景下的静态路由联通</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter lab fade-in" href="实验04-RIP动态路由.html">
+        <span class="num">04</span><span class="info"><h4>RIP 动态路由</h4><p>距离向量协议的配置与验证</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter lab fade-in" href="实验05-OSPF单区域.html">
+        <span class="num">05</span><span class="info"><h4>OSPF 单区域</h4><p>单区域 OSPF 邻居建立与路由同步</p></span><span class="arrow">→</span>
+      </a>
+      <a class="chapter lab fade-in" href="实验06-综合实践-VLAN与路由.html">
+        <span class="num">06</span><span class="info"><h4>综合实践 · VLAN 与路由</h4><p>综合实验：VLAN + 静态 + 动态路由</p></span><span class="arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 使用说明 ============ -->
+<section class="usage" id="usage">
+  <div class="section-head">
+    <div>
+      <h2>使用说明</h2>
+      <p>演示文稿无需服务器环境，浏览器直接打开即可播放。</p>
+    </div>
+  </div>
+  <div class="usage-grid">
+    <div class="usage-card fade-in">
+      <h4>键盘快捷键</h4>
+      <ul>
+        <li><span class="kbd">← →</span><span>切换上一页 / 下一页幻灯片</span></li>
+        <li><span class="kbd">Space</span><span>下一页</span></li>
+        <li><span class="kbd">ESC</span><span>展开 / 收起侧边栏导航</span></li>
+        <li><span class="kbd">1-9</span><span>快速跳转到指定页码</span></li>
+        <li><span class="kbd">滚轮</span><span>上下翻页</span></li>
+        <li><span class="kbd">H</span><span>调出快捷键帮助面板</span></li>
+      </ul>
+    </div>
+    <div class="usage-card fade-in delay-1">
+      <h4>演示功能</h4>
+      <ul>
+        <li><span style="color:var(--accent-strong)">●</span><span>幻灯片动画效果</span></li>
+        <li><span style="color:var(--accent-strong)">●</span><span>进度条显示当前播放位置</span></li>
+        <li><span style="color:var(--accent-strong)">●</span><span>页码计数器实时显示当前位置</span></li>
+        <li><span style="color:var(--accent-strong)">●</span><span>侧边栏导航可快速定位任意章节</span></li>
+      </ul>
+    </div>
+    <div class="usage-card fade-in delay-2">
+      <h4>环境要求</h4>
+      <ul>
+        <li><span style="color:var(--accent-strong)">●</span><span>现代浏览器（Chrome、Firefox、Edge、Safari）</span></li>
+        <li><span style="color:var(--accent-strong)">●</span><span>无需服务器环境</span></li>
+        <li><span style="color:var(--accent-strong)">●</span><span>原生 HTML / CSS / JavaScript，不依赖第三方框架</span></li>
+        <li><span style="color:var(--accent-strong)">●</span><span>响应式设计，适配不同屏幕尺寸</span></li>
+      </ul>
+    </div>
+    <div class="usage-card fade-in delay-3">
+      <h4>适用人群</h4>
+      <ul>
+        <li><span style="color:var(--accent-strong)">●</span><span>计算机科学专业学生</span></li>
+        <li><span style="color:var(--accent-strong)">●</span><span>网络工程技术人员</span></li>
+        <li><span style="color:var(--accent-strong)">●</span><span>IT 从业人员技能提升</span></li>
+        <li><span style="color:var(--accent-strong)">●</span><span>对计算机网络感兴趣的任何人</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 页脚 ============ -->
+<footer class="footer">
+  <p>
+    苏州工业职业技术学院 · 计算机网络课程 · SIIT 42160<br>
+    <a href="readme.md">查看 README</a> ·
+    <a href="LICENSE">许可证</a> ·
+    <a href="https://github.com/Leoworkspace357/SIIT_01177_Course_ComputerNetwork" target="_blank" rel="noopener">GitHub 仓库</a>
+  </p>
+</footer>
+
+<script>
+// Tab 切换
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.tab-panel');
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.target;
+    tabs.forEach(t => t.classList.toggle('active', t === tab));
+    panels.forEach(p => p.classList.toggle('active', p.id === target));
+  });
+});
+
+// 键盘 1 / 2 切换 tab
+document.addEventListener('keydown', (e) => {
+  if (e.target.matches('input,textarea')) return;
+  if (e.key === '1') {
+    document.querySelector('.tab[data-target="panel-main"]').click();
+  } else if (e.key === '2') {
+    document.querySelector('.tab[data-target="panel-lab"]').click();
+  }
+});
+</script>
 </body>
 </html>

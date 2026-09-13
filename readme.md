@@ -74,4 +74,4 @@
 
 如果您发现内容错误或有改进建议，欢迎通过平台提交 Issue 或 Pull Request。
 
-[👉 在线预览页面](https://leoworkspace357.github.io/SIIT_01177_Course_ComputerNetwork/index.html)
+[👉 在线预览页面](index.html)

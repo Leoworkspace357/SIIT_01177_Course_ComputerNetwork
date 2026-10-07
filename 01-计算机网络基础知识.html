@@ -284,6 +284,36 @@
     .slide{display:flex!important;opacity:1!important;transform:none!important;
       page-break-after:always;height:100vh;background:#fff;color:#000}
     .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
+  .diagram-svg{display:block;margin:1.4rem auto 0;
+    max-width:760px;width:100%;background:var(--bg-elev-2);
+    border:1px solid var(--hairline);border-radius:10px;
+    padding:1.2rem;font-family:var(--font-mono);
+    color:var(--ink-2)}
+  .diagram-svg svg{display:block;width:100%;height:auto;
+    max-height:280px}
+  .diagram-svg .node-fill{fill:var(--bg-elev-3);stroke:var(--accent);
+    stroke-width:1.5}
+  .diagram-svg .router-fill{fill:var(--accent-soft);stroke:var(--accent);
+    stroke-width:2}
+  .diagram-svg .switch-fill{fill:var(--bg-elev-1);stroke:var(--accent-ring);
+    stroke-width:1.5}
+  .diagram-svg .hub-fill{fill:var(--bg-elev-2);stroke:var(--ink-mute);
+    stroke-width:1;stroke-dasharray:3 2}
+  .diagram-svg .pc-fill{fill:var(--bg-elev-2);stroke:var(--ink-3);
+    stroke-width:1}
+  .diagram-svg .label{fill:var(--ink);font-family:var(--font-mono);
+    font-size:11px;text-anchor:middle}
+  .diagram-svg .label-sm{fill:var(--ink-2);font-family:var(--font-mono);
+    font-size:9px;text-anchor:middle}
+  .diagram-svg .label-accent{fill:var(--accent);font-family:var(--font-mono);
+    font-size:11px;font-weight:600;text-anchor:middle}
+  .diagram-svg .label-link{fill:var(--ink-3);font-family:var(--font-mono);
+    font-size:8.5px;text-anchor:middle}
+  .diagram-svg .link{stroke:var(--accent);stroke-width:1.5;fill:none}
+  .diagram-svg .link-dashed{stroke:var(--ink-3);stroke-width:1;
+    stroke-dasharray:4 3;fill:none}
+  .diagram-svg .link-trunk{stroke:var(--status-serious);stroke-width:2;
+    fill:none}
 </style>
 </head>
 <body>
@@ -312,7 +342,7 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">PART 01 · Why Networks</p>
       <h2>没有网络的年代……</h2>
       <div class="callout" style="margin-top:2rem">
@@ -325,7 +355,7 @@
       <p style="margin-top:1.6rem" class="muted">这是一个「单台计算机孤立工作」的时代。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Motivation · 01</p>
       <h2>单机的三大痛点</h2>
       <p class="lead">在没有网络的时代，每台计算机都是一座「孤岛」：</p>
@@ -336,7 +366,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Motivation · 02</p>
       <h2>把机器连起来之后</h2>
       <p class="lead">网络让用户之间共享信息更为容易，也更有效率。</p>
@@ -347,7 +377,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Motivation · 03</p>
       <h2>网络给我们带来什么？</h2>
       <div class="chips">
@@ -365,13 +395,13 @@
       </blockquote>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 02 · Definition</p>
       <h2>什么是计算机网络？</h2>
       <p class="lead">在给出定义之前，先看看网络能做什么。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Definition</p>
       <h2>计算机网络的定义</h2>
       <blockquote>
@@ -381,7 +411,7 @@
       <p class="muted fragment" style="margin-top:1.4rem;font-size:.95rem">—— 这个定义包含三个关键词：<strong>通信线路</strong>、<strong>独立功能</strong>、<strong>资源共享</strong>。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Definition · 4 Goals</p>
       <h2>网络的四大功能</h2>
       <div class="grid-2">
@@ -408,7 +438,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Definition · 3 Elements</p>
       <h2>从定义中提炼三个要素</h2>
       <div class="grid-3" style="margin-top:1.6rem">
@@ -430,13 +460,200 @@
       </div>
     </section>
 
-    <section class="slide section">
-      <p class="eyebrow">PART 03 · Performance</p>
+<section class="slide section">
+      <p class="eyebrow">PART 03 · History</p>
+      <h2>计算机网络的历史</h2>
+      <p class="lead">从一台机器连到另一台机器，到地球村。</p>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">History · Early</p>
+      <h2>从 50s 到 90s：四个关键年代</h2>
+      <div class="timeline">
+        <div class="era fragment">
+          <div class="yr">50s</div>
+          <div class="lbl">初步形成</div>
+          <p>面向终端的<strong>远程联机系统</strong>，目的就是<strong>共享资源</strong>。</p>
+        </div>
+        <div class="era fragment">
+          <div class="yr">60s</div>
+          <div class="lbl">ARPANET</div>
+          <p>美国国防部组建 ARPANET（<strong>1969</strong>），奠定现代互联网基础。</p>
+        </div>
+        <div class="era fragment">
+          <div class="yr">70s</div>
+          <div class="lbl">局域网兴起</div>
+          <p><strong>以太网</strong>（1973）与 <strong>TCP/IP 协议</strong>（1974）相继问世，局域网技术兴起。</p>
+        </div>
+        <div class="era fragment">
+          <div class="yr">90s</div>
+          <div class="lbl">Internet 时代</div>
+          <p><strong>万维网（WWW）</strong>出现，Internet 飞速发展，形成今天的网络形态。</p>
+        </div>
+      </div>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">History · Modern</p>
+      <h2>21 世纪：移动互联网与云计算</h2>
+      <div class="timeline l8">
+        <div class="era fragment"><div class="yr">2000</div><div class="lbl">宽带普及</div><p>ADSL / Cable Modem 进入家庭。</p></div>
+        <div class="era fragment"><div class="yr">2007</div><div class="lbl">智能手机</div><p>iPhone 发布，移动上网爆发。</p></div>
+        <div class="era fragment"><div class="yr">2010</div><div class="lbl">云计算</div><p>AWS / 阿里云改变企业 IT。</p></div>
+        <div class="era fragment"><div class="yr">2015</div><div class="lbl">4G 普及</div><p>移动互联网成为主流。</p></div>
+        <div class="era fragment"><div class="yr">2019</div><div class="lbl">5G 商用</div><p>高速、低时延、海量连接。</p></div>
+        <div class="era fragment"><div class="yr">2020</div><div class="lbl">远程办公</div><p>疫情催化远程协作常态化。</p></div>
+        <div class="era fragment"><div class="yr">2023</div><div class="lbl">生成式 AI</div><p>大模型重塑人机交互。</p></div>
+        <div class="era fragment"><div class="yr">2026+</div><div class="lbl">万物互联</div><p>5.5G / 6G、卫星互联网。</p></div>
+      </div>
+    </section>
+
+<section class="slide section">
+      <p class="eyebrow">PART 04 · Classification</p>
+      <h2>计算机网络的分类</h2>
+      <p class="lead">按覆盖范围划分的三种基本形态。</p>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Classification · Overview</p>
+      <h2>分类方式不止一种</h2>
+      <p class="lead">可以按<strong>拓扑结构</strong>、按<strong>地理覆盖范围</strong>、按<strong>使用对象</strong>等多种维度划分。</p>
+      <p style="margin-top:1.4rem">本课程采用最常见的划分——按<strong>覆盖范围</strong>分为：</p>
+      <ul class="clean" style="margin-top:1rem">
+        <li class="fragment"><strong>局域网 LAN</strong>　Local Area Network</li>
+        <li class="fragment"><strong>城域网 MAN</strong>　Metropolitan Area Network</li>
+        <li class="fragment"><strong>广域网 WAN</strong>　Wide Area Network</li>
+      </ul>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        三种划分并非绝对，彼此之间存在交叠（如校园网常横跨 LAN 与 MAN）。
+      </p>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Classification · LAN</p>
+      <h2>小范围内的高速私有网络</h2>
+      <p class="lead" style="max-width:48ch">通常覆盖<strong>一间办公室、一栋楼或一个园区</strong>，由单个组织自行建设与维护。</p>
+      <div class="grid-3" style="margin-top:2rem">
+        <div class="card fragment"><span class="tag">覆盖</span><h3>≤ 2 km</h3><p class="muted">同一建筑或同一园区内。</p></div>
+        <div class="card fragment"><span class="tag">设备</span><h3>交换机、Wi-Fi AP</h3><p class="muted">成本低、部署灵活。</p></div>
+        <div class="card fragment"><span class="tag">场景</span><h3>校园网、办公网</h3><p class="muted">最常见的网络形态。</p></div>
+      </div>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Classification · MAN</p>
+      <h2>一座城市之内的「中型」网络</h2>
+      <p class="lead">覆盖范围介于 LAN 与 WAN 之间，通常由<strong>电信运营商或市政府</strong>承建。</p>
+      <div class="grid-3" style="margin-top:2rem">
+        <div class="card fragment"><span class="tag">覆盖</span><h3>2 – 10 km</h3><p class="muted">同一座城市之内。</p></div>
+        <div class="card fragment"><span class="tag">技术</span><h3>光纤、Metro Ethernet</h3><p class="muted">承载能力大于 LAN。</p></div>
+        <div class="card fragment"><span class="tag">场景</span><h3>城市政务网、教育城域网</h3><p class="muted">连接多个局域网。</p></div>
+      </div>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Classification · WAN</p>
+      <h2>跨越城市、地区甚至全球</h2>
+      <p class="lead">由<strong>运营商</strong>承建，使用长途传输链路，是 Internet 的主干。</p>
+      <div class="grid-3" style="margin-top:2rem">
+        <div class="card fragment"><span class="tag">覆盖</span><h3>≥ 10 km ～ 全球</h3><p class="muted">跨城市、跨国家、跨洲。</p></div>
+        <div class="card fragment"><span class="tag">技术</span><h3>光纤、卫星、海底光缆</h3><p class="muted">传输距离极远，延迟不可忽视。</p></div>
+        <div class="card fragment"><span class="tag">场景</span><h3>Internet、跨国专网</h3><p class="muted">我们日常使用的网络都建立在 WAN 之上。</p></div>
+      </div>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Classification · Compare</p>
+      <h2>四类网络的对比</h2>
+      <table class="t">
+        <thead>
+          <tr><th>Type</th><th>Hosts</th><th>Range</th><th>Error rate</th></tr>
+        </thead>
+        <tbody>
+          <tr class="fragment"><td>局域网 <span class="muted">LAN</span></td><td>数十 ~ 数千</td><td>≤ 2 km，building / campus</td><td>low</td></tr>
+          <tr class="fragment"><td>城域网 <span class="muted">MAN</span></td><td>medium</td><td>2 – 10 km，metropolitan</td><td>higher</td></tr>
+          <tr class="fragment"><td>广域网 <span class="muted">WAN</span></td><td>many</td><td>> 10 km，cross-region</td><td>higher</td></tr>
+          <tr class="fragment"><td>Internet</td><td>unbounded</td><td>worldwide</td><td>highest</td></tr>
+        </tbody>
+      </table>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        <strong style="color:var(--ink)">关键</strong>　传输距离不同 → 采用技术不同 → 性能与成本不同。
+      </p>
+    </section>
+
+<section class="slide section">
+      <p class="eyebrow">PART 05 · Components</p>
+      <h2>网络由什么组成？</h2>
+      <p class="lead">从一台机器的视角，看见整张网络。</p>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Components · Hardware</p>
+      <h2>硬件层面：一台机器看出去</h2>
+      <div class="grid-3">
+        <div class="card fragment">
+          <span class="tag">终端</span>
+          <h3>计算机 / 终端</h3>
+          <p class="muted">发出请求或提供资源的设备：PC、服务器、手机、IoT 设备。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">连接</span>
+          <h3>网络线缆</h3>
+          <p class="muted">双绞线、光纤、电话线、无线电磁波。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">机柜</span>
+          <h3>交换机 / 路由器（早期集线器已淘汰）</h3>
+          <p class="muted">把多台设备聚合在一起，转发数据。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">接入</span>
+          <h3>ADSL Modem / 光猫</h3>
+          <p class="muted">把局域网接入运营商网络的「桥梁」。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">机房</span>
+          <h3>机柜与配线架</h3>
+          <p class="muted">成百上千条线缆的「中枢神经」。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">末端</span>
+          <h3>网卡 / Wi-Fi</h3>
+          <p class="muted">每台终端接入网络的「最后一步」。</p>
+        </div>
+      </div>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Components · Logical</p>
+      <h2>通信子网 vs 资源子网</h2>
+      <div class="grid-2" style="margin-top:2rem">
+        <div class="card fragment">
+          <span class="tag">通信子网</span>
+          <h3>负责「把比特送到」</h3>
+          <ul class="clean">
+            <li>通信设备：集线器、交换机、路由器、ADSL Modem、程控交换机</li>
+            <li>通信线路：双绞线、电话线、光纤、无线电波</li>
+          </ul>
+        </div>
+        <div class="card fragment">
+          <span class="tag">资源子网</span>
+          <h3>负责「提供与使用资源」</h3>
+          <ul class="clean">
+            <li>提供方：文件共享、Web 服务、打印机共享、应用服务</li>
+            <li>使用方：浏览网页、下载文件、收发邮件</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+<section class="slide section">
+      <p class="eyebrow">PART 06 · Performance</p>
       <h2>网络的性能指标</h2>
       <p class="lead">怎么判断一个网络「快不快、稳不稳」？</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Performance · 4 Metrics</p>
       <h2>四个核心指标</h2>
       <div class="grid-4">
@@ -448,7 +665,7 @@
         <div class="card compact fragment">
           <span class="tag">延迟</span>
           <h3>时延 Latency</h3>
-          <p>一个比特从一端到另一端所需时间，单位 ms。光速是物理下限。</p>
+          <p>数据从源到目的地的总耗时(发送+传播+排队+处理),单位 ms。</p>
         </div>
         <div class="card compact fragment">
           <span class="tag">吞吐</span>
@@ -458,12 +675,12 @@
         <div class="card compact fragment">
           <span class="tag">可靠</span>
           <h3>误码率 BER</h3>
-          <p>传输错误比特数 / 总比特数。光纤 < 10⁻¹²，铜缆 ~ 10⁻⁵。</p>
+          <p>传输错误比特数 / 总比特数。光纤 &lt; 10⁻¹²，铜缆 ~ 10⁻⁵。</p>
         </div>
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Performance · Latency</p>
       <h2>时延的四个组成部分</h2>
       <p class="lead">数据从源到目的地，总时延 = 各段时延之和：</p>
@@ -491,7 +708,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Performance · Compare</p>
       <h2>带宽 vs 吞吐量：常被混淆</h2>
       <div class="compare">
@@ -503,79 +720,13 @@
         <div class="fragment">
           <h3>吞吐量 Throughput</h3>
           <p><strong>实际</strong>可达的数据传输速率——受协议开销、拥塞、错误重传影响。</p>
-          <p class="muted" style="margin-top:.6rem;font-size:.85rem">例：100 Mbps 链路上 FTP 实际 ~ 11 MB/s（≈ 88 Mbps）</p>
+          <p class="muted" style="margin-top:.6rem;font-size:.85rem">例：100 Mbps 链路上 FTP 理论最快 12.5 MB/s,实测约 11 MB/s（≈ 88 Mbps）</p>
         </div>
       </div>
       <p class="muted" style="margin-top:1.4rem;font-size:.95rem">类比：带宽是水管直径，吞吐量是实际出水量——直径再大，水压不够也出不来。</p>
     </section>
 
-    <section class="slide section">
-      <p class="eyebrow">PART 04 · Components</p>
-      <h2>网络由什么组成？</h2>
-      <p class="lead">从一台机器的视角，看见整张网络。</p>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Components · Hardware</p>
-      <h2>硬件层面：一台机器看出去</h2>
-      <div class="grid-3">
-        <div class="card fragment">
-          <span class="tag">终端</span>
-          <h3>计算机 / 终端</h3>
-          <p class="muted">发出请求或提供资源的设备：PC、服务器、手机、IoT 设备。</p>
-        </div>
-        <div class="card fragment">
-          <span class="tag">连接</span>
-          <h3>网络线缆</h3>
-          <p class="muted">双绞线、光纤、电话线、无线电磁波。</p>
-        </div>
-        <div class="card fragment">
-          <span class="tag">机柜</span>
-          <h3>集线器 / 交换机 / 路由器</h3>
-          <p class="muted">把多台设备聚合在一起，转发数据。</p>
-        </div>
-        <div class="card fragment">
-          <span class="tag">接入</span>
-          <h3>ADSL Modem / 光猫</h3>
-          <p class="muted">把局域网接入运营商网络的「桥梁」。</p>
-        </div>
-        <div class="card fragment">
-          <span class="tag">机房</span>
-          <h3>机柜与配线架</h3>
-          <p class="muted">成百上千条线缆的「中枢神经」。</p>
-        </div>
-        <div class="card fragment">
-          <span class="tag">末端</span>
-          <h3>网卡 / Wi-Fi</h3>
-          <p class="muted">每台终端接入网络的「最后一步」。</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Components · Logical</p>
-      <h2>通信子网 vs 资源子网</h2>
-      <div class="grid-2" style="margin-top:2rem">
-        <div class="card fragment">
-          <span class="tag">通信子网</span>
-          <h3>负责「把比特送到」</h3>
-          <ul class="clean">
-            <li>通信设备：集线器、交换机、路由器、ADSL Modem、程控交换机</li>
-            <li>通信线路：双绞线、电话线、光纤、无线电波</li>
-          </ul>
-        </div>
-        <div class="card fragment">
-          <span class="tag">资源子网</span>
-          <h3>负责「提供与使用资源」</h3>
-          <ul class="clean">
-            <li>提供方：文件共享、Web 服务、打印机共享、应用服务</li>
-            <li>使用方：浏览网页、下载文件、收发邮件</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Components · Software</p>
       <h2>协议：设备之间的「共同语言」</h2>
       <blockquote>
@@ -589,7 +740,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Components · Standards</p>
       <h2>标准化组织</h2>
       <p class="lead">协议不是一个人写的——由国际标准组织协调制定。</p>
@@ -612,13 +763,13 @@
       </div>
     </section>
 
-    <section class="slide section">
-      <p class="eyebrow">PART 05 · Transmission</p>
+<section class="slide section">
+      <p class="eyebrow">PART 07 · Transmission</p>
       <h2>传输介质与方式</h2>
       <p class="lead">数据在网络中如何「跑」起来？</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Transmission · Media</p>
       <h2>传输介质的两大类</h2>
       <div class="compare">
@@ -639,7 +790,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Transmission · Mode</p>
       <h2>三种通信方式</h2>
       <div class="compare3">
@@ -659,7 +810,7 @@
       <p class="muted" style="margin-top:1.6rem;font-size:.95rem">现代以太网基本都是全双工——可同时收发，效率翻倍。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Transmission · Switching</p>
       <h2>三种交换技术</h2>
       <p class="lead">数据在网络节点之间如何转发？</p>
@@ -682,7 +833,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Transmission · Packet Switching</p>
       <h2>分组交换的两种方式</h2>
       <div class="compare">
@@ -699,13 +850,13 @@
       </div>
     </section>
 
-    <section class="slide section">
-      <p class="eyebrow">PART 06 · Topology</p>
+<section class="slide section">
+      <p class="eyebrow">PART 08 · Topology</p>
       <h2>网络的拓扑结构</h2>
       <p class="lead">把计算机抽象成「点」、通信线路抽象成「线」——形成的几何图形。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Topology · 5 Types</p>
       <h2>五种基本拓扑</h2>
       <div class="compare4">
@@ -717,20 +868,27 @@
       <p class="muted" style="margin-top:1.2rem;font-size:.9rem;text-align:center">还有「网状 Mesh」——每两个节点间都有路径，Internet 骨干的典型形态。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Topology · Star</p>
       <h2>星型：现代局域网的事实标准</h2>
-      <div class="topo">            [中心交换机/Hub]
-           /     |      \
-          /      |       \
-        PC1     PC2     PC3
-        ↑        ↑        ↑
-      线缆集中在一个机柜或桌面 Hub</div>
+            <div class="diagram-svg">
+        <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg">
+          <line x1="180" y1="45" x2="350" y2="95" class="link"/>
+          <line x1="380" y1="25" x2="380" y2="95" class="link"/>
+          <line x1="580" y1="45" x2="410" y2="95" class="link"/>
+          <circle cx="180" cy="40" r="9" class="pc-fill"/><text x="180" y="65" class="label-sm">PC1</text>
+          <circle cx="380" cy="20" r="9" class="pc-fill"/><text x="380" y="45" class="label-sm">PC2</text>
+          <circle cx="580" cy="40" r="9" class="pc-fill"/><text x="580" y="65" class="label-sm">PC3</text>
+          <rect x="310" y="95" width="140" height="38" rx="6" class="switch-fill"/>
+          <text x="380" y="119" class="label">中心交换机（早期为 HUB）</text>
+          <text x="380" y="180" class="label-sm">所有线缆集中到一个机柜(早期为桌面 Hub)</text>
+        </svg>
+      </div>
       <p class="lead" style="margin-top:1.6rem"><strong>优点</strong>：易管理、易扩展、单点故障隔离；<strong>缺点</strong>：对中心节点要求高、布线多。</p>
       <p class="muted fragment" style="margin-top:1rem;font-size:.95rem">家庭路由器 + Wi-Fi、本公司办公网、校园网机房——全是星型或树型。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Topology · Compare</p>
       <h2>五种拓扑的优缺点对比</h2>
       <table class="t">
@@ -747,134 +905,13 @@
       </table>
     </section>
 
-    <section class="slide section">
-      <p class="eyebrow">PART 07 · History</p>
-      <h2>计算机网络的历史</h2>
-      <p class="lead">从一台机器连到另一台机器，到地球村。</p>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">History · Early</p>
-      <h2>从 50s 到 90s：四个关键年代</h2>
-      <div class="timeline">
-        <div class="era fragment">
-          <div class="yr">50s</div>
-          <div class="lbl">初步形成</div>
-          <p>面向终端的<strong>远程联机系统</strong>，目的就是<strong>共享资源</strong>。</p>
-        </div>
-        <div class="era fragment">
-          <div class="yr">60s</div>
-          <div class="lbl">ARPANET</div>
-          <p>美国国防部组建 ARPANET，<strong>TCP/IP 协议</strong>出现，奠定现代互联网基础。</p>
-        </div>
-        <div class="era fragment">
-          <div class="yr">70s</div>
-          <div class="lbl">局域网兴起</div>
-          <p><strong>以太网</strong>、令牌环等局域网技术成熟，中小企业也能组建自己的网络。</p>
-        </div>
-        <div class="era fragment">
-          <div class="yr">90s</div>
-          <div class="lbl">Internet 时代</div>
-          <p><strong>万维网（WWW）</strong>出现，Internet 飞速发展，形成今天的网络形态。</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">History · Modern</p>
-      <h2>21 世纪：移动互联网与云计算</h2>
-      <div class="timeline l8">
-        <div class="era fragment"><div class="yr">2000</div><div class="lbl">宽带普及</div><p>ADSL / Cable Modem 进入家庭。</p></div>
-        <div class="era fragment"><div class="yr">2007</div><div class="lbl">智能手机</div><p>iPhone 发布，移动上网爆发。</p></div>
-        <div class="era fragment"><div class="yr">2010</div><div class="lbl">云计算</div><p>AWS / 阿里云改变企业 IT。</p></div>
-        <div class="era fragment"><div class="yr">2015</div><div class="lbl">4G 普及</div><p>移动互联网成为主流。</p></div>
-        <div class="era fragment"><div class="yr">2019</div><div class="lbl">5G 商用</div><p>高速、低时延、海量连接。</p></div>
-        <div class="era fragment"><div class="yr">2020</div><div class="lbl">远程办公</div><p>疫情催化远程协作常态化。</p></div>
-        <div class="era fragment"><div class="yr">2023</div><div class="lbl">生成式 AI</div><p>大模型重塑人机交互。</p></div>
-        <div class="era fragment"><div class="yr">2026+</div><div class="lbl">万物互联</div><p>5.5G / 6G、卫星互联网。</p></div>
-      </div>
-    </section>
-
-    <section class="slide section">
-      <p class="eyebrow">PART 08 · Classification</p>
-      <h2>计算机网络的分类</h2>
-      <p class="lead">按覆盖范围划分的三种基本形态。</p>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Classification · Overview</p>
-      <h2>分类方式不止一种</h2>
-      <p class="lead">可以按<strong>拓扑结构</strong>、按<strong>地理覆盖范围</strong>、按<strong>使用对象</strong>等多种维度划分。</p>
-      <p style="margin-top:1.4rem">本课程采用最常见的划分——按<strong>覆盖范围</strong>分为：</p>
-      <ul class="clean" style="margin-top:1rem">
-        <li class="fragment"><strong>局域网 LAN</strong>　Local Area Network</li>
-        <li class="fragment"><strong>城域网 MAN</strong>　Metropolitan Area Network</li>
-        <li class="fragment"><strong>广域网 WAN</strong>　Wide Area Network</li>
-      </ul>
-      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
-        三种划分并非绝对，彼此之间存在交叠（如校园网常横跨 LAN 与 MAN）。
-      </p>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Classification · LAN</p>
-      <h2>小范围内的高速私有网络</h2>
-      <p class="lead" style="max-width:48ch">通常覆盖<strong>一间办公室、一栋楼或一个园区</strong>，由单个组织自行建设与维护。</p>
-      <div class="grid-3" style="margin-top:2rem">
-        <div class="card fragment"><span class="tag">覆盖</span><h3>≤ 2 km</h3><p class="muted">同一建筑或同一园区内。</p></div>
-        <div class="card fragment"><span class="tag">设备</span><h3>交换机、Wi-Fi AP</h3><p class="muted">成本低、部署灵活。</p></div>
-        <div class="card fragment"><span class="tag">场景</span><h3>校园网、办公网</h3><p class="muted">最常见的网络形态。</p></div>
-      </div>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Classification · MAN</p>
-      <h2>一座城市之内的「中型」网络</h2>
-      <p class="lead">覆盖范围介于 LAN 与 WAN 之间，通常由<strong>电信运营商或市政府</strong>承建。</p>
-      <div class="grid-3" style="margin-top:2rem">
-        <div class="card fragment"><span class="tag">覆盖</span><h3>2 – 10 km</h3><p class="muted">同一座城市之内。</p></div>
-        <div class="card fragment"><span class="tag">技术</span><h3>光纤、Metro Ethernet</h3><p class="muted">承载能力大于 LAN。</p></div>
-        <div class="card fragment"><span class="tag">场景</span><h3>城市政务网、教育城域网</h3><p class="muted">连接多个局域网。</p></div>
-      </div>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Classification · WAN</p>
-      <h2>跨越城市、地区甚至全球</h2>
-      <p class="lead">由<strong>运营商</strong>承建，使用长途传输链路，是 Internet 的主干。</p>
-      <div class="grid-3" style="margin-top:2rem">
-        <div class="card fragment"><span class="tag">覆盖</span><h3>≥ 10 km ～ 全球</h3><p class="muted">跨城市、跨国家、跨洲。</p></div>
-        <div class="card fragment"><span class="tag">技术</span><h3>光纤、卫星、海底光缆</h3><p class="muted">传输距离极远，延迟不可忽视。</p></div>
-        <div class="card fragment"><span class="tag">场景</span><h3>Internet、跨国专网</h3><p class="muted">我们日常使用的网络都建立在 WAN 之上。</p></div>
-      </div>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Classification · Compare</p>
-      <h2>四类网络的对比</h2>
-      <table class="t">
-        <thead>
-          <tr><th>Type</th><th>Hosts</th><th>Range</th><th>Error rate</th></tr>
-        </thead>
-        <tbody>
-          <tr class="fragment"><td>局域网 <span class="muted">LAN</span></td><td>≤ 200</td><td>≤ 2 km，building / campus</td><td>low</td></tr>
-          <tr class="fragment"><td>城域网 <span class="muted">MAN</span></td><td>medium</td><td>2 – 10 km，metropolitan</td><td>higher</td></tr>
-          <tr class="fragment"><td>广域网 <span class="muted">WAN</span></td><td>many</td><td>> 10 km，cross-region</td><td>higher</td></tr>
-          <tr class="fragment"><td>Internet</td><td>unbounded</td><td>worldwide</td><td>highest</td></tr>
-        </tbody>
-      </table>
-      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
-        <strong style="color:var(--ink)">关键</strong>　传输距离不同 → 采用技术不同 → 性能与成本不同。
-      </p>
-    </section>
-
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 09 · Architecture</p>
       <h2>对等与主从</h2>
       <p class="lead">两种工作方式：网络中的「身份」由角色决定，不由机器决定。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Architecture · Compare</p>
       <h2>对等（P2P） vs 主从（C/S）</h2>
       <div class="compare">
@@ -897,10 +934,10 @@
           </ul>
         </div>
       </div>
-      <p class="muted" style="margin-top:1.4rem;font-size:.95rem">主从 ≠ C/S：C/S 描述<em>这一次交互</em>，主从描述<em>网络中的角色分工</em>。</p>
+      <p class="muted" style="margin-top:1.4rem;font-size:.95rem">「主从」就是 C/S 结构——Client（客户端）是「从」，Server（服务器）是「主」，<strong>两种说法本质相同</strong>。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Architecture · Diagram</p>
       <h2>C/S 服务的提供与请求</h2>
       <div class="cs-diagram" style="max-width:720px;margin:1.4rem auto">
@@ -923,7 +960,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Recap</p>
       <h2>今天我们学到了什么</h2>
       <ol class="steps">
@@ -941,7 +978,7 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Homework</p>
       <h2>课后任务</h2>
       <div class="callout fragment">
@@ -962,7 +999,7 @@
         <div class="ico">03</div>
         <div>
           <p style="font-size:1.1rem;color:var(--ink)"><strong>思考题</strong></p>
-          <p class="muted" style="margin-top:.3rem">为什么「带宽 100 Mbps」时下载文件最快只能 ~11 MB/s？带宽与吞吐量的区别是什么？</p>
+          <p class="muted" style="margin-top:.3rem">为什么「带宽 100 Mbps」时理论最快 12.5 MB/s,实测却只有约 11 MB/s？带宽与吞吐量的区别是什么？</p>
         </div>
       </div>
     </section>
@@ -1033,7 +1070,7 @@
     for (var k = 0; k < frags.length; k++) {
       if (k < fragIdx) {
         frags[k].classList.add('visible');
-        frags[k].style.setProperty('--frag-stagger', (k * 90) + 'ms');
+        frags[k].style.setProperty('--frag-stagger','0ms');
       } else {
         frags[k].classList.remove('visible');
         frags[k].style.setProperty('--frag-stagger', '0ms');
@@ -1131,7 +1168,7 @@
       });
     } else {
       stage.style.display = '';
-      slides.forEach(function(s){ s.style.display = ''; });
+      slides.forEach(function(s){ s.style.display=''; s.style.position=''; s.style.inset=''; s.style.aspectRatio=''; s.style.padding=''; s.style.border=''; s.style.borderRadius=''; s.style.background=''; s.style.cursor=''; s.style.overflow=''; s.style.transform=''; s.style.opacity=''; Array.prototype.forEach.call(s.children, function(c){ c.style.transform=''; c.style.transformOrigin=''; }); });
       show(i);
     }
   }

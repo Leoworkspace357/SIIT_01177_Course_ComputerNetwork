@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SIIT 42160 计算机网络 · 课程主页</title>
-<meta name="description" content="苏州工业职业技术学院 计算机网络 课程交互式演示文稿。17 章 + 6 实验，从网络基础到 VLAN/OSPF/DNS 的完整链路。">
+<meta name="description" content="苏州工业职业技术学院 计算机网络 课程交互式演示文稿。17 章主线课程，从网络基础到 VLAN/OSPF/DNS 的完整链路。">
 <meta name="author" content="苏州工业职业技术学院">
 <style>
 /* =====================================================================
@@ -245,7 +245,7 @@ img{max-width:100%}
 }
 .chapter:hover .arrow{color:var(--accent-strong);transform:translateX(4px)}
 
-/* 实验章卡片稍作区分 */
+/* 章节卡片悬停效果 */
 .chapter.lab .num{background:var(--accent-soft);color:var(--accent-strong);border:1px solid var(--accent-ring)}
 .chapter.lab:hover .num{background:var(--accent);color:#fff;border-color:transparent}
 
@@ -335,16 +335,12 @@ img{max-width:100%}
   </div>
   <h1 class="fade-in delay-1">从 <span class="accent">网络协议</span> 到 <span class="accent">VLAN 与 OSPF</span>，系统掌握计算机网络。</h1>
   <p class="hero-sub fade-in delay-2">
-    本课程通过 17 章课堂演示 + 6 个实验项目，覆盖计算机网络的核心概念、协议分层、IP 地址与子网、VLAN、DHCP、静态/动态路由（OSPF/RIP）、DNS/WWW 服务等关键内容。配套浏览器内幻灯片放映，支持键盘快捷键与动画演示。
+    本课程通过 17 章主线课堂演示，覆盖计算机网络的核心概念、协议分层、IP 地址与子网、VLAN、DHCP、静态/动态路由（OSPF/RIP）、DNS/WWW 服务等关键内容。配套浏览器内幻灯片放映，支持键盘快捷键与动画演示。
   </p>
   <div class="hero-meta fade-in delay-3">
     <div class="hero-meta-item">
       <span class="label">课程章节</span>
       <span class="value">17 <small>主课</small></span>
-    </div>
-    <div class="hero-meta-item">
-      <span class="label">实验项目</span>
-      <span class="value">6 <small>实训</small></span>
     </div>
     <div class="hero-meta-item">
       <span class="label">课程模块</span>
@@ -414,14 +410,9 @@ img{max-width:100%}
   <div class="section-head">
     <div>
       <h2>章节目录</h2>
-      <p>点击任意章节进入课堂演示。实验章节配套真实拓扑与配置演练。</p>
+      <p>点击任意章节进入课堂演示。</p>
     </div>
-    <span class="count">23 个文档</span>
-  </div>
-
-  <div class="tabs" role="tablist">
-    <button class="tab active" data-target="panel-main" role="tab">主课 <span class="badge">17</span></button>
-    <button class="tab" data-target="panel-lab" role="tab">实验 <span class="badge">6</span></button>
+    <span class="count">17 个文档</span>
   </div>
 
   <!-- 主课面板 -->
@@ -436,14 +427,14 @@ img{max-width:100%}
       <a class="chapter fade-in" href="03-TCPIP.html">
         <span class="num">03</span><span class="info"><h4>TCP/IP 协议族</h4><p>核心协议簇的工作原理与封装结构</p></span><span class="arrow">→</span>
       </a>
-      <a class="chapter fade-in" href="04-认识IP地址.html">
-        <span class="num">04</span><span class="info"><h4>认识 IP 地址</h4><p>IPv4 编址、分类与公有/私有地址</p></span><span class="arrow">→</span>
+      <a class="chapter fade-in" href="04-常见的网络协议及网络命令.html">
+        <span class="num">04</span><span class="info"><h4>常见的网络协议及网络命令</h4><p>ping / traceroute / netstat 等诊断工具</p></span><span class="arrow">→</span>
       </a>
-      <a class="chapter fade-in" href="05-子网编址.html">
-        <span class="num">05</span><span class="info"><h4>子网编址</h4><p>子网划分、可变长子网掩码 VLSM</p></span><span class="arrow">→</span>
+      <a class="chapter fade-in" href="05-认识IP地址.html">
+        <span class="num">05</span><span class="info"><h4>认识 IP 地址</h4><p>IPv4 编址、分类与公有/私有地址</p></span><span class="arrow">→</span>
       </a>
-      <a class="chapter fade-in" href="06-常见的网络协议及网络命令.html">
-        <span class="num">06</span><span class="info"><h4>常见协议与网络命令</h4><p>ping / traceroute / netstat 等诊断工具</p></span><span class="arrow">→</span>
+      <a class="chapter fade-in" href="06-子网编址.html">
+        <span class="num">06</span><span class="info"><h4>子网编址</h4><p>子网划分、可变长子网掩码 VLSM</p></span><span class="arrow">→</span>
       </a>
       <a class="chapter fade-in" href="07-网线制作.html">
         <span class="num">07</span><span class="info"><h4>网线制作</h4><p>双绞线 T568A / T568B 标准与制作流程</p></span><span class="arrow">→</span>
@@ -472,35 +463,11 @@ img{max-width:100%}
       <a class="chapter fade-in" href="15-动态路由-RIP.html">
         <span class="num">15</span><span class="info"><h4>动态路由 · RIP</h4><p>距离向量协议与 RIP v1/v2 配置</p></span><span class="arrow">→</span>
       </a>
-      <a class="chapter fade-in" href="16-使用OSPFf实现单区域内网络互通.html">
+      <a class="chapter fade-in" href="16-使用OSPF实现单区域内网络互通.html">
         <span class="num">16</span><span class="info"><h4>使用 OSPF 实现单区域内网络互通</h4><p>链路状态协议与 OSPF 单区域配置</p></span><span class="arrow">→</span>
       </a>
       <a class="chapter fade-in" href="17-WWW和DNS服务.html">
         <span class="num">17</span><span class="info"><h4>WWW 和 DNS 服务</h4><p>Web 服务器部署与 DNS 域名解析流程</p></span><span class="arrow">→</span>
-      </a>
-    </div>
-  </div>
-
-  <!-- 实验面板 -->
-  <div id="panel-lab" class="tab-panel" role="tabpanel">
-    <div class="chapters-grid">
-      <a class="chapter lab fade-in" href="实验01-小型交换式局域网.html">
-        <span class="num">01</span><span class="info"><h4>小型交换式局域网</h4><p>交换机基础配置与 VLAN 入门实验</p></span><span class="arrow">→</span>
-      </a>
-      <a class="chapter lab fade-in" href="实验02-子网规划.html">
-        <span class="num">02</span><span class="info"><h4>子网规划</h4><p>给定需求完成 VLSM 子网划分</p></span><span class="arrow">→</span>
-      </a>
-      <a class="chapter lab fade-in" href="实验03-静态路由配置.html">
-        <span class="num">03</span><span class="info"><h4>静态路由配置</h4><p>多路由器场景下的静态路由联通</p></span><span class="arrow">→</span>
-      </a>
-      <a class="chapter lab fade-in" href="实验04-RIP动态路由.html">
-        <span class="num">04</span><span class="info"><h4>RIP 动态路由</h4><p>距离向量协议的配置与验证</p></span><span class="arrow">→</span>
-      </a>
-      <a class="chapter lab fade-in" href="实验05-OSPF单区域.html">
-        <span class="num">05</span><span class="info"><h4>OSPF 单区域</h4><p>单区域 OSPF 邻居建立与路由同步</p></span><span class="arrow">→</span>
-      </a>
-      <a class="chapter lab fade-in" href="实验06-综合实践-VLAN与路由.html">
-        <span class="num">06</span><span class="info"><h4>综合实践 · VLAN 与路由</h4><p>综合实验：VLAN + 静态 + 动态路由</p></span><span class="arrow">→</span>
       </a>
     </div>
   </div>
@@ -567,26 +534,7 @@ img{max-width:100%}
 </footer>
 
 <script>
-// Tab 切换
-const tabs = document.querySelectorAll('.tab');
-const panels = document.querySelectorAll('.tab-panel');
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    const target = tab.dataset.target;
-    tabs.forEach(t => t.classList.toggle('active', t === tab));
-    panels.forEach(p => p.classList.toggle('active', p.id === target));
-  });
-});
-
-// 键盘 1 / 2 切换 tab
-document.addEventListener('keydown', (e) => {
-  if (e.target.matches('input,textarea')) return;
-  if (e.key === '1') {
-    document.querySelector('.tab[data-target="panel-main"]').click();
-  } else if (e.key === '2') {
-    document.querySelector('.tab[data-target="panel-lab"]').click();
-  }
-});
+// 章节目录中悬停已通过 :hover 处理；此处保留空脚本以便后续扩展（如搜索、按标签筛选等）。
 </script>
 </body>
 </html>

@@ -308,7 +308,7 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Objectives</p>
       <h2>通过本次课，你将能够：</h2>
       <ol class="steps">
@@ -320,13 +320,13 @@
       </ol>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 01</p>
       <h2>TCP/IP 概述</h2>
       <p class="lead">互联网事实标准的协议族。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Definition</p>
       <h2>什么是 TCP/IP？</h2>
       <div class="grid-2">
@@ -353,7 +353,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Features</p>
       <h2>TCP/IP 的核心特点</h2>
       <ul class="clean">
@@ -366,7 +366,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">History</p>
       <h2>TCP/IP 的诞生</h2>
       <div class="timeline">
@@ -393,7 +393,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">4 Layers</p>
       <h2>TCP/IP 四层模型</h2>
       <div class="grid-2">
@@ -420,7 +420,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Visual · Stack</p>
       <h2>TCP/IP 模型的纵向视角</h2>
       <div class="layer-stack">
@@ -434,7 +434,7 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">OSI ↔ TCP/IP</p>
       <h2>TCP/IP 与 OSI 的对应</h2>
       <table class="t">
@@ -451,13 +451,13 @@
       </p>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 02</p>
       <h2>应用层协议</h2>
       <p class="lead">用户看得见摸得着的「网络服务」。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">App · Overview</p>
       <h2>常见应用层协议</h2>
       <div class="grid-3">
@@ -494,7 +494,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">HTTP</p>
       <h2>HTTP · Web 的语言</h2>
       <ul class="clean">
@@ -506,7 +506,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">DNS</p>
       <h2>DNS · 互联网的「地址簿」</h2>
       <div class="grid-2">
@@ -533,7 +533,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">DHCP</p>
       <h2>DHCP · 自动分配地址</h2>
       <blockquote>没有 DHCP，每台新设备都要<strong>手动配置</strong> IP、子网掩码、网关、DNS——繁琐且易错。</blockquote>
@@ -546,13 +546,13 @@
       </ul>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 03</p>
       <h2>传输层：TCP 与 UDP</h2>
       <p class="lead">为应用程序提供<strong>端到端</strong>的通信服务。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Transport · Role</p>
       <h2>传输层的角色</h2>
       <ul class="clean">
@@ -564,7 +564,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">TCP vs UDP</p>
       <h2>TCP 与 UDP 的对比</h2>
       <div class="grid-2">
@@ -591,7 +591,7 @@
       </table>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">TCP · 3WHS</p>
       <h2>TCP 三次握手</h2>
       <div class="cs-diagram" style="grid-template-columns:1fr auto 1fr auto 1fr">
@@ -621,7 +621,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">TCP · 4WT</p>
       <h2>TCP 四次挥手</h2>
       <ul class="clean">
@@ -629,12 +629,12 @@
         <li class="fragment">第二次：服务器 <strong>ACK</strong>　<em>「我知道了，但你先等一下」</em></li>
         <li class="fragment">第三次：服务器 <strong>FIN</strong>　<em>「我也发完了」</em></li>
         <li class="fragment">第四次：客户端 <strong>ACK</strong>　<em>「好的，连接关闭」</em></li>
-        <li class="fragment">等待 <strong>2MSL</strong>（约 2 分钟）后真正释放——防<em>「迟到包」</em>干扰</li>
+        <li class="fragment">等待 <strong>2MSL</strong>（MSL 建议 2 分钟，共约 4 分钟）后真正释放——防<em>「迟到包」</em>干扰</li>
         <li class="fragment">为什么是<strong>四次</strong>？因为 TCP 是<em>全双工</em>——双方都得单独关</li>
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Port</p>
       <h2>端口号 · 应用的「门牌号」</h2>
       <div class="grid-2">
@@ -661,13 +661,13 @@
       </div>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 04</p>
       <h2>网际层：IP</h2>
       <p class="lead">整个 TCP/IP 协议族的<strong>基石</strong>——把分组送到任何地方。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">IP · Role</p>
       <h2>IP 协议 · 网际层的核心</h2>
       <ul class="clean">
@@ -679,7 +679,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">IPv4</p>
       <h2>IPv4 · 32 位地址</h2>
       <div class="grid-2">
@@ -696,7 +696,7 @@
         <div class="card fragment">
           <span class="tag">分类</span>
           <h3>A / B / C 类</h3>
-          <p class="muted">A 类 0.x.x.x（巨型）、B 类 128.x.x.x（大）、C 类 192.x.x.x（小）。</p>
+          <p class="muted">A 类 1–126.x.x.x（巨型）、B 类 128–191.x.x.x（大）、C 类 192–223.x.x.x（小）。</p>
         </div>
         <div class="card fragment">
           <span class="tag">私有</span>
@@ -706,7 +706,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">IPv6</p>
       <h2>IPv6 · 128 位地址</h2>
       <ul class="clean">
@@ -718,7 +718,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Subnet Mask</p>
       <h2>子网掩码 · 网络号与主机号的「分界线」</h2>
       <div class="grid-2">
@@ -745,7 +745,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Routing</p>
       <h2>路由 · 把分组送到下一跳</h2>
       <ul class="clean">
@@ -758,7 +758,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">ARP</p>
       <h2>ARP · IP 到 MAC 的桥梁</h2>
       <ul class="clean">
@@ -770,7 +770,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">ICMP</p>
       <h2>ICMP · 差错与控制</h2>
       <ul class="clean">
@@ -782,13 +782,13 @@
       </ul>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 05</p>
       <h2>网络接口层</h2>
       <p class="lead">最后一公里——把数据变成物理信号。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Link Layer</p>
       <h2>网络接口层的作用</h2>
       <ul class="clean">
@@ -800,7 +800,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Ethernet</p>
       <h2>以太网 · 局域网的事实标准</h2>
       <div class="grid-2">
@@ -827,7 +827,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Encapsulation</p>
       <h2>数据在 TCP/IP 中的封装</h2>
       <blockquote>每加一层头部，就<strong>多一层职责</strong>——<em>「分工」</em>的真实体现。</blockquote>
@@ -855,13 +855,13 @@
       </div>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 06</p>
       <h2>OSI vs TCP/IP · 总结对比</h2>
       <p class="lead">两种参考模型的异同与历史命运。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Common</p>
       <h2>OSI 与 TCP/IP 的共同点</h2>
       <ul class="clean">
@@ -873,7 +873,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Differences</p>
       <h2>OSI 与 TCP/IP 的核心差异</h2>
       <div class="grid-2">
@@ -890,7 +890,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Why TCP/IP Won</p>
       <h2>为什么 TCP/IP 胜出？</h2>
       <ul class="clean">
@@ -903,7 +903,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">5-Layer</p>
       <h2>五层教学模型（折中）</h2>
       <div class="layer-stack">
@@ -918,13 +918,13 @@
       </p>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 07</p>
       <h2>实践与排错</h2>
       <p class="lead">把 TCP/IP 用起来——常见命令与排错思路。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Tools</p>
       <h2>常用网络命令</h2>
       <table class="t">
@@ -933,7 +933,7 @@
           <tr class="fragment"><td><code>ping</code></td><td>测试连通性</td><td>网际层（ICMP）</td></tr>
           <tr class="fragment"><td><code>traceroute</code> / <code>tracert</code></td><td>查看路径</td><td>网际层</td></tr>
           <tr class="fragment"><td><code>ipconfig</code> / <code>ifconfig</code></td><td>查看本机 IP</td><td>网际层 / 接口层</td></tr>
-          <tr class="fragment"><td><code>arp -a</code></td><td>查看 ARP 缓存</td><td>接口层</td></tr>
+          <tr class="fragment"><td><code>arp -a</code></td><td>查看 ARP 缓存</td><td>网际层</td></tr>
           <tr class="fragment"><td><code>netstat -an</code></td><td>查看端口连接</td><td>传输层</td></tr>
           <tr class="fragment"><td><code>nslookup</code> / <code>dig</code></td><td>DNS 查询</td><td>应用层</td></tr>
           <tr class="fragment"><td><code>curl</code> / <code>wget</code></td><td>HTTP 请求</td><td>应用层</td></tr>
@@ -941,7 +941,7 @@
       </table>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Troubleshooting</p>
       <h2>分层排错思路</h2>
       <div class="grid-2">
@@ -958,7 +958,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">A Real Visit</p>
       <h2>一个 HTTP 请求的完整旅程</h2>
       <ol class="steps">
@@ -972,66 +972,7 @@
       </ol>
     </section>
 
-    <section class="slide">
-      <p class="eyebrow">Recap</p>
-      <h2>本章小结</h2>
-      <ol class="steps">
-        <li class="fragment"><strong>TCP/IP 协议族</strong>：互联网的事实标准</li>
-        <li class="fragment"><strong>四层结构</strong>：应用、传输、网际、网络接口</li>
-        <li class="fragment"><strong>应用层</strong>：HTTP、DNS、DHCP、FTP…</li>
-        <li class="fragment"><strong>传输层</strong>：TCP（三次握手、可靠）vs UDP（无连接、快速）</li>
-        <li class="fragment"><strong>网际层</strong>：IP 地址、子网掩码、路由、ARP、ICMP</li>
-        <li class="fragment"><strong>网络接口层</strong>：以太网、Wi-Fi、MAC 地址</li>
-        <li class="fragment">OSI 与 TCP/IP 的<strong>对应关系</strong>与历史命运</li>
-      </ol>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Homework</p>
-      <h2>课后任务</h2>
-      <div class="callout fragment">
-        <div class="ico">01</div>
-        <div>
-          <p style="font-size:1.1rem;color:var(--ink)"><strong>查命令</strong></p>
-          <p class="muted" style="margin-top:.3rem">在电脑上执行 <code>ipconfig /all</code>、<code>arp -a</code>、<code>ping www.baidu.com</code>，记录并解释输出。</p>
-        </div>
-      </div>
-      <div class="callout fragment">
-        <div class="ico">02</div>
-        <div>
-          <p style="font-size:1.1rem;color:var(--ink)"><strong>算地址</strong></p>
-          <p class="muted" style="margin-top:.3rem">已知 <code>192.168.10.0/26</code>，划分 4 个子网，写出每个子网的网络地址、广播地址、可用主机范围。</p>
-        </div>
-      </div>
-      <div class="callout fragment">
-        <div class="ico">03</div>
-        <div>
-          <p style="font-size:1.1rem;color:var(--ink)"><strong>分析</strong></p>
-          <p class="muted" style="margin-top:.3rem">用 TCP/IP 协议栈，描述一次<em>从浏览器输入 URL 到页面显示</em>的完整过程（每层发生了什么）。</p>
-        </div>
-      </div>
-      <div class="callout fragment">
-        <div class="ico">04</div>
-        <div>
-          <p style="font-size:1.1rem;color:var(--ink)"><strong>思考</strong></p>
-          <p class="muted" style="margin-top:.3rem">为什么<em>「三次握手」</em>是三次而不是两次？如果是两次，可能出现什么问题？</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Misconceptions</p>
-      <h2>常见误解 · 别踩坑</h2>
-      <ul class="clean">
-        <li class="fragment">「<em>TCP 比 UDP 高级</em>」——<strong>错</strong>。二者适用场景不同，UDP 在实时场景下更优。</li>
-        <li class="fragment">「<em>IP 地址 = 主机身份</em>」——<strong>不准确</strong>。同一主机可有多 IP；同一 IP 可对应多设备（NAT）。</li>
-        <li class="fragment">「<em>DNS 必须用 UDP</em>」——<strong>不绝对</strong>。大响应、超时重传会切到 TCP。</li>
-        <li class="fragment">「<em>MAC 地址全球唯一</em>」——理论上<strong>是</strong>，但虚拟机、网卡克隆会重复。</li>
-        <li class="fragment">「<em>Ping 通 = 网络通</em>」——<strong>不</strong>。Ping 走 ICMP，可能被防火墙拦；应用层可能仍不通。</li>
-      </ul>
-    </section>
-
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">IP Header</p>
       <h2>IPv4 头部结构（简化）</h2>
       <table class="t">
@@ -1048,7 +989,7 @@
       </table>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">TCP Header</p>
       <h2>TCP 头部结构（关键字段）</h2>
       <table class="t">
@@ -1065,7 +1006,7 @@
       </table>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Protocol Zoo</p>
       <h2>TCP/IP 协议族一览</h2>
       <div class="chips">
@@ -1100,7 +1041,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Glossary</p>
       <h2>本章关键术语</h2>
       <ul class="clean">
@@ -1117,7 +1058,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Real Packet</p>
       <h2>一个真实的 TCP 三次握手</h2>
       <p class="muted" style="margin-top:.3rem">在 Wireshark 中抓包的样子：</p>
@@ -1145,7 +1086,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">DNS Walkthrough</p>
       <h2>DNS 解析的一次完整过程</h2>
       <ol class="steps">
@@ -1160,7 +1101,7 @@
       </ol>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">NAT</p>
       <h2>NAT · 内网共享公网 IP</h2>
       <ul class="clean">
@@ -1173,7 +1114,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Firewall</p>
       <h2>防火墙 · 守门人</h2>
       <ul class="clean">
@@ -1186,7 +1127,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Use Cases</p>
       <h2>不同场景的协议选择</h2>
       <div class="grid-2">
@@ -1213,7 +1154,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Socket</p>
       <h2>Socket · 程序员的世界</h2>
       <ul class="clean">
@@ -1226,7 +1167,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Handshake Detail</p>
       <h2>为什么是三次，不是两次？</h2>
       <div class="grid-2">
@@ -1246,7 +1187,7 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">HTTP Versions</p>
       <h2>HTTP 协议的发展</h2>
       <table class="t">
@@ -1262,7 +1203,7 @@
       </table>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Internet Layers</p>
       <h2>一个完整的 HTTP 旅程（按层）</h2>
       <ol class="steps">
@@ -1277,7 +1218,7 @@
       </ol>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Throughput</p>
       <h2>性能与吞吐</h2>
       <div class="grid-2">
@@ -1304,7 +1245,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Security</p>
       <h2>TCP/IP 的安全挑战</h2>
       <ul class="clean">
@@ -1317,7 +1258,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Future</p>
       <h2>TCP/IP 的未来</h2>
       <div class="grid-2">
@@ -1344,19 +1285,78 @@
       </div>
     </section>
 
-    <section class="slide">
-      <p class="eyebrow">Look Ahead</p>
-      <h2>下一章预告</h2>
-      <p class="lead">掌握 TCP/IP 之后，下一章我们深入<strong>认识 IP 地址</strong>——子网划分、掩码计算、CIDR、VLSM。</p>
-      <p class="muted" style="margin-top:1.4rem;font-size:.92rem">从「知道 TCP/IP」到「熟练使用 TCP/IP」，差距就在 IP 地址这一关。</p>
+<section class="slide">
+      <p class="eyebrow">Misconceptions</p>
+      <h2>常见误解 · 别踩坑</h2>
+      <ul class="clean">
+        <li class="fragment">「<em>TCP 比 UDP 高级</em>」——<strong>错</strong>。二者适用场景不同，UDP 在实时场景下更优。</li>
+        <li class="fragment">「<em>IP 地址 = 主机身份</em>」——<strong>不准确</strong>。同一主机可有多 IP；同一 IP 可对应多设备（NAT）。</li>
+        <li class="fragment">「<em>DNS 必须用 UDP</em>」——<strong>不绝对</strong>。大响应、超时重传会切到 TCP。</li>
+        <li class="fragment">「<em>MAC 地址全球唯一</em>」——理论上<strong>是</strong>，但虚拟机、网卡克隆会重复。</li>
+        <li class="fragment">「<em>Ping 通 = 网络通</em>」——<strong>不</strong>。Ping 走 ICMP，可能被防火墙拦；应用层可能仍不通。</li>
+      </ul>
     </section>
 
-    <section class="slide title">
+<section class="slide">
+      <p class="eyebrow">Recap</p>
+      <h2>本章小结</h2>
+      <ol class="steps">
+        <li class="fragment"><strong>TCP/IP 协议族</strong>：互联网的事实标准</li>
+        <li class="fragment"><strong>四层结构</strong>：应用、传输、网际、网络接口</li>
+        <li class="fragment"><strong>应用层</strong>：HTTP、DNS、DHCP、FTP…</li>
+        <li class="fragment"><strong>传输层</strong>：TCP（三次握手、可靠）vs UDP（无连接、快速）</li>
+        <li class="fragment"><strong>网际层</strong>：IP 地址、子网掩码、路由、ARP、ICMP</li>
+        <li class="fragment"><strong>网络接口层</strong>：以太网、Wi-Fi、MAC 地址</li>
+        <li class="fragment">OSI 与 TCP/IP 的<strong>对应关系</strong>与历史命运</li>
+      </ol>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Homework</p>
+      <h2>课后任务</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>查命令</strong></p>
+          <p class="muted" style="margin-top:.3rem">在电脑上执行 <code>ipconfig /all</code>、<code>arp -a</code>、<code>ping www.baidu.com</code>，记录并解释输出。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>算地址</strong></p>
+          <p class="muted" style="margin-top:.3rem">已知 <code>192.168.10.0/26</code>，划分 4 个子网，写出每个子网的网络地址、广播地址、可用主机范围。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>分析</strong></p>
+          <p class="muted" style="margin-top:.3rem">用 TCP/IP 协议栈，描述一次<em>从浏览器输入 URL 到页面显示</em>的完整过程（每层发生了什么）。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">04</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>思考</strong></p>
+          <p class="muted" style="margin-top:.3rem">为什么<em>「三次握手」</em>是三次而不是两次？如果是两次，可能出现什么问题？</p>
+        </div>
+      </div>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Look Ahead</p>
+      <h2>下一章预告</h2>
+      <p class="lead">掌握 TCP/IP 之后，下一章我们<strong>动手实践</strong>——ICMP、ARP 与常用网络命令(ping / tracert / ipconfig / nslookup …),用命令验证协议。</p>
+      <p class="muted" style="margin-top:1.4rem;font-size:.92rem">从「知道 TCP/IP」到「熟练使用 TCP/IP」，中间隔着无数次 <strong>ping</strong>。</p>
+    </section>
+
+<section class="slide title">
       <p class="eyebrow">End of Chapter 03</p>
-      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">认识 IP 地址</span></h1>
-      <p class="lead" style="margin-top:1.4rem">从 <code>192.168.1.1</code> 到子网划分——掌握 IP 地址的<strong>全部</strong>细节。</p>
+      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">网络协议与命令</span></h1>
+      <p class="lead" style="margin-top:1.4rem">ping 不通?tracert 到哪儿断了?——用命令<strong>看懂</strong>网络。</p>
       <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
-        End · 60+ slides · Chapter 03
+        End · 62 slides · Chapter 03
       </p>
     </section>
 
@@ -1405,7 +1405,7 @@
     for(let k=0;k<frags.length;k++){
       if(k<fragIdx){
         frags[k].classList.add('visible');
-        frags[k].style.setProperty('--frag-stagger',(k*90)+'ms');
+        frags[k].style.setProperty('--frag-stagger','0ms');
       } else {
         frags[k].classList.remove('visible');
         frags[k].style.setProperty('--frag-stagger','0ms');
@@ -1489,7 +1489,7 @@
       });
     } else {
       stage.style.display='';
-      slides.forEach((s)=>{s.style.display='';});
+      slides.forEach((s)=>{s.style.display='';s.style.position='';s.style.inset='';s.style.aspectRatio='';s.style.padding='';s.style.border='';s.style.borderRadius='';s.style.background='';s.style.cursor='';s.style.overflow='';s.style.transform='';s.style.opacity='';Array.from(s.children).forEach(c=>{c.style.transform='';c.style.transformOrigin='';});});
       show(i);
     }
   }

@@ -291,6 +291,69 @@
     padding:.55rem 0;border-bottom:1px solid var(--hairline)}
   .help .row:last-child{border-bottom:0}
   .help .row span:last-child{font-family:var(--font-mono);font-size:.82em;color:var(--ink-3)}
+  
+  /* ============ Calculation block ============ */
+  .calc-block{border:1px solid var(--accent-ring);border-radius:10px;
+    padding:1.2rem 1.4rem;background:var(--bg-elev-2);
+    margin-top:1.4rem;border-left:3px solid var(--accent);
+    transition:border-color 300ms var(--ease)}
+  .calc-block:hover{border-color:var(--accent);background:var(--bg-elev-3)}
+  .calc-block .calc-title{font-family:var(--font-mono);font-size:.72rem;
+    color:var(--accent);margin-bottom:.8rem;letter-spacing:.04em;
+    display:flex;align-items:center;gap:.5rem}
+  .calc-block .calc-title::before{content:"Σ";font-size:1rem;
+    color:var(--accent);font-weight:700}
+  .calc-step{display:grid;grid-template-columns:30px 1fr;gap:.8rem;
+    padding:.5rem 0;border-bottom:1px dashed var(--hairline);
+    font-family:var(--font-mono);font-size:.82rem;line-height:1.5}
+  .calc-step:last-child{border-bottom:0}
+  .calc-step .num{color:var(--accent);font-weight:600;
+    text-align:right;padding-top:.05rem}
+  .calc-step .label{color:var(--ink);font-weight:500}
+  .calc-step .formula{color:var(--status-warning);font-weight:500;
+    font-family:var(--font-mono);margin-top:.2rem;display:block;
+    font-size:.78rem}
+  .calc-step .result{color:var(--status-good);font-weight:600;
+    font-family:var(--font-mono);margin-top:.2rem;display:block;
+    font-size:.78rem}
+  .calc-step .note{color:var(--ink-3);font-style:italic;
+    margin-top:.2rem;display:block;font-size:.76rem;font-family:var(--font-sans)}
+
+  
+  /* ============ SVG diagram container ============ */
+  .diagram-svg{display:block;margin:1.4rem auto 0;
+    max-width:760px;width:100%;background:var(--bg-elev-2);
+    border:1px solid var(--hairline);border-radius:10px;
+    padding:1.2rem;font-family:var(--font-mono);
+    color:var(--ink-2)}
+  .diagram-svg svg{display:block;width:100%;height:auto;
+    max-height:280px}
+  .diagram-svg .node-fill{fill:var(--bg-elev-3);stroke:var(--accent);
+    stroke-width:1.5}
+  .diagram-svg .router-fill{fill:var(--accent-soft);stroke:var(--accent);
+    stroke-width:2}
+  .diagram-svg .switch-fill{fill:var(--bg-elev-1);stroke:var(--accent-ring);
+    stroke-width:1.5}
+  .diagram-svg .hub-fill{fill:var(--bg-elev-2);stroke:var(--ink-mute);
+    stroke-width:1;stroke-dasharray:3 2}
+  .diagram-svg .pc-fill{fill:var(--bg-elev-2);stroke:var(--ink-3);
+    stroke-width:1}
+  .diagram-svg .label{fill:var(--ink);font-family:var(--font-mono);
+    font-size:11px;text-anchor:middle}
+  .diagram-svg .label-sm{fill:var(--ink-2);font-family:var(--font-mono);
+    font-size:9px;text-anchor:middle}
+  .diagram-svg .label-accent{fill:var(--accent);font-family:var(--font-mono);
+    font-size:11px;font-weight:600;text-anchor:middle}
+  .diagram-svg .label-link{fill:var(--ink-3);font-family:var(--font-mono);
+    font-size:8.5px;text-anchor:middle}
+  .diagram-svg .link{stroke:var(--accent);stroke-width:1.5;fill:none}
+  .diagram-svg .link-dashed{stroke:var(--ink-3);stroke-width:1;
+    stroke-dasharray:4 3;fill:none}
+  .diagram-svg .link-trunk{stroke:var(--status-serious);stroke-width:2;
+    fill:none}
+  .diagram-svg .bus{stroke:var(--accent);stroke-width:3;fill:none}
+  .diagram-svg .bus-end{fill:var(--accent)}
+
   @media print{.stage{position:static;display:block}
     .slide{display:flex!important;opacity:1!important;transform:none!important;
       page-break-after:always;height:100vh;background:#fff;color:#000}
@@ -325,39 +388,39 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Objectives</p>
       <h2>通过本次课,你将能够:</h2>
       <ol class="steps">
         <li class="fragment">解释 <strong>局域网</strong> 的定义与覆盖范围</li>
         <li class="fragment">识别 5 种<strong>网络拓扑结构</strong>的优缺点</li>
-        <li class="fragment">区分 <strong>共享式 vs 交换式</strong> 局域网</li>
         <li class="fragment">理解 <strong>介质访问控制</strong>(CSMA/CD、令牌环)的原理</li>
-        <li class="fragment">说出<strong>以太网系列标准</strong>(10/100/1000/10G BASE-T)</li>
+        <li class="fragment">说出<strong>以太网系列标准</strong>(10/100/1000/10G BASE-T)与 5-4-3 规则</li>
+        <li class="fragment">区分 <strong>共享式 vs 交换式</strong> 局域网</li>
         <li class="fragment">在 Packet Tracer 中搭建一个小型 LAN</li>
       </ol>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Agenda</p>
       <h2>本章结构</h2>
       <ul class="clean">
         <li class="fragment"><strong>PART 01</strong>　任务情境 · SIK 工作室</li>
-        <li class="fragment"><strong>PART 02</strong>　三个任务 · HUB 组网 · 配置 · 测试</li>
-        <li class="fragment"><strong>PART 03</strong>　拓扑结构 · 5 种基本形态</li>
-        <li class="fragment"><strong>PART 04</strong>　介质访问控制 · CSMA/CD · Token</li>
-        <li class="fragment"><strong>PART 05</strong>　以太网标准与组网实践</li>
-        <li class="fragment"><strong>PART 06</strong>　共享式 vs 交换式 · 案例与展望</li>
+        <li class="fragment"><strong>PART 02</strong>　拓扑结构 · 5 种基本形态</li>
+        <li class="fragment"><strong>PART 03</strong>　介质访问控制 · CSMA/CD · Token</li>
+        <li class="fragment"><strong>PART 04</strong>　以太网标准与组网 · 5-4-3 规则</li>
+        <li class="fragment"><strong>PART 05</strong>　三个任务 · HUB 组网 · 配置 · 测试</li>
+        <li class="fragment"><strong>PART 06</strong>　共享式 vs 交换式 · Switch 与案例</li>
       </ul>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 01</p>
       <h2>任务情境 · SIK 工作室</h2>
       <p class="lead">在学校的支持下,召集几个志同道合的同学成立工作室。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Scenario</p>
       <h2>SIK 工作室 · 故事背景</h2>
       <div class="callout fragment">
@@ -390,7 +453,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Needs</p>
       <h2>为什么需要局域网?</h2>
       <div class="grid-2">
@@ -417,123 +480,13 @@
       </div>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
       <p class="eyebrow">PART 02</p>
-      <h2>三个任务</h2>
-      <p class="lead">HUB 组网 → 配置主机 → 测试连通性。</p>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Task 01</p>
-      <h2>任务一 · HUB 组网</h2>
-      <div class="grid-2">
-        <div class="card fragment">
-          <span class="tag">定义</span>
-          <h3>共享式局域网</h3>
-          <p class="muted">所有主机共享同一条传输总线,任何时候只允许一台主机占用总线。</p>
-        </div>
-        <div class="card fragment">
-          <span class="tag">核心</span>
-          <h3>集线器(HUB)</h3>
-          <p class="muted">以<strong>集线器</strong>为核心组建的局域网共享传输总线。</p>
-        </div>
-        <div class="card fragment">
-          <span class="tag">冲突域</span>
-          <h3>同一冲突域</h3>
-          <p class="muted">所有连在 HUB 上的主机处于<strong>同一个冲突域</strong>。</p>
-        </div>
-        <div class="card fragment">
-          <span class="tag">带宽</span>
-          <h3>带宽共享</h3>
-          <p class="muted">n 台主机共享 10/100 Mbps,每台实际可用<strong>约 1/n</strong>。</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">HUB Topology</p>
-      <h2>HUB 星型连接 · 共享总线</h2>
-      <div class="topo fragment">
-                            [ Alice-PC ]
-                                 |
-                            [ Bob-PC ]
-                                 |
-     [ Chris-PC ]-----------[   HUB   ]-----------[ Dave-PC ]
-                                 |
-                            [ Eve-PC ]
-                                 |
-                            [ Frank-PC ]
-      </div>
-      <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
-        表面上是<strong>星型</strong>(每台 PC 独立连线),但 HUB 内部把所有端口连到<strong>同一条总线</strong>——本质仍是<em>共享介质</em>。
-      </p>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Task 02</p>
-      <h2>任务二 · 配置主机名与 TCP/IP</h2>
-      <div class="callout fragment">
-        <div class="ico">Alice</div>
-        <div>
-          <p style="font-size:1.1rem;color:var(--ink)"><strong>192.168.10.10/24</strong></p>
-          <p class="muted" style="margin-top:.3rem">子网掩码 <code>255.255.255.0</code>;主机名 <strong>Alice-PC</strong>。</p>
-        </div>
-      </div>
-      <div class="callout fragment">
-        <div class="ico">Bob</div>
-        <div>
-          <p style="font-size:1.1rem;color:var(--ink)"><strong>192.168.10.20/24</strong></p>
-          <p class="muted" style="margin-top:.3rem">子网掩码 <code>255.255.255.0</code>;主机名 <strong>Bob-PC</strong>。</p>
-        </div>
-      </div>
-      <div class="callout fragment">
-        <div class="ico">Chris</div>
-        <div>
-          <p style="font-size:1.1rem;color:var(--ink)"><strong>192.168.10.30/24</strong></p>
-          <p class="muted" style="margin-top:.3rem">子网掩码 <code>255.255.255.0</code>;主机名 <strong>Chris-PC</strong>。</p>
-        </div>
-      </div>
-      <div class="callout fragment">
-        <div class="ico">提示</div>
-        <div>
-          <p style="font-size:1.1rem;color:var(--ink)"><strong>同网段才可直接互通</strong></p>
-          <p class="muted" style="margin-top:.3rem">三台主机均在 <code>192.168.10.0/24</code> 网段,无需路由器即可互相 ping。</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Config Steps</p>
-      <h2>Windows 设置 · 5 步</h2>
-      <ol class="steps">
-        <li class="fragment">控制面板 → <strong>网络和共享中心</strong> → 更改适配器设置</li>
-        <li class="fragment">右键 <strong>以太网</strong> → 属性 → Internet 协议版本 4 (TCP/IPv4)</li>
-        <li class="fragment">选择「<strong>使用下面的 IP 地址</strong>」</li>
-        <li class="fragment">填入:<strong>IP</strong>(192.168.10.10)、<strong>子网掩码</strong>(255.255.255.0)</li>
-        <li class="fragment">系统 → 属性 → 更改设置 → 填入<strong>计算机名</strong>(Alice-PC),<strong>重启</strong>生效</li>
-      </ol>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Task 03</p>
-      <h2>任务三 · 测试连通性</h2>
-      <ul class="clean">
-        <li class="fragment">用 <code>ping 192.168.10.20</code> 等命令互相测试连通性</li>
-        <li class="fragment">用 <code>ping Alice-PC</code> 测试<strong>主机名解析</strong>是否正常</li>
-        <li class="fragment">若 <strong>Ping 失败</strong>,先看<strong>指示灯</strong>确认物理连接</li>
-        <li class="fragment">再查看 <strong>TCP/IP 配置</strong>,确认 IP、子网掩码</li>
-        <li class="fragment">可在 Packet Tracer 的 <strong>Simulation 模式</strong>下观察包的转发过程</li>
-        <li class="fragment">完成测试后<strong>记录现象</strong>,作为后续故障排查的基础</li>
-      </ul>
-    </section>
-
-    <section class="slide section">
-      <p class="eyebrow">PART 03</p>
       <h2>拓扑结构</h2>
       <p class="lead">网络的<strong>「骨架」</strong>——5 种基本形态。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Topology</p>
       <h2>网络拓扑结构 · 概念</h2>
       <div class="grid-2">
@@ -560,20 +513,27 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Bus</p>
       <h2>总线型拓扑 · 一根主干</h2>
-      <div class="topo fragment">
-     ===[ Terminator ]====PC1====PC2====PC3====[ Terminator ]===
-            50Ω             |        |        |              50Ω
-                           [ HUB ]  [ HUB ]  [ HUB ]
-      </div>
+<div class="diagram-svg fragment"><svg viewBox="0 0 480 200" xmlns="http://www.w3.org/2000/svg">
+  <line x1="40" y1="100" x2="440" y2="100" class="bus"/>
+  <circle cx="40"  cy="100" r="6" class="bus-end"/><text x="40"  y="78" class="label-link">50Ω 端接</text>
+  <circle cx="440" cy="100" r="6" class="bus-end"/><text x="440" y="78" class="label-link">50Ω 端接</text>
+  <line x1="120" y1="100" x2="120" y2="60" class="link-dashed"/>
+  <line x1="240" y1="100" x2="240" y2="60" class="link-dashed"/>
+  <line x1="360" y1="100" x2="360" y2="60" class="link-dashed"/>
+  <rect x="95"  y="35" width="50" height="22" rx="3" class="pc-fill"/><text x="120" y="22" class="label">PC1</text>
+  <rect x="215" y="35" width="50" height="22" rx="3" class="pc-fill"/><text x="240" y="22" class="label">PC2</text>
+  <rect x="335" y="35" width="50" height="22" rx="3" class="pc-fill"/><text x="360" y="22" class="label">PC3</text>
+  <text x="240" y="145" class="label-sm">(同轴电缆 · 10BASE-2)</text>
+</svg></div>
       <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
         所有节点共用<strong>一根主干电缆</strong>;两端<strong>终端电阻</strong>防止信号反射。
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Bus · Pros & Cons</p>
       <h2>总线型 · 优缺点</h2>
       <div class="grid-2">
@@ -600,26 +560,27 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Star</p>
       <h2>星型拓扑 · 现代 LAN 的骨架</h2>
-      <div class="topo fragment">
-                            [ Alice-PC ]
-                                 |
-                            [ Bob-PC ]
-                                 |
-     [ Chris-PC ]-----------[   HUB/SW  ]-----------[ Dave-PC ]
-                                 |
-                            [ Eve-PC ]
-                                 |
-                            [ Frank-PC ]
-      </div>
+<div class="diagram-svg fragment"><svg viewBox="0 0 480 240" xmlns="http://www.w3.org/2000/svg">
+  <line x1="240" y1="40" x2="240" y2="120" class="link"/>
+  <line x1="80"  y1="120" x2="210" y2="120" class="link"/>
+  <line x1="400" y1="120" x2="270" y2="120" class="link"/>
+  <line x1="240" y1="200" x2="240" y2="120" class="link"/>
+  <rect x="200" y="105" width="80" height="30" rx="4" class="switch-fill"/>
+  <text x="240" y="125" class="label-accent">SWITCH</text>
+  <rect x="215" y="22"  width="50" height="22" rx="3" class="pc-fill"/><text x="240" y="38" class="label">Alice-PC</text>
+  <rect x="55"  y="105" width="50" height="22" rx="3" class="pc-fill"/><text x="80"  y="120" class="label">Chris-PC</text>
+  <rect x="375" y="105" width="50" height="22" rx="3" class="pc-fill"/><text x="400" y="120" class="label">Dave-PC</text>
+  <rect x="215" y="200" width="50" height="22" rx="3" class="pc-fill"/><text x="240" y="216" class="label">Eve-PC</text>
+</svg></div>
       <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
         所有节点通过独立链路连到<strong>中央节点</strong>——早期是 HUB,现代是<strong>交换机</strong>。
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Star · Pros & Cons</p>
       <h2>星型 · 优缺点</h2>
       <div class="grid-2">
@@ -646,22 +607,22 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Ring</p>
       <h2>环形拓扑 · 单向令牌环</h2>
       <div class="ring-vis">
         <div class="ring"></div>
-        <div class="node fragment" style="left:50%;top:5px">PC1</div>
-        <div class="node fragment" style="left:95%;top:50%">PC2</div>
-        <div class="node fragment" style="left:50%;top:95%">PC3</div>
-        <div class="node fragment" style="left:5%;top:50%">PC4</div>
+        <div class="node fragment" style="left:50%;top:30px">PC1</div>
+        <div class="node fragment" style="left:270px;top:50%">PC2</div>
+        <div class="node fragment" style="left:50%;top:270px">PC3</div>
+        <div class="node fragment" style="left:30px;top:50%">PC4</div>
       </div>
       <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
         数据沿环<strong>单向传输</strong>;令牌在环上传递,获得令牌的节点才能发送——典型应用:<strong>令牌环 / FDDI</strong>。
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Ring · Pros & Cons</p>
       <h2>环形 · 优缺点</h2>
       <div class="grid-2">
@@ -688,22 +649,45 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Tree</p>
-      <h2>树型拓扑 · 星型的层次化</h2>
-      <div class="topo fragment">
-                              [ Core Switch ]
-                                    |
-                          __________|__________
-                         /          |                             [ Switch ]   [ Switch ]   [ Switch ]
-                      /  \        /  \         /                [PC1][PC2][PC3][PC4][PC5][PC6][PC7][PC8]
-      </div>
+      <h2>树型拓扑 · 层级结构</h2>
+      <div class="diagram-svg fragment"><svg viewBox="0 0 480 240" xmlns="http://www.w3.org/2000/svg">
+  <line x1="240" y1="40" x2="240" y2="80" class="link"/>
+  <line x1="120" y1="80" x2="360" y2="80" class="link"/>
+  <line x1="120" y1="80" x2="120" y2="120" class="link"/>
+  <line x1="240" y1="80" x2="240" y2="120" class="link"/>
+  <line x1="360" y1="80" x2="360" y2="120" class="link"/>
+  <line x1="80"  y1="120" x2="160" y2="120" class="link"/>
+  <line x1="200" y1="120" x2="280" y2="120" class="link"/>
+  <line x1="320" y1="120" x2="400" y2="120" class="link"/>
+  <line x1="80"  y1="120" x2="80"  y2="170" class="link"/>
+  <line x1="160" y1="120" x2="160" y2="170" class="link"/>
+  <line x1="200" y1="120" x2="200" y2="170" class="link"/>
+  <line x1="280" y1="120" x2="280" y2="170" class="link"/>
+  <line x1="320" y1="120" x2="320" y2="170" class="link"/>
+  <line x1="400" y1="120" x2="400" y2="170" class="link"/>
+  <rect x="200" y="30" width="80" height="22" rx="3" class="switch-fill"/>
+  <text x="240" y="45" class="label-accent">核心</text>
+  <rect x="90"  y="100" width="60" height="22" rx="3" class="switch-fill"/>
+  <text x="120" y="115" class="label-sm">汇聚1</text>
+  <rect x="210" y="100" width="60" height="22" rx="3" class="switch-fill"/>
+  <text x="240" y="115" class="label-sm">汇聚2</text>
+  <rect x="330" y="100" width="60" height="22" rx="3" class="switch-fill"/>
+  <text x="360" y="115" class="label-sm">汇聚3</text>
+  <circle cx="80"  cy="195" r="6" class="pc-fill"/><text x="80"  y="220" class="label-sm">PC1</text>
+  <circle cx="160" cy="195" r="6" class="pc-fill"/><text x="160" y="220" class="label-sm">PC2</text>
+  <circle cx="200" cy="195" r="6" class="pc-fill"/><text x="200" y="220" class="label-sm">PC3</text>
+  <circle cx="280" cy="195" r="6" class="pc-fill"/><text x="280" y="220" class="label-sm">PC4</text>
+  <circle cx="320" cy="195" r="6" class="pc-fill"/><text x="320" y="220" class="label-sm">PC5</text>
+  <circle cx="400" cy="195" r="6" class="pc-fill"/><text x="400" y="220" class="label-sm">PC6</text>
+</svg></div>
       <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
         树型 = 多个星型<strong>按层次级联</strong>——核心层、汇聚层、接入层。
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Tree · Pros & Cons</p>
       <h2>树型 · 优缺点</h2>
       <div class="grid-2">
@@ -730,7 +714,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Mesh</p>
       <h2>网状型拓扑 · 多路径冗余</h2>
       <div class="grid-2">
@@ -757,7 +741,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Hybrid</p>
       <h2>混合型拓扑 · 真实工程</h2>
       <ul class="clean">
@@ -769,7 +753,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Compare</p>
       <h2>5 种拓扑 · 一表对比</h2>
       <table class="t">
@@ -784,13 +768,13 @@
       </table>
     </section>
 
-    <section class="slide section">
-      <p class="eyebrow">PART 04</p>
+<section class="slide section">
+      <p class="eyebrow">PART 03</p>
       <h2>介质访问控制 · MAC</h2>
       <p class="lead">共享介质上,<strong>谁可以说话</strong>?——三种经典方法。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Why MAC</p>
       <h2>为什么需要介质访问控制?</h2>
       <div class="grid-3">
@@ -827,7 +811,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">MAC Methods</p>
       <h2>三种经典介质访问控制</h2>
       <div class="grid-3">
@@ -849,7 +833,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">CSMA/CD</p>
       <h2>CSMA/CD · 十六字口诀</h2>
       <div class="csmacd">
@@ -879,12 +863,12 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Token Ring</p>
       <h2>令牌环 · 工作原理</h2>
       <ul class="clean">
         <li class="fragment"><strong>空闲时</strong>:令牌沿环绕行;任何站点必须<strong>先获得令牌</strong>才能发送</li>
-        <li class="fragment"><strong>发送站点</strong>:捕获令牌 → 发送数据帧 → 释放令牌 → 等待数据绕环一周被吸收</li>
+        <li class="fragment"><strong>发送站点</strong>:捕获令牌 → 发送数据帧 → 帧绕环一周<strong>被发送站收回</strong> → 释放新令牌</li>
         <li class="fragment"><strong>中间站点</strong>(目的地址非己):<strong>转发</strong>环上的数据帧</li>
         <li class="fragment"><strong>接收站点</strong>(目的地址为己):<strong>拷贝</strong>数据帧,然后继续转发</li>
         <li class="fragment">令牌机制保证<strong>任一时刻只有一台站点在发送</strong>,从根本上避免冲突</li>
@@ -892,7 +876,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">FDDI</p>
       <h2>FDDI · 双环自愈</h2>
       <div class="grid-2">
@@ -919,13 +903,13 @@
       </div>
     </section>
 
-    <section class="slide section">
-      <p class="eyebrow">PART 05</p>
+<section class="slide section">
+      <p class="eyebrow">PART 04</p>
       <h2>以太网标准与组网</h2>
       <p class="lead">10/100/1000 Mbps 的演进——同一根双绞线,越来越快。</p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Ethernet Standards</p>
       <h2>以太网主要技术标准</h2>
       <table class="t">
@@ -944,7 +928,7 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">10 vs 100</p>
       <h2>10 Mb/s 与 100 Mb/s · 单 HUB 组网</h2>
       <div class="grid-2">
@@ -971,7 +955,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Multi-HUB</p>
       <h2>多 HUB 级联 · 扩大规模</h2>
       <ul class="clean">
@@ -984,7 +968,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Cascade</p>
       <h2>多 HUB 级联结构 · 两种形态</h2>
       <div class="grid-2">
@@ -1014,60 +998,249 @@
     <section class="slide">
       <p class="eyebrow">5-4-3 Rule</p>
       <h2>10 Mb/s 以太网 · 5-4-3 规则</h2>
-      <div class="topo fragment">
-     [PC]---[HUB]---[HUB]---[HUB]---[HUB]---[PC]
-        |    1        2        3        4
-     segment1 seg2 seg3 seg4 seg5
-                    |
-                max 5 segments · 4 HUBs · 3 populated
+      <div class="calc-block fragment">
+        <div class="calc-title">规则拆解 · 5 段 · 4 HUB · 3 段接设备</div>
+        <div class="calc-step">
+          <span class="num">01</span>
+          <div>
+            <span class="label">5 段</span>
+            <span class="formula">PC1 → 段1 → HUB1 → 段2 → HUB2 → 段3 → HUB3 → 段4 → HUB4 → 段5 → PC2</span>
+            <span class="result">任意两台主机之间最多 5 个物理网段</span>
+            <span class="note">两端 PC 直连的段也计入在内</span>
+          </div>
+        </div>
+        <div class="calc-step">
+          <span class="num">02</span>
+          <div>
+            <span class="label">4 HUB</span>
+            <span class="formula">最多串接 4 台 HUB</span>
+            <span class="result">HUB1 – HUB4</span>
+            <span class="note">再多信号衰减与延迟过大</span>
+          </div>
+        </div>
+        <div class="calc-step">
+          <span class="num">03</span>
+          <div>
+            <span class="label">3 段接设备</span>
+            <span class="formula">最多 3 个段可接 PC</span>
+            <span class="result">段 1 / 3 / 5 接 PC</span>
+            <span class="note">段 2 / 4 仅用于连接 HUB,不接设备</span>
+          </div>
+        </div>
+      </div>
+      <div class="diagram-svg fragment">
+        <svg viewBox="0 0 760 170" xmlns="http://www.w3.org/2000/svg">
+          <line x1="40" y1="60" x2="140" y2="60" class="link"/>
+          <line x1="200" y1="60" x2="260" y2="60" class="link"/>
+          <line x1="320" y1="60" x2="380" y2="60" class="link"/>
+          <line x1="440" y1="60" x2="500" y2="60" class="link"/>
+          <line x1="560" y1="60" x2="690" y2="60" class="link"/>
+          <circle cx="30" cy="60" r="10" class="pc-fill"/>
+          <text x="30" y="92" class="label-sm" text-anchor="middle">PC1</text>
+          <rect x="140" y="48" width="60" height="24" rx="4" class="switch-fill"/>
+          <text x="170" y="64" class="label-sm" text-anchor="middle">HUB1</text>
+          <rect x="260" y="48" width="60" height="24" rx="4" class="switch-fill"/>
+          <text x="290" y="64" class="label-sm" text-anchor="middle">HUB2</text>
+          <rect x="380" y="48" width="60" height="24" rx="4" class="switch-fill"/>
+          <text x="410" y="64" class="label-sm" text-anchor="middle">HUB3</text>
+          <rect x="500" y="48" width="60" height="24" rx="4" class="switch-fill"/>
+          <text x="530" y="64" class="label-sm" text-anchor="middle">HUB4</text>
+          <circle cx="700" cy="60" r="10" class="pc-fill"/>
+          <text x="700" y="92" class="label-sm" text-anchor="middle">PC2</text>
+          <text x="90" y="135" class="label-accent" text-anchor="middle">段1</text>
+          <text x="230" y="135" class="label-sm" text-anchor="middle">段2</text>
+          <text x="350" y="135" class="label-accent" text-anchor="middle">段3</text>
+          <text x="470" y="135" class="label-sm" text-anchor="middle">段4</text>
+          <text x="625" y="135" class="label-accent" text-anchor="middle">段5</text>
+          <text x="380" y="160" class="label-sm" text-anchor="middle">高亮段(1/3/5)可接设备 · 其余段仅连接 HUB</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">5-4-3 Math</p>
+      <h2>为什么是 5-4-3?· 数学依据</h2>
+      <div class="calc-block fragment">
+        <div class="calc-title">计算 · 冲突检测给网络划了「红线」</div>
+        <div class="calc-step">
+          <span class="num">01</span>
+          <div>
+            <span class="label">根因</span>
+            <span class="formula">CSMA/CD:最坏情况下信号往返时延必须 ≤ 1 个时隙</span>
+            <span class="result">10 Mb/s 时隙 = 512 bit 时间 ≈ 51.2 μs</span>
+            <span class="note">否则两端同时发送,谁都检测不到冲突</span>
+          </div>
+        </div>
+        <div class="calc-step">
+          <span class="num">02</span>
+          <div>
+            <span class="label">距离上限</span>
+            <span class="formula">5 段 × 每段 ≤ 500m（粗缆 10BASE-5）→ ≤ 2500m</span>
+            <span class="result">信号往返 ≈ 5000m ÷ 2×10⁸ m/s ≈ 25 μs</span>
+            <span class="note">双绞线 10BASE-T 每段 100m → 端到端 500m</span>
+          </div>
+        </div>
+        <div class="calc-step">
+          <span class="num">03</span>
+          <div>
+            <span class="label">100 Mb/s 更严</span>
+            <span class="formula">速率 ×10 → 时隙缩短到 5.12 μs(仍是 512 bit)</span>
+            <span class="result">最多 2 个 HUB,最大直径 205m(Class II 中继器)</span>
+            <span class="note">速率越高,留给信号传播的时间越短</span>
+          </div>
+        </div>
       </div>
       <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
-        <strong>5</strong> 段、<strong>4</strong> 个 HUB、<strong>3</strong> 个有设备的段 ——<em>这是 10BASE-T 网络的理论上限</em>。
+        一句话:<strong>时隙不变(512 bit),速率越快 → 允许的距离越短</strong>——这就是 100BASE-TX 只允许 <strong>2 个 HUB、205m</strong> 的原因。
       </p>
     </section>
 
-    <section class="slide section">
+<section class="slide section">
+      <p class="eyebrow">PART 05</p>
+      <h2>三个任务</h2>
+      <p class="lead">HUB 组网 → 配置主机 → 测试连通性。</p>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Task 01</p>
+      <h2>任务一 · HUB 组网</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">定义</span>
+          <h3>共享式局域网</h3>
+          <p class="muted">所有主机共享同一条传输总线,任何时候只允许一台主机占用总线。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">核心</span>
+          <h3>集线器(HUB)</h3>
+          <p class="muted">以<strong>集线器</strong>为核心组建的局域网共享传输总线。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">冲突域</span>
+          <h3>同一冲突域</h3>
+          <p class="muted">所有连在 HUB 上的主机处于<strong>同一个冲突域</strong>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">带宽</span>
+          <h3>带宽共享</h3>
+          <p class="muted">n 台主机共享 10/100 Mbps,每台实际可用<strong>约 1/n</strong>。</p>
+        </div>
+      </div>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">HUB Topology</p>
+      <h2>HUB 星型连接 · 共享总线</h2>
+<div class="diagram-svg fragment"><svg viewBox="0 0 360 240" xmlns="http://www.w3.org/2000/svg">
+  <line x1="180" y1="40" x2="180" y2="120" class="link"/>
+  <line x1="60"  y1="120" x2="150" y2="120" class="link"/>
+  <line x1="300" y1="120" x2="210" y2="120" class="link"/>
+  <line x1="180" y1="200" x2="180" y2="120" class="link"/>
+  <line x1="100" y1="172" x2="160" y2="135" class="link"/>
+  <line x1="260" y1="172" x2="200" y2="135" class="link"/>
+  <rect x="140" y="105" width="80" height="30" rx="4" class="hub-fill"/>
+  <text x="180" y="125" class="label-accent">HUB</text>
+  <rect x="155" y="22"  width="50" height="22" rx="3" class="pc-fill"/><text x="180" y="38" class="label">Alice-PC</text>
+  <rect x="35"  y="105" width="50" height="22" rx="3" class="pc-fill"/><text x="60"  y="120" class="label">Chris-PC</text>
+  <rect x="275" y="105" width="50" height="22" rx="3" class="pc-fill"/><text x="300" y="120" class="label">Dave-PC</text>
+  <rect x="155" y="200" width="50" height="22" rx="3" class="pc-fill"/><text x="180" y="216" class="label">Eve-PC</text>
+  <rect x="75"  y="172" width="50" height="22" rx="3" class="pc-fill"/><text x="100" y="186" class="label-sm">Bob-PC</text>
+  <rect x="235" y="172" width="50" height="22" rx="3" class="pc-fill"/><text x="260" y="186" class="label-sm">Frank-PC</text>
+</svg></div>
+      <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
+        表面上是<strong>星型</strong>(每台 PC 独立连线),但 HUB 内部把所有端口连到<strong>同一条总线</strong>——本质仍是<em>共享介质</em>。
+      </p>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Task 02</p>
+      <h2>任务二 · 配置主机名与 TCP/IP</h2>
+      <div class="callout fragment">
+        <div class="ico">Alice</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>192.168.10.10/24</strong></p>
+          <p class="muted" style="margin-top:.3rem">子网掩码 <code>255.255.255.0</code>;主机名 <strong>Alice-PC</strong>。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">Bob</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>192.168.10.20/24</strong></p>
+          <p class="muted" style="margin-top:.3rem">子网掩码 <code>255.255.255.0</code>;主机名 <strong>Bob-PC</strong>。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">Chris</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>192.168.10.30/24</strong></p>
+          <p class="muted" style="margin-top:.3rem">子网掩码 <code>255.255.255.0</code>;主机名 <strong>Chris-PC</strong>。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">提示</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>同网段才可直接互通</strong></p>
+          <p class="muted" style="margin-top:.3rem">三台主机均在 <code>192.168.10.0/24</code> 网段,无需路由器即可互相 ping。</p>
+        </div>
+      </div>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Config Steps</p>
+      <h2>Windows 设置 · 5 步</h2>
+      <ol class="steps">
+        <li class="fragment">控制面板 → <strong>网络和共享中心</strong> → 更改适配器设置</li>
+        <li class="fragment">右键 <strong>以太网</strong> → 属性 → Internet 协议版本 4 (TCP/IPv4)</li>
+        <li class="fragment">选择「<strong>使用下面的 IP 地址</strong>」</li>
+        <li class="fragment">填入:<strong>IP</strong>(192.168.10.10)、<strong>子网掩码</strong>(255.255.255.0)</li>
+        <li class="fragment">系统 → 属性 → 更改设置 → 填入<strong>计算机名</strong>(Alice-PC),<strong>重启</strong>生效</li>
+      </ol>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Task 03</p>
+      <h2>任务三 · 测试连通性</h2>
+      <ul class="clean">
+        <li class="fragment">用 <code>ping 192.168.10.20</code> 等命令互相测试连通性</li>
+        <li class="fragment">用 <code>ping Alice-PC</code> 测试<strong>主机名解析</strong>是否正常（真实 Windows 有效；<em>PT 6.2 的 PC 不支持主机名解析，请改用 IP</em>）</li>
+        <li class="fragment">若 <strong>Ping 失败</strong>,先看<strong>指示灯</strong>确认物理连接</li>
+        <li class="fragment">再查看 <strong>TCP/IP 配置</strong>,确认 IP、子网掩码</li>
+        <li class="fragment">可在 Packet Tracer 的 <strong>Simulation 模式</strong>下观察包的转发过程</li>
+        <li class="fragment">完成测试后<strong>记录现象</strong>,作为后续故障排查的基础</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Interlude</p>
+      <h2>任务完成 · 但 HUB 有极限</h2>
+      <p class="lead">三个任务全部成功——可当工作室从 <strong>3 人</strong> 扩到 <strong>12 人</strong>,HUB 还撑得住吗?</p>
+      <div class="grid-2" style="margin-top:1.6rem">
+        <div>
+          <span class="verdict bad">HUB 的先天不足</span>
+          <ul class="clean" style="margin-top:.8rem">
+            <li class="fragment">带宽共享:12 台 PC 平分 100 Mb/s（每台 ≈ 8.3M）</li>
+            <li class="fragment">冲突不断:两台同时发包就得重发</li>
+            <li class="fragment">规模受限:5-4-3 规则卡死扩展</li>
+          </ul>
+        </div>
+        <div>
+          <span class="verdict good">下一步的答案</span>
+          <ul class="clean" style="margin-top:.8rem">
+            <li class="fragment">共享式 → <strong>交换式</strong></li>
+            <li class="fragment">HUB → <strong>Switch</strong></li>
+            <li class="fragment">「大家一起听」→ <strong>精准转发</strong></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+<section class="slide section">
       <p class="eyebrow">PART 06</p>
       <h2>共享式 vs 交换式</h2>
       <p class="lead">从 HUB 到 Switch——LAN 的<strong>革命性升级</strong>。</p>
     </section>
 
-    <section class="slide">
-      <p class="eyebrow">Shared vs Switched</p>
-      <h2>共享式 vs 交换式 · 一表对比</h2>
-      <table class="t">
-        <thead><tr><th>维度</th><th>共享式(HUB)</th><th>交换式(Switch)</th></tr></thead>
-        <tbody>
-          <tr class="fragment"><td>工作方式</td><td>所有端口共享总线</td><td>每端口独立冲突域</td></tr>
-          <tr class="fragment"><td>冲突</td><td>大量冲突</td><td>无冲突</td></tr>
-          <tr class="fragment"><td>带宽</td><td>共享(总带宽/n)</td><td>每端口独占</td></tr>
-          <tr class="fragment"><td>全双工</td><td>否</td><td>是</td></tr>
-          <tr class="fragment"><td>MAC 学习</td><td>无</td><td>有 MAC 表</td></tr>
-          <tr class="fragment"><td>现代地位</td><td>已淘汰</td><td><strong>主流</strong></td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section class="slide">
-      <p class="eyebrow">Compare · Detail</p>
-      <h2>共享式 vs 交换式 · 详细对比</h2>
-      <div class="compare-grid">
-        <div>
-          <span class="verdict bad">旧 · 共享式</span>
-          <h3>HUB 时代</h3>
-          <p>所有 PC 共用同一条<strong>总线</strong>——A 发包时 B/C/D 都<em>被迫收到</em>。</p>
-          <p style="margin-top:.6rem">冲突严重、带宽均分、需要 MAC 地址过滤。</p>
-        </div>
-        <div>
-          <span class="verdict good">新 · 交换式</span>
-          <h3>Switch 时代</h3>
-          <p>每端口是<strong>独立的微冲突域</strong>——A 与 B 通信不影响 C 与 D。</p>
-          <p style="margin-top:.6rem">全双工、并行通信、每端口独享带宽。</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Case 01</p>
       <h2>案例 1 · 共享式 LAN 越用越慢</h2>
       <div class="case-box">
@@ -1088,7 +1261,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Case 02</p>
       <h2>案例 2 · HUB 级联过多</h2>
       <div class="case-box">
@@ -1110,7 +1283,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Switch vs Hub</p>
       <h2>Switch vs Hub · 工作方式</h2>
       <div class="grid-2">
@@ -1130,24 +1303,24 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">MAC Table</p>
       <h2>Switch 的 MAC 地址学习</h2>
       <ul class="clean">
         <li class="fragment">每台 Switch 内部维护一张<strong>MAC 地址表</strong></li>
         <li class="fragment">每收到一帧,记录 <strong>源 MAC + 端口号</strong> → 学习</li>
-        <li class="fragment">转发时,查目的 MAC:<strong>找到</strong> → 单播;找不到 → <strong>广播</strong></li>
+        <li class="fragment">转发时,查目的 MAC:<strong>找到</strong> → 单播;找不到 → <strong>洪泛</strong>到除入端口外的所有端口</li>
         <li class="fragment">一段时间不用的 MAC 条目会被<strong>老化</strong>(默认 5 分钟)</li>
         <li class="fragment">所以 Switch 启动后要<em>「学习一段时间」</em>才能正常工作</li>
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Learning</p>
       <h2>Switch 的学习过程 · 4 步</h2>
       <ol class="steps">
         <li class="fragment">A 给 B 发帧 → Switch 从 Port 1 收到帧,记录:<strong>MAC_A → Port 1</strong></li>
-        <li class="fragment">查 MAC 表,目的 MAC_B 不存在 → <strong>广播</strong>到所有其他端口</li>
+        <li class="fragment">查 MAC 表,目的 MAC_B 不存在 → <strong>洪泛</strong>到除入端口外的所有端口</li>
         <li class="fragment">B 收到并回复 → Switch 从 Port 2 收到,记录:<strong>MAC_B → Port 2</strong></li>
         <li class="fragment">以后 A↔B 的通信<strong>直接 Port 1 ↔ Port 2</strong>,不再广播</li>
       </ol>
@@ -1156,7 +1329,7 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Switch · Pros</p>
       <h2>交换机的 4 大优势</h2>
       <div class="grid-2">
@@ -1178,12 +1351,12 @@
         <div class="card fragment">
           <span class="tag">扩展性</span>
           <h3>任意级联</h3>
-          <p class="muted">多台 Switch 级联不影响性能——突破 5-4-3 限制。</p>
+          <p class="muted">多台 Switch 级联不再受 5-4-3 限制;但上联带宽、背板容量与 STP 仍需规划。</p>
         </div>
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Full Duplex</p>
       <h2>全双工 · 收发同时进行</h2>
       <ul class="clean">
@@ -1195,7 +1368,7 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Broadcast Domain</p>
       <h2>广播域 vs 冲突域</h2>
       <div class="grid-2">
@@ -1211,7 +1384,7 @@
         </div>
         <div class="card fragment">
           <span class="tag">关键</span>
-          <h3>HUB 分冲突不分广播</h3>
+          <h3>HUB 不分冲突也不分广播</h3>
           <p class="muted">HUB 既不分割冲突域、也不分割广播域——所以性能差。</p>
         </div>
         <div class="card fragment">
@@ -1222,7 +1395,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Broadcast Storm</p>
       <h2>广播风暴 · 共享介质的隐忧</h2>
       <ul class="clean">
@@ -1236,7 +1409,42 @@
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
+      <p class="eyebrow">Shared vs Switched</p>
+      <h2>共享式 vs 交换式 · 一表对比</h2>
+      <table class="t">
+        <thead><tr><th>维度</th><th>共享式(HUB)</th><th>交换式(Switch)</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>工作方式</td><td>所有端口共享总线</td><td>每端口独立冲突域</td></tr>
+          <tr class="fragment"><td>冲突</td><td>大量冲突</td><td>无冲突</td></tr>
+          <tr class="fragment"><td>带宽</td><td>共享(总带宽/n)</td><td>每端口独占</td></tr>
+          <tr class="fragment"><td>全双工</td><td>否</td><td>是</td></tr>
+          <tr class="fragment"><td>MAC 学习</td><td>无</td><td>有 MAC 表</td></tr>
+          <tr class="fragment"><td>现代地位</td><td>已淘汰</td><td><strong>主流</strong></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+<section class="slide">
+      <p class="eyebrow">Compare · Detail</p>
+      <h2>共享式 vs 交换式 · 详细对比</h2>
+      <div class="compare-grid">
+        <div>
+          <span class="verdict bad">旧 · 共享式</span>
+          <h3>HUB 时代</h3>
+          <p>所有 PC 共用同一条<strong>总线</strong>——A 发包时 B/C/D 都<em>被迫收到</em>。</p>
+          <p style="margin-top:.6rem">冲突严重、带宽均分、需要 MAC 地址过滤。</p>
+        </div>
+        <div>
+          <span class="verdict good">新 · 交换式</span>
+          <h3>Switch 时代</h3>
+          <p>每端口是<strong>独立的微冲突域</strong>——A 与 B 通信不影响 C 与 D。</p>
+          <p style="margin-top:.6rem">全双工、并行通信、每端口独享带宽。</p>
+        </div>
+      </div>
+    </section>
+
+<section class="slide">
       <p class="eyebrow">Lab · Setup</p>
       <h2>实验搭建 · 5 步</h2>
       <ol class="steps">
@@ -1248,7 +1456,7 @@
       </ol>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Lab · Test</p>
       <h2>实验测试 · 5 步</h2>
       <ol class="steps">
@@ -1260,7 +1468,7 @@
       </ol>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Case 03</p>
       <h2>案例 3 · 真实工程:HUB 换 Switch</h2>
       <div class="case-box">
@@ -1283,7 +1491,7 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Why Switch</p>
       <h2>为什么现代 LAN 全部用 Switch?</h2>
       <div class="grid-2">
@@ -1310,23 +1518,47 @@
       </div>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Architecture</p>
       <h2>现代 LAN 三层架构</h2>
-      <div class="topo fragment">
-                          [ Core Switch ]
-                                |
-                  ____________|____________
-                /                                    [ Aggregation Switch ]   [ Aggregation Switch ]
-                /          \              /                  [ Access SW ] [ Access SW ]  [ Access SW ] [ Access SW ]
-          /  |  \        /  |  \        /  |  \        /  |           PC PC PC PC  PC PC PC PC  PC PC PC PC  PC PC PC PC
+            <div class="diagram-svg fragment">
+        <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg">
+          <rect x="300" y="28" width="160" height="30" rx="6" class="switch-fill"/>
+          <text x="380" y="48" class="label-accent" text-anchor="middle">核心层 · Core</text>
+          <line x1="350" y1="58" x2="200" y2="95" class="link"/>
+          <line x1="410" y1="58" x2="560" y2="95" class="link"/>
+          <rect x="130" y="95" width="140" height="26" rx="6" class="switch-fill"/>
+          <text x="200" y="112" class="label-sm" text-anchor="middle">汇聚层 1</text>
+          <rect x="490" y="95" width="140" height="26" rx="6" class="switch-fill"/>
+          <text x="560" y="112" class="label-sm" text-anchor="middle">汇聚层 2</text>
+          <line x1="200" y1="121" x2="155" y2="152" class="link"/>
+          <line x1="200" y1="121" x2="315" y2="152" class="link"/>
+          <line x1="560" y1="121" x2="475" y2="152" class="link"/>
+          <line x1="560" y1="121" x2="635" y2="152" class="link"/>
+          <rect x="95" y="152" width="120" height="24" rx="6" class="switch-fill"/>
+          <text x="155" y="168" class="label-sm" text-anchor="middle">接入层 SW1</text>
+          <rect x="255" y="152" width="120" height="24" rx="6" class="switch-fill"/>
+          <text x="315" y="168" class="label-sm" text-anchor="middle">接入层 SW2</text>
+          <rect x="415" y="152" width="120" height="24" rx="6" class="switch-fill"/>
+          <text x="475" y="168" class="label-sm" text-anchor="middle">接入层 SW3</text>
+          <rect x="575" y="152" width="120" height="24" rx="6" class="switch-fill"/>
+          <text x="635" y="168" class="label-sm" text-anchor="middle">接入层 SW4</text>
+          <line x1="155" y1="176" x2="155" y2="200" class="link"/>
+          <line x1="315" y1="176" x2="315" y2="200" class="link"/>
+          <line x1="475" y1="176" x2="475" y2="200" class="link"/>
+          <line x1="635" y1="176" x2="635" y2="200" class="link"/>
+          <circle cx="155" cy="210" r="8" class="pc-fill"/><text x="155" y="236" class="label-sm" text-anchor="middle">PC…</text>
+          <circle cx="315" cy="210" r="8" class="pc-fill"/><text x="315" y="236" class="label-sm" text-anchor="middle">PC…</text>
+          <circle cx="475" cy="210" r="8" class="pc-fill"/><text x="475" y="236" class="label-sm" text-anchor="middle">PC…</text>
+          <circle cx="635" cy="210" r="8" class="pc-fill"/><text x="635" y="236" class="label-sm" text-anchor="middle">PC…</text>
+        </svg>
       </div>
       <p class="muted fragment" style="margin-top:1.2rem;font-size:.92rem">
         <strong>核心层 → 汇聚层 → 接入层</strong>——大型 LAN / 校园网的标准架构。
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Recap</p>
       <h2>本章小结</h2>
       <ol class="steps">
@@ -1339,31 +1571,31 @@
       </ol>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Misconceptions</p>
       <h2>常见误解 · 别踩坑</h2>
       <ul class="clean">
         <li class="fragment">「<em>HUB 和 Switch 都能用</em>」——<strong>错</strong>。HUB 早已淘汰,Switch 价格更低性能更好。</li>
-        <li class="fragment">「<em>100M Switch 每端口 100M</em>」——<strong>错</strong>。100M Switch 是<em>「每端口独享 100M」</em>,不是 100M/n。</li>
+        <li class="fragment">「<em>100M Switch 是整机 100M、大家平分</em>」——<strong>错</strong>。100M Switch 是<em>「每端口独享 100M」</em>,不是 100M/n。</li>
         <li class="fragment">「<em>Switch 隔离广播</em>」——<strong>错</strong>。Switch 隔离<em>冲突</em>但不隔离<em>广播</em>——广播域默认全网。</li>
         <li class="fragment">「<em>MAC 地址全球唯一</em>」——<strong>理论上</strong>,但虚拟机、克隆会重复。</li>
         <li class="fragment">「<em>CSMA/CD 已过时</em>」——<strong>部分对</strong>。Switch 全双工下基本不用,但 HUB 仍要。</li>
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Pitfalls</p>
       <h2>工程师常犯的 5 个错</h2>
       <ul class="clean">
         <li class="fragment"><strong>用 HUB 组大网</strong>　——人多了就卡</li>
-        <li class="fragment"><strong>忘了关闭 STP</strong>　——冗余链路直接广播风暴</li>
+        <li class="fragment"><strong>误把 STP 关掉</strong>　——冗余链路直接广播风暴</li>
         <li class="fragment"><strong>配置错全双工</strong>　——一端全双工、另一端半双工 → 性能极差</li>
-        <li class="fragment"><strong>Switch 当 Hub 买</strong>　——便宜 Switch 可能没 MAC 学习功能</li>
+        <li class="fragment"><strong>采购只看端口数</strong>　——不看背板带宽，上联带宽不足 → 卡顿</li>
         <li class="fragment"><strong>广播域过大</strong>　——不划分 VLAN,几百台机器互发广播</li>
       </ul>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Look Ahead</p>
       <h2>下一章预告 · VLAN</h2>
       <p class="lead">Switch 解决了<em>「冲突域」</em>,但广播域依然过大——<strong>VLAN</strong> 让一台 Switch 同时承载多个<em>「独立网络」</em>。</p>
@@ -1372,7 +1604,7 @@
       </p>
     </section>
 
-    <section class="slide">
+<section class="slide">
       <p class="eyebrow">Homework</p>
       <h2>作业</h2>
       <div class="callout fragment">
@@ -1412,12 +1644,12 @@
       </div>
     </section>
 
-    <section class="slide title">
+<section class="slide title">
       <p class="eyebrow">End of Chapter 08</p>
       <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">配置 VLAN</span></h1>
       <p class="lead" style="margin-top:1.4rem">从<strong>「共享」</strong>走向<strong>「隔离」</strong>——一台 Switch 承载多个独立网络。</p>
       <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
-        End · 60 slides · Chapter 08
+        End · 62 slides · Chapter 08
       </p>
     </section>
 
@@ -1466,7 +1698,7 @@
     for(let k=0;k<frags.length;k++){
       if(k<fragIdx){
         frags[k].classList.add('visible');
-        frags[k].style.setProperty('--frag-stagger',(k*90)+'ms');
+        frags[k].style.setProperty('--frag-stagger','0ms');
       } else {
         frags[k].classList.remove('visible');
         frags[k].style.setProperty('--frag-stagger','0ms');
@@ -1550,7 +1782,7 @@
       });
     } else {
       stage.style.display='';
-      slides.forEach((s)=>{s.style.display='';});
+      slides.forEach((s)=>{s.style.display='';s.style.position='';s.style.inset='';s.style.aspectRatio='';s.style.padding='';s.style.border='';s.style.borderRadius='';s.style.background='';s.style.cursor='';s.style.overflow='';s.style.transform='';s.style.opacity='';Array.from(s.children).forEach(c=>{c.style.transform='';c.style.transformOrigin='';});});
       show(i);
     }
   }

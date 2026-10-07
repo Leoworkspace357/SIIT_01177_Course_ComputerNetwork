@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第 16 章  使用 OSPF 实现单区域内网络互通</title>
+<style>
+  :root {
+    --accent:#5e6ad2; --accent-strong:#7170ff;
+    --accent-soft:rgba(94,106,210,.10); --accent-glow:rgba(94,106,210,.18);
+    --accent-ring:rgba(94,106,210,.30);
+    --status-good:#4cb782; --status-warning:#f2c94c;
+    --status-serious:#eb8c4a; --status-critical:#e34948;
+    --ease:cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-soft:cubic-bezier(0.45, 0, 0.15, 1);
+    --dur-slide:900ms; --dur-frag:720ms;
+    --stagger:90ms;
+    --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+      "SFMono-Regular","Menlo","Consolas",monospace;
+  }
+  .deck{
+    --bg:#08080a; --bg-elev-1:#0d0d10; --bg-elev-2:#141417;
+    --bg-elev-3:#1c1c1f; --ink:#f7f8f8; --ink-2:#b4b8c0;
+    --ink-3:#8a8f98; --ink-mute:#62666d;
+    --hairline:rgba(255,255,255,.08);
+    --code-bg:#141418;
+  }
+  .deck[data-theme="light"]{
+    --bg:#fbfbfc; --bg-elev-1:#fff; --bg-elev-2:#f4f4f7;
+    --bg-elev-3:#ebebef; --ink:#0a0a0c; --ink-2:#4a4d57;
+    --ink-3:#6f727a;--ink-mute:#989ba2;
+    --hairline:rgba(10,10,12,.08);
+    --code-bg:#f0f0f3;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);
+    font-family:var(--font-sans);color:var(--ink)}
+  body{overflow:hidden}
+  .deck{width:100vw;height:100vh;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,
+      rgba(94,106,210,.07) 0%,transparent 60%),var(--bg)}
+  .stage{position:absolute;inset:0}
+  .slide{position:absolute;inset:0;padding:6vh 7vw;
+    display:flex;flex-direction:column;justify-content:center;
+    background:transparent;opacity:0;transform:translateY(36px) scale(.985);
+    transition:opacity var(--dur-slide) var(--ease-soft),
+      transform var(--dur-slide) var(--ease-soft);
+    pointer-events:none;will-change:transform,opacity}
+  .slide.active{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+  .slide.leaving{opacity:0;transform:translateY(-32px) scale(.985);
+    transition:opacity 540ms var(--ease-soft),transform 540ms var(--ease-soft)}
+  .slide.title::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 50% 40% at 72% 30%,
+      var(--accent-soft) 0%,transparent 70%);pointer-events:none}
+  .slide.section{background:var(--bg-elev-2)}
+  .slide.section::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 80% at 80% 50%,
+      var(--accent-soft) 0%,transparent 65%);pointer-events:none}
+  .slide.section .eyebrow{color:var(--ink-3)}
+  .slide.section h2{color:var(--ink)}
+  .slide.section .lead{color:var(--ink-2)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.04em;text-transform:none;color:var(--ink-3);
+    margin:0 0 1.2rem;font-weight:500;
+    display:inline-flex;align-items:center;gap:.6rem;
+    padding:.3rem .6rem .3rem .4rem;
+    border:1px solid var(--hairline);border-radius:999px;
+    background:var(--bg-elev-2)}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px var(--accent-ring)}
+  h1.title-h{font-size:clamp(3rem,6vw,5rem);line-height:1.02;
+    letter-spacing:-.035em;margin:0 0 1rem;font-weight:600;color:var(--ink)}
+  h1.title-h .accent{background:linear-gradient(180deg,var(--accent-strong),var(--accent));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h2{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.15;
+    letter-spacing:-.02em;margin:0 0 1.4rem;font-weight:600;color:var(--ink)}
+  h3{font-size:1.05rem;margin:1rem 0 .4rem;color:var(--ink);
+    font-weight:600;letter-spacing:-.005em}
+  p,li{font-size:clamp(.95rem,1.05vw,1.1rem);line-height:1.55;color:var(--ink-2)}
+  .lead{font-size:clamp(1.05rem,1.3vw,1.3rem);color:var(--ink-2);
+    max-width:60ch;margin-top:.3rem;line-height:1.5;font-weight:400}
+  .muted{color:var(--ink-3)}
+  strong{color:var(--ink);font-weight:600}
+  em{font-style:normal;color:var(--accent)}
+  code,kbd{font-family:var(--font-mono);font-size:.86em;
+    padding:.12em .45em;border-radius:5px;background:var(--code-bg);
+    color:var(--ink);border:1px solid var(--hairline)}
+  ul.clean{list-style:none;padding:0;margin:1.4rem 0 0;max-width:64ch}
+  ul.clean>li{padding:.9rem 0 .9rem 1.6rem;position:relative;
+    border-bottom:1px solid var(--hairline)}
+  ul.clean>li:last-child{border-bottom:0}
+  ul.clean>li::before{content:"";position:absolute;left:0;top:1.4rem;
+    width:6px;height:6px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--accent-ring)}
+  ol.steps{counter-reset:step;list-style:none;padding:0;margin:1.6rem 0 0;max-width:64ch}
+  ol.steps>li{counter-increment:step;padding:1.4rem 0 1.4rem 4rem;
+    position:relative;border-top:1px solid var(--hairline)}
+  ol.steps>li:last-child{border-bottom:1px solid var(--hairline)}
+  ol.steps>li::before{content:counter(step,decimal-leading-zero);
+    position:absolute;left:0;top:1.45rem;font-family:var(--font-mono);
+    font-size:.82rem;color:var(--accent);font-weight:500;letter-spacing:.04em}
+  .grid-2{display:grid;grid-template-columns:1.15fr 1fr;gap:2rem;
+    align-items:start;margin-top:1.4rem}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.4rem}
+  .card{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.4rem 1.5rem;background:var(--bg-elev-2);
+    transition:border-color 400ms var(--ease)}
+  .card:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .card h3{margin-top:.3rem}
+  .card .tag{display:inline-flex;align-items:center;gap:.35rem;
+    font-family:var(--font-mono);font-size:.68rem;letter-spacing:.04em;
+    color:var(--accent);margin-bottom:.6rem;font-weight:500}
+  .card .tag::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--accent)}
+  table.t{width:100%;border-collapse:collapse;margin-top:1.4rem;
+    font-variant-numeric:tabular-nums;
+    border:1px solid var(--hairline);border-radius:10px;overflow:hidden}
+  table.t th,table.t td{text-align:left;padding:.85rem 1rem;
+    border-bottom:1px solid var(--hairline);font-size:.95rem;color:var(--ink-2);
+    background:var(--bg-elev-2)}
+  table.t th{color:var(--ink-3);font-weight:500;
+    border-bottom:1px solid var(--hairline);
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;background:var(--bg-elev-1)}
+  table.t tr:last-child td{border-bottom:0}
+  table.t tbody tr:hover td{background:var(--bg-elev-3)}
+  blockquote{margin:1.4rem 0;padding:.4rem 0 .4rem 1.2rem;
+    border-left:2px solid var(--accent);color:var(--ink-2);font-style:normal;
+    font-size:clamp(1.05rem,1.25vw,1.22rem);line-height:1.55}
+  .callout{display:flex;gap:1.2rem;padding:1.1rem 1.3rem;border-radius:10px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    margin-top:1rem;transition:border-color 300ms var(--ease)}
+  .callout:hover{border-color:var(--accent-ring)}
+  .callout .ico{flex:none;font-family:var(--font-mono);font-weight:500;
+    font-size:.8rem;color:var(--accent);padding-top:.15rem}
+  .callout p{margin:0;color:var(--ink-2)}
+  .callout p+p{margin-top:.3rem}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.4rem}
+  .chip{padding:.45rem .9rem;border-radius:999px;
+    border:1px solid var(--hairline);background:var(--bg-elev-2);
+    font-size:.92rem;color:var(--ink)}
+  .topo{font-family:var(--font-mono);font-size:.78rem;color:var(--ink-2);
+    line-height:1.6;padding:1.4rem;border:1px solid var(--hairline);
+    border-radius:10px;background:var(--bg-elev-2);margin-top:1.4rem;
+    white-space:pre;text-align:center}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;
+    margin-top:1.4rem;max-width:760px}
+  .compare-grid>div{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.2rem;background:var(--bg-elev-2);
+    transition:border-color 300ms var(--ease)}
+  .compare-grid>div:hover{border-color:var(--accent-ring)}
+  .compare-grid h3{font-size:1.05rem;color:var(--ink);margin:0 0 .6rem}
+  .compare-grid .verdict{font-family:var(--font-mono);font-size:.7rem;
+    letter-spacing:.04em;padding:.2rem .5rem;border-radius:4px;
+    display:inline-block;margin-bottom:.6rem}
+  .compare-grid .verdict.bad{background:rgba(227,73,72,.15);color:var(--status-critical)}
+  .compare-grid .verdict.good{background:rgba(76,183,130,.15);color:var(--status-good)}
+  .case-box{border:1px solid var(--accent-ring);border-radius:10px;
+    padding:1.2rem 1.4rem;background:var(--bg-elev-2);
+    margin-top:1.4rem;transition:border-color 300ms var(--ease)}
+  .case-box .case-title{font-family:var(--font-mono);font-size:.7rem;
+    color:var(--accent);margin-bottom:.6rem;letter-spacing:.04em}
+  .case-box p{margin:.4rem 0;color:var(--ink-2);font-size:.98rem}
+  .terminal{border:1px solid var(--hairline);border-radius:10px;
+    background:#0a0a0c;padding:1.2rem 1.4rem;margin-top:1.4rem;
+    font-family:var(--font-mono);font-size:.85rem;line-height:1.65;
+    color:var(--ink-2);max-width:780px;
+    box-shadow:0 8px 32px rgba(0,0,0,.3)}
+  .terminal .prompt{color:var(--accent);font-weight:500}
+  .terminal .cmd{color:var(--ink);font-weight:500}
+  .terminal .ok{color:var(--status-good)}
+  .terminal .err{color:var(--status-critical)}
+  .terminal .info{color:var(--status-warning)}
+  .terminal .dim{color:var(--ink-3)}
+  .terminal .head{color:var(--ink-3);font-size:.78rem;
+    border-bottom:1px solid var(--hairline);padding-bottom:.6rem;
+    margin-bottom:.6rem;letter-spacing:.04em}
+  .step-flow{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;
+    margin-top:1.6rem;max-width:780px}
+  .step-flow>div{border:1px solid var(--hairline);border-radius:10px;
+    padding:1.2rem;background:var(--bg-elev-2);text-align:center;
+    transition:border-color 300ms var(--ease)}
+  .step-flow>div:hover{border-color:var(--accent-ring);background:var(--bg-elev-3)}
+  .step-flow .num{font-family:var(--font-mono);font-size:.78rem;
+    color:var(--accent);font-weight:600;margin-bottom:.4rem}
+  .step-flow .name{color:var(--ink);font-weight:600;font-size:1rem}
+  .step-flow .desc{color:var(--ink-3);font-size:.78rem;margin-top:.4rem;line-height:1.4}
+  .fragment{opacity:0;transform:translateY(22px) scale(.97);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .fragment.visible{opacity:1;transform:translateY(0) scale(1);
+    transition:opacity var(--dur-frag) var(--ease-soft),
+      transform var(--dur-frag) var(--ease-soft);
+    transition-delay:var(--frag-stagger, 0ms)}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);
+    width:0;box-shadow:0 0 8px var(--accent-glow);transition:width 600ms var(--ease);z-index:30}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:48px;z-index:25;
+    border-right:1px solid var(--hairline);background:var(--bg-elev-1);
+    display:flex;flex-direction:column;align-items:center;
+    padding-top:18px;gap:14px}
+  .sidebar .mark{width:24px;height:24px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+    box-shadow:0 2px 8px var(--accent-glow);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.72rem;font-family:var(--font-mono)}
+  .sidebar .nav-dots{display:flex;flex-direction:column;gap:3px;
+    margin-top:8px;flex:1;align-items:center;padding-top:8px;overflow-y:auto}
+  .sidebar .nav-dot{width:3px;height:3px;border-radius:50%;
+    background:var(--ink-mute);opacity:.35;flex:none;
+    transition:opacity 300ms var(--ease),transform 300ms var(--ease),
+      background 300ms var(--ease);cursor:pointer}
+  .sidebar .nav-dot:hover{opacity:.8}
+  .sidebar .nav-dot.active{opacity:1;background:var(--accent);
+    box-shadow:0 0 6px var(--accent-ring);transform:scale(1.4)}
+  .brand{position:fixed;top:28px;left:72px;z-index:30;
+    font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3)}
+  .brand strong{color:var(--ink);font-weight:600}
+  .counter{position:fixed;bottom:24px;right:28px;z-index:30;
+    color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
+    font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
+  .counter .now{color:var(--accent);font-weight:500}
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
+  .toolbar button{background:transparent;border:1px solid var(--hairline);
+    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
+    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono)}
+  .help{position:fixed;inset:0;background:rgba(8,8,10,.65);
+    backdrop-filter:blur(8px);display:none;align-items:center;
+    justify-content:center;z-index:40}
+  .help.open{display:flex;animation:helpFade 280ms var(--ease)}
+  .help .panel{background:var(--bg-elev-2);border:1px solid var(--hairline);
+    border-radius:12px;padding:1.8rem 2.2rem;max-width:520px;min-width:380px;
+    box-shadow:0 24px 80px rgba(0,0,0,.5);animation:helpIn 380ms var(--ease)}
+  .help h3{margin-top:0}
+  .help .row{display:flex;justify-content:space-between;
+    padding:.55rem 0;border-bottom:1px solid var(--hairline)}
+  .help .row span:last-child{font-family:var(--font-mono);font-size:.82em;color:var(--ink-3)}
+  
+  /* ============ Calculation block ============ */
+  .calc-block{border:1px solid var(--accent-ring);border-radius:10px;
+    padding:1.2rem 1.4rem;background:var(--bg-elev-2);
+    margin-top:1.4rem;border-left:3px solid var(--accent);
+    transition:border-color 300ms var(--ease)}
+  .calc-block:hover{border-color:var(--accent);background:var(--bg-elev-3)}
+  .calc-block .calc-title{font-family:var(--font-mono);font-size:.72rem;
+    color:var(--accent);margin-bottom:.8rem;letter-spacing:.04em;
+    display:flex;align-items:center;gap:.5rem}
+  .calc-block .calc-title::before{content:"Σ";font-size:1rem;
+    color:var(--accent);font-weight:700}
+  .calc-step{display:grid;grid-template-columns:30px 1fr;gap:.8rem;
+    padding:.5rem 0;border-bottom:1px dashed var(--hairline);
+    font-family:var(--font-mono);font-size:.82rem;line-height:1.5}
+  .calc-step:last-child{border-bottom:0}
+  .calc-step .num{color:var(--accent);font-weight:600;
+    text-align:right;padding-top:.05rem}
+  .calc-step .label{color:var(--ink);font-weight:500}
+  .calc-step .formula{color:var(--status-warning);font-weight:500;
+    font-family:var(--font-mono);margin-top:.2rem;display:block;
+    font-size:.78rem}
+  .calc-step .result{color:var(--status-good);font-weight:600;
+    font-family:var(--font-mono);margin-top:.2rem;display:block;
+    font-size:.78rem}
+  .calc-step .note{color:var(--ink-3);font-style:italic;
+    margin-top:.2rem;display:block;font-size:.76rem;font-family:var(--font-sans)}
+
+  @media print{.stage{position:static;display:block}
+    .slide{display:flex!important;opacity:1!important;transform:none!important;
+      page-break-after:always;height:100vh;background:#fff;color:#000}
+    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
+  @keyframes helpFade{from{opacity:0}to{opacity:1}}
+  @keyframes helpIn{from{opacity:0;transform:translateY(20px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)}}
+  @media (prefers-reduced-motion:reduce){
+    .slide,.fragment,.chip,.card,.toolbar button,
+    .help .panel,.progress,.nav-dot{transition-duration:0ms!important}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <aside class="sidebar" id="sidebar">
+    <div class="mark">JN</div>
+    <div class="nav-dots" id="nav-dots"></div>
+  </aside>
+  <div class="brand">第 16 章  OSPF 单区域  <strong>|  Leonard F. Li</strong></div>
+  <div class="progress" id="progress"></div>
+  <div class="counter">
+    <span class="now" id="now">01</span>
+    <span>/</span>
+    <span id="total">25</span>
+  </div>
+
+  <div class="stage" id="stage">
+
+    <section class="slide title active">
+      <p class="eyebrow">Chapter 16  |  OSPF</p>
+      <h1 class="title-h">动态路由<br><span class="accent">OSPF</span></h1>
+      <p class="lead">RIP 只能 15 跳——<strong>OSPF</strong> 无跳数限制,<em>大型企业首选</em>。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        Instructor · Leonard F. Li　　·　　Period · 16　　·　　Spring 2026
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Objectives</p>
+      <h2>通过本次课,你将能够:</h2>
+      <ol class="steps">
+        <li class="fragment">解释 <strong>OSPF</strong> 与 RIP 的核心差异</li>
+        <li class="fragment">理解<strong>链路状态算法</strong>与 SPF 计算</li>
+        <li class="fragment">描述 OSPF 的<strong>5 种报文</strong>与 7 个状态</li>
+        <li class="fragment">配置 OSPF <strong>单区域</strong> 并验证邻居</li>
+        <li class="fragment">使用 <code>show ip ospf neighbor</code> 排错</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Agenda</p>
+      <h2>本章结构</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>PART 01</strong>　情境 · RIP 不够用了</li>
+        <li class="fragment"><strong>PART 02</strong>　OSPF 原理 · 链路状态 · Dijkstra</li>
+        <li class="fragment"><strong>PART 03</strong>　OSPF 报文与邻居建立</li>
+        <li class="fragment"><strong>PART 04</strong>　OSPF 单区域配置 + 案例</li>
+      </ul>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 01</p>
+      <h2>任务情境 · RIP 不够用了</h2>
+      <p class="lead">公司扩展到跨省的 30 个办公地点——</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Scenario</p>
+      <h2>RIP 的 3 大局限</h2>
+      <div class="callout fragment">
+        <div class="ico">跳数</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>15 跳上限</strong></p>
+          <p class="muted" style="margin-top:.3rem">大型网络<em>无法</em>使用 RIP——超过 15 跳路由<em>不可达</em>。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">收敛</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>收敛慢</strong></p>
+          <p class="muted" style="margin-top:.3rem">全网路由变化需 <strong>3-5 分钟</strong> 才能收敛。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">度量</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>只看跳数</strong></p>
+          <p class="muted" style="margin-top:.3rem">不区分链路<em>带宽/延迟</em>——10M 和 1G 链路<em>等价</em>。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">方案</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>OSPF</strong></p>
+          <p class="muted" style="margin-top:.3rem"><strong>链路状态</strong>算法、<strong>无跳数限制</strong>、<strong>支持区域</strong>——大型企业首选。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Tasks</p>
+      <h2>本课任务</h2>
+      <ol class="steps">
+        <li class="fragment"><strong>任务一</strong>　启动 OSPF 协议</li>
+        <li class="fragment"><strong>任务二</strong>　宣告网络</li>
+        <li class="fragment"><strong>任务三</strong>　验证邻居与路由</li>
+        <li class="fragment"><strong>相关知识</strong>　链路状态、Dijkstra、邻居、5 种报文</li>
+      </ol>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 02</p>
+      <h2>OSPF 原理</h2>
+      <p class="lead">链路状态算法——<em>每台路由器都画一张「全网地图」</em>。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">LSA</p>
+      <h2>OSPF 的 3 步工作过程</h2>
+      <div class="step-flow">
+        <div class="fragment">
+          <div class="num">STEP 01</div>
+          <div class="name">发现邻居</div>
+          <div class="desc">Hello 包建立<strong>邻居关系</strong></div>
+        </div>
+        <div class="fragment">
+          <div class="num">STEP 02</div>
+          <div class="name">泛洪 LSA</div>
+          <div class="desc">每台路由器向全网<em>通告</em>自己的链路</div>
+        </div>
+        <div class="fragment">
+          <div class="num">STEP 03</div>
+          <div class="name">计算路由</div>
+          <div class="desc">每台路由器用 <strong>Dijkstra 算法</strong>算出最短路径</div>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.4rem;font-size:.92rem">
+        三步完成后——<em>每台路由器都有完整的「链路状态数据库」</em>,算出的路由<strong>不会环路</strong>。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">LSDB</p>
+      <h2>链路状态数据库 · LSDB</h2>
+      <ul class="clean">
+        <li class="fragment">每台路由器都维护<strong>相同的 LSDB</strong>(链路状态数据库)</li>
+        <li class="fragment">LSDB 包含网络中<em>所有</em>路由器的链路状态信息</li>
+        <li class="fragment">LSA(Link-State Advertisement)是 LSDB 的基本单位</li>
+        <li class="fragment">LSA 通过<strong>可靠泛洪</strong>传播到整个区域</li>
+        <li class="fragment">同一区域内的路由器 LSDB <em>完全一致</em></li>
+        <li class="fragment">基于 LSDB,每台路由器<strong>独立计算</strong>路由(SPF)</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Dijkstra</p>
+      <h2>Dijkstra 算法 · 最短路径</h2>
+      <ul class="clean">
+        <li class="fragment">以<strong>本路由器</strong>为根,建立一棵最短路径树</li>
+        <li class="fragment">每个<em>节点</em>(路由器 / 网络)有<strong>开销</strong>(cost)</li>
+        <li class="fragment">OSPF 默认 cost = <code>100 Mbps / 链路带宽</code></li>
+        <li class="fragment">10M 链路 cost = 10;100M = 1;1G = 1</li>
+        <li class="fragment">从根出发,沿 cost <em>最小</em>的路径到达每个节点</li>
+        <li class="fragment">算法保证<em>无环路</em>(树天然无环)</li>
+        <li class="fragment">结果放进 IP 路由表</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Packets</p>
+      <h2>OSPF 的 5 种报文</h2>
+      <table class="t">
+        <thead><tr><th>报文类型</th><th>编号</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr class="fragment"><td>Hello</td><td>1</td><td>发现 / 维护邻居</td></tr>
+          <tr class="fragment"><td>DD (Database Description)</td><td>2</td><td>描述 LSDB 摘要</td></tr>
+          <tr class="fragment"><td>LSR (Link State Request)</td><td>3</td><td>请求<strong>缺失</strong>的 LSA</td></tr>
+          <tr class="fragment"><td>LSU (Link State Update)</td><td>4</td><td>发送<strong>完整</strong> LSA</td></tr>
+          <tr class="fragment"><td>LSAck</td><td>5</td><td>对 LSU 的<em>确认</em></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Neighbors</p>
+      <h2>邻居建立 · 7 个状态</h2>
+      <ol class="steps">
+        <li class="fragment"><strong>Down</strong>　未收到任何 Hello 包</li>
+        <li class="fragment"><strong>Init</strong>　收到对方 Hello,但<em>自己</em>不在对方列表</li>
+        <li class="fragment"><strong>2-Way</strong>　双方<em>互相</em>在对方列表 → <strong>邻居建立</strong></li>
+        <li class="fragment"><strong>Exstart</strong>　协商<strong>主 / 从</strong>关系</li>
+        <li class="fragment"><strong>Exchange</strong>　交换 DD 报文(LSDB 摘要)</li>
+        <li class="fragment"><strong>Loading</strong>　请求缺失的 LSA(LSR / LSU)</li>
+        <li class="fragment"><strong>Full</strong>　LSDB <strong>同步完成</strong>——可计算路由</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Areas</p>
+      <h2>OSPF 区域 · 分层设计</h2>
+      <ul class="clean">
+        <li class="fragment"><strong>单区域</strong>:所有路由器在 Area 0——适合<em>小型</em>网络</li>
+        <li class="fragment"><strong>多区域</strong>:有骨干区域(Backbone / Area 0)+ 常规区域</li>
+        <li class="fragment">LSA<em>只在区域内泛洪</em>——区域间通过 ABR 汇总</li>
+        <li class="fragment">降低 LSDB 规模,加快收敛</li>
+        <li class="fragment">本章用<strong>单区域</strong>(全部 Area 0)</li>
+        <li class="fragment">大型企业用多区域(课外拓展)</li>
+      </ul>
+    </section>
+
+    <section class="slide section">
+      <p class="eyebrow">PART 03</p>
+      <h2>OSPF 配置与验证</h2>
+      <p class="lead">3 路由器 OSPF 单区域配置。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Lab Setup</p>
+      <h2>OSPF 实验 · 7 步</h2>
+      <ol class="steps">
+        <li class="fragment">Packet Tracer 新建 <code>Lab16-OSPF.pkt</code></li>
+        <li class="fragment">拖入 <strong>3 Router + 6 PC + 3 Switch</strong></li>
+        <li class="fragment">配置所有接口 IP(类似 RIP 实验)</li>
+        <li class="fragment">每台路由器<strong>启动 OSPF 进程</strong></li>
+        <li class="fragment"><code>router ospf 1</code> → <code>network &lt;net&gt; &lt;wc&gt; area 0</code></li>
+        <li class="fragment">等待 <strong>40 秒</strong>——Hello 包建立邻居</li>
+        <li class="fragment">验证邻居与路由表</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Config</p>
+      <h2>OSPF 单区域配置</h2>
+      <div class="terminal fragment">
+<div class="head">R1&gt;</div>
+<span class="prompt">R1#</span> <span class="cmd">configure terminal</span>
+<span class="prompt">R1(config)#</span> <span class="cmd">router ospf 1</span>   <span class="dim">! 进程 ID 1(本地有效)</span>
+<span class="prompt">R1(config-router)#</span> <span class="cmd">network 192.168.10.0 0.0.0.255 area 0</span>
+<span class="prompt">R1(config-router)#</span> <span class="cmd">network 10.0.0.0 0.255.255.255 area 0</span>
+<span class="prompt">R1(config-router)#</span> <span class="cmd">end</span>
+<span class="prompt">R1#</span> <span class="cmd">show ip ospf neighbor</span>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Wildcard</p>
+      <h2>反掩码 · 与子网掩码相反</h2>
+      <ul class="clean">
+        <li class="fragment">子网掩码 <code>255.255.255.0</code> → 反掩码 <code>0.0.0.255</code></li>
+        <li class="fragment">子网掩码 <code>/24</code> → 反掩码 <code>0.0.0.255</code></li>
+        <li class="fragment">子网掩码 <code>/8</code> → 反掩码 <code>0.255.255.255</code></li>
+        <li class="fragment">规则:0 = <strong>必须匹配</strong>,255 = <strong>任意</strong></li>
+        <li class="fragment">OSPF 用反掩码决定哪些接口<em>参与 OSPF</em></li>
+        <li class="fragment">例子:<code>network 192.168.10.0 0.0.0.255 area 0</code> = 192.168.10.0/24 网段参与</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Verify</p>
+      <h2>验证邻居 · show ip ospf neighbor</h2>
+      <div class="terminal fragment">
+<div class="head">R1# show ip ospf neighbor</div>
+
+<span class="info">Neighbor ID     Pri   State           Dead Time   Address         Interface</span>
+<span class="ok">2.2.2.2           1   FULL/  -        00:00:38    10.0.0.2        Serial0/0/0</span>
+
+      </div>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.92rem">
+        <strong>FULL</strong> = 邻居关系<em>完全建立</em>;左侧 IP 是邻居的 Router ID(示例 2.2.2.2 需在 R2 上配置 <code>router-id 2.2.2.2</code>;未手工配置时优先取最高 loopback 接口 IP,无 loopback 才取最高物理接口 IP)。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Routing Table</p>
+      <h2>OSPF 路由表 · O 开头</h2>
+      <div class="terminal fragment">
+<div class="head">R1# show ip route ospf</div>
+
+<span class="info">Codes: O - OSPF, IA - OSPF inter area, ...</span>
+
+<span class="ok">O    192.168.20.0/24 [110/65] via 10.0.0.2, Serial0/0/0</span>
+<span class="ok">O    192.168.30.0/24 [110/129] via 10.0.0.2, Serial0/0/0</span>
+<span class="ok">O    20.0.0.0/8 [110/128] via 10.0.0.2, Serial0/0/0</span>
+      </div>
+      <p class="muted fragment" style="margin-top:1rem;font-size:.92rem">
+        O = <strong>OSPF 学到的路由</strong>;110 = OSPF 管理距离;后面的数 = <em>cost</em>(沿途出接口开销之和:串口 64 + 以太网口 1;如 192.168.20.0/24 = 64 + 1 = 65)。
+      </p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Router ID</p>
+      <h2>Router ID · OSPF 的「身份证」</h2>
+      <ul class="clean">
+        <li class="fragment">32 位 IP 格式的<strong>唯一标识</strong>——同一 OSPF 域内<em>不可重复</em></li>
+        <li class="fragment">选取规则:
+          <ul style="margin-top:.4rem">
+            <li>1. 手工配置(推荐)</li>
+            <li>2. 最高 loopback IP</li>
+            <li>3. 最高物理接口 IP</li>
+          </ul>
+        </li>
+        <li class="fragment">配置:<code>router-id 1.1.1.1</code>(在 OSPF 进程下)</li>
+        <li class="fragment">建议用 <strong>loopback 接口</strong> 的 IP——稳定、不会变</li>
+        <li class="fragment">改 Router ID 需<em>重启进程</em>:<code>clear ip ospf process</code></li>
+      </ul>
+    </section>
+
+            <section class="slide">
+      <p class="eyebrow">Cost</p>
+      <h2>Cost · OSPF 的度量(计算)</h2>
+      <div class="calc-block fragment">
+        <div class="calc-title">计算 · OSPF Cost 计算(默认参考带宽 100Mbps)</div>
+        <div class="calc-step">
+          <span class="num">01</span>
+          <div>
+            <span class="label">公式</span>
+            <span class="formula">cost = 参考带宽 / 实际带宽</span>
+            <span class="result">默认:参考 = 100 Mbps</span>
+            <span class="note">结果取整数</span>
+          </div>
+        </div>
+        <div class="calc-step">
+          <span class="num">02</span>
+          <div>
+            <span class="label">串口 1.544M</span>
+            <span class="formula">100 / 1.544 ≈ 64</span>
+            <span class="result">cost = 64</span>
+            <span class="note">T1 链路</span>
+          </div>
+        </div>
+        <div class="calc-step">
+          <span class="num">03</span>
+          <div>
+            <span class="label">串口 2.048M</span>
+            <span class="formula">100 / 2.048 ≈ 48</span>
+            <span class="result">cost = 48</span>
+            <span class="note">E1 链路</span>
+          </div>
+        </div>
+        <div class="calc-step">
+          <span class="num">04</span>
+          <div>
+            <span class="label">以太网 10M</span>
+            <span class="formula">100 / 10 = 10</span>
+            <span class="result">cost = 10</span>
+            <span class="note">早期以太网</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Cost</p>
+      <h2>Cost · 高速链路与路径累加</h2>
+      <div class="calc-block fragment">
+        <div class="calc-title">计算 · 100M / 1G 与端到端 cost</div>
+        <div class="calc-step">
+          <span class="num">01</span>
+          <div>
+            <span class="label">以太网 100M</span>
+            <span class="formula">100 / 100 = 1</span>
+            <span class="result">cost = 1</span>
+            <span class="note">Fast Ethernet</span>
+          </div>
+        </div>
+        <div class="calc-step">
+          <span class="num">02</span>
+          <div>
+            <span class="label">以太网 1G</span>
+            <span class="formula">100 / 1000 < 1 → 1</span>
+            <span class="result">cost = 1</span>
+            <span class="note">最小 1</span>
+          </div>
+        </div>
+        <div class="calc-step">
+          <span class="num">03</span>
+          <div>
+            <span class="label">100M 与 1G 都 = 1</span>
+            <span class="formula">无法区分</span>
+            <span class="result">需调整参考带宽</span>
+            <span class="note">1000 → 1G=1,100M=10</span>
+          </div>
+        </div>
+        <div class="calc-step">
+          <span class="num">04</span>
+          <div>
+            <span class="label">北京→广州累加</span>
+            <span class="formula">R1→R2(64) + R2→R3(64) = 128</span>
+            <span class="result">到串行网段 20.0.0.0/8 cost = 128;到广州 LAN 再加 R3 的 Fa0/0(1)= <strong>129</strong></span>
+            <span class="note">走 R2 路径</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Cost</p>
+      <h2>Cost · 局限与调整方法</h2>
+      <div class="grid-2">
+        <div class="card fragment">
+          <span class="tag">公式</span>
+          <h3>cost = 参考带宽 / 实际带宽</h3>
+          <p class="muted">默认<strong>参考带宽 100 Mbps</strong>:100M=1,10M=10,1G=1。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">问题</span>
+          <h3>1G 链路 cost=1</h3>
+          <p class="muted">默认参考带宽 100Mbps 下,100M 与 1G 链路 <strong>cost 都等于 1</strong>——快链路<em>无法区分</em>。可手动改<strong>参考带宽</strong>(如 1000)或接口级 <code>ip ospf cost</code>。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">配置</span>
+          <h3>auto-cost reference-bandwidth</h3>
+          <p class="muted">真实 IOS:<code>auto-cost reference-bandwidth 1000</code>(<em>PT 6.2 不支持,请用接口级 ip ospf cost</em>)</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">接口级</span>
+          <h3>ip ospf cost</h3>
+          <p class="muted">接口下直接指定:<code>ip ospf cost 5</code></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Case 01</p>
+      <h2>案例 · 邻居卡在 INIT</h2>
+      <div class="case-box">
+        <div class="case-title">故障现象</div>
+        <p>R1 与 R2 OSPF <code>show ip ospf neighbor</code> 显示<strong>状态 INIT,不是 FULL</strong>。</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">诊断</div>
+        <p>步骤 1:两端接口是否 UP?</p>
+        <p>步骤 2:<strong>区域号</strong>是否一致?(区域号不一致邻居会停在 DOWN,而非 INIT)</p>
+        <p>步骤 3:<strong>子网掩码</strong>是否一致?</p>
+        <p>步骤 4:是否有 <strong>ACL 阻塞</strong> OSPF 报文(协议 89)?</p>
+      </div>
+      <div class="case-box fragment">
+        <div class="case-title">解决</div>
+        <p>INIT = 收到过对方 Hello,但自己的 Router ID 不在对方 Hello 中——多为单向可达、组播被过滤或认证不匹配;area 号不一致则邻居停在 DOWN(或邻居表为空)。</p>
+      </div>
+      <div class="case-box fragment" style="border-color:var(--status-good)">
+        <div class="case-title" style="color:var(--status-good)">结论</div>
+        <p>✅ OSPF 邻居建立必须:<em>Area 一致 + 接口 UP + 掩码一致 + Hello/Dead 计时器一致 + 认证匹配</em>。</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Recap</p>
+      <h2>本章小结</h2>
+      <ol class="steps">
+        <li class="fragment"><strong>OSPF</strong>:链路状态算法,<em>无跳数限制</em></li>
+        <li class="fragment"><strong>3 步</strong>:邻居 / 泛洪 / SPF 计算</li>
+        <li class="fragment"><strong>5 种报文</strong>:Hello / DD / LSR / LSU / LSAck</li>
+        <li class="fragment"><strong>7 个状态</strong>:Down → Init → 2-Way → ... → Full</li>
+        <li class="fragment"><strong>单区域配置</strong>:<code>router ospf 1</code> + <code>network ... area 0</code></li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Homework</p>
+      <h2>作业</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>实验 · OSPF 单区域</strong></p>
+          <p class="muted" style="margin-top:.3rem">Packet Tracer 搭建 <strong>3 路由器 OSPF</strong>,验证邻居建立与路由学习。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>实验 · Router ID</strong></p>
+          <p class="muted" style="margin-top:.3rem">手工配置 Router ID,使用 <code>show ip ospf interface</code> 验证。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>实验 · 邻居排错</strong></p>
+          <p class="muted" style="margin-top:.3rem">故意把一端 area 改成 1,看<em>邻居停在 DOWN</em>,再改回 0。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">04</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>对比</strong></p>
+          <p class="muted" style="margin-top:.3rem">对比 RIP 与 OSPF 的<em>收敛速度</em>,记录差异。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide title">
+      <p class="eyebrow">End of Chapter 16</p>
+      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">WWW 和 DNS</span></h1>
+      <p class="lead" style="margin-top:1.4rem">日常使用的服务背后——<strong>WWW 与 DNS</strong> 的工作原理。</p>
+      <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
+        End · 27 slides · Chapter 16
+      </p>
+    </section>
+
+
+  </div>
+
+  <div class="toolbar">
+    <button id="b-theme" title="切换主题 (T)">Theme</button>
+    <button id="b-help" title="键盘帮助 (?)">Help</button>
+    <button id="b-overview" title="总览 (Esc)">Overview</button>
+    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+  </div>
+
+  <div class="help" id="help">
+    <div class="panel">
+      <h3>Keyboard | Mouse</h3>
+      <div class="row"><span>Next slide</span><span>→ / Space / PageDown</span></div>
+      <div class="row"><span>Prev slide</span><span>← / PageUp</span></div>
+      <div class="row"><span>First / Last</span><span>Home / End</span></div>
+      <div class="row"><span>Overview (click to jump)</span><span>Esc</span></div>
+      <div class="row"><span>Toggle theme</span><span>T</span></div>
+      <div class="row"><span>Fullscreen</span><span>F</span></div>
+      <div class="row"><span>Help</span><span>?</span></div>
+      <p class="muted" style="margin-top:.8rem;font-size:.82rem">
+        Click empty area to advance; press <kbd>?</kbd> to dismiss.
+      </p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const deck=document.getElementById('deck');
+  const stage=document.getElementById('stage');
+  const slides=Array.from(stage.querySelectorAll('.slide'));
+  const dots=document.getElementById('nav-dots');
+  const now=document.getElementById('now');
+  const total=document.getElementById('total');
+  const progress=document.getElementById('progress');
+  const help=document.getElementById('help');
+  let i=0;
+  let fragIdx=0;
+  function slideFrags(slide){ return slide.querySelectorAll('.fragment'); }
+  function revealFragments(){
+    const frags=slideFrags(slides[i]);
+    for(let k=0;k<frags.length;k++){
+      if(k<fragIdx){
+        frags[k].classList.add('visible');
+        frags[k].style.setProperty('--frag-stagger','0ms');
+      } else {
+        frags[k].classList.remove('visible');
+        frags[k].style.setProperty('--frag-stagger','0ms');
+      }
+    }
+  }
+  total.textContent=String(slides.length).padStart(2,'0');
+  slides.forEach((_,k)=>{
+    const d=document.createElement('div');d.className='nav-dot';
+    d.title='Slide '+(k+1);d.addEventListener('click',()=>show(k));
+    dots.appendChild(d)});
+  function setActiveDot(){
+    Array.from(dots.children).forEach((d,k)=>d.classList.toggle('active',k===i))}
+  function show(n){
+    const next=Math.max(0,Math.min(slides.length-1,n));
+    if(next===i)return;
+    const out=slides[i];const inn=slides[next];
+    out.classList.add('leaving');inn.classList.add('active');
+    setTimeout(()=>{out.classList.remove('active','leaving')},600);
+    i=next;
+    fragIdx=0;
+    revealFragments();
+    now.textContent=String(i+1).padStart(2,'0');
+    progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+    history.replaceState(null,'','#'+(i+1));setActiveDot()}
+  function next(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx<frags.length){
+      fragIdx++;revealFragments();
+    } else if(i<slides.length-1){
+      show(i+1);
+    }
+  }
+  function prev(){
+    const frags=slideFrags(slides[i]);
+    if(fragIdx>1){
+      fragIdx--;revealFragments();
+    } else if(fragIdx===1){
+      fragIdx=0;revealFragments();
+    } else if(i>0){
+      const prevIdx=i-1;
+      const inn=slides[prevIdx];
+      const prevFrags=slideFrags(inn);
+      inn.classList.add('active');
+      const out=slides[i];
+      out.classList.add('leaving');
+      setTimeout(()=>{out.classList.remove('active','leaving')},600);
+      i=prevIdx;
+      fragIdx=prevFrags.length;
+      revealFragments();
+      now.textContent=String(i+1).padStart(2,'0');
+      progress.style.width=(((i+1)/slides.length)*100).toFixed(1)+'%';
+      history.replaceState(null,'','#'+(i+1));setActiveDot();
+    }
+  }
+  function toggleOverview(){
+    const on=deck.classList.toggle('overview');
+    if(on){
+      stage.style.display='grid';
+      stage.style.gridTemplateColumns='repeat(4, 1fr)';
+      stage.style.gap='14px';
+      stage.style.padding='80px 28px 80px 72px';
+      stage.style.overflow='auto';
+      slides.forEach((s)=>{
+        s.style.display='flex';
+        s.style.position='relative';
+        s.style.inset='auto';
+        s.style.aspectRatio='16/9';
+        s.style.padding='1rem';
+        s.style.border='1px solid var(--hairline)';
+        s.style.borderRadius='10px';
+        s.style.background='var(--bg-elev-1)';
+        s.style.cursor='pointer';
+        s.style.overflow='hidden';
+        s.style.transform='none';
+        s.style.opacity='1';
+        Array.from(s.children).forEach((c)=>{
+          c.style.transform='scale(.18)';
+          c.style.transformOrigin='top left';
+        });
+      });
+    } else {
+      stage.style.display='';
+      slides.forEach((s)=>{s.style.display='';s.style.position='';s.style.inset='';s.style.aspectRatio='';s.style.padding='';s.style.border='';s.style.borderRadius='';s.style.background='';s.style.cursor='';s.style.overflow='';s.style.transform='';s.style.opacity='';Array.from(s.children).forEach(c=>{c.style.transform='';c.style.transformOrigin='';});});
+      show(i);
+    }
+  }
+  function toggleTheme(){
+    const cur=deck.getAttribute('data-theme');
+    deck.setAttribute('data-theme',cur==='light'?'dark':'light');
+  }
+  function toggleHelp(){help.classList.toggle('open')}
+  document.addEventListener('keydown',(e)=>{
+    if(help.classList.contains('open')){
+      if(e.key==='Escape'||e.key==='?'){toggleHelp();e.preventDefault()}
+      return;
+    }
+    if(deck.classList.contains('overview')){
+      if(e.key==='Escape'){toggleOverview();e.preventDefault()}
+      return;
+    }
+    switch(e.key){
+      case'ArrowRight':case'PageDown':case' ':case'Spacebar':
+        next();e.preventDefault();break;
+      case'ArrowLeft':case'PageUp':prev();e.preventDefault();break;
+      case'Home':show(0);e.preventDefault();break;
+      case'End':show(slides.length-1);e.preventDefault();break;
+      case'Escape':toggleOverview();e.preventDefault();break;
+      case't':case'T':toggleTheme();break;
+      case'f':case'F':if(document.fullscreenElement)document.exitFullscreen();
+        else deck.requestFullscreen&&deck.requestFullscreen();break;
+      case'?':case'/':toggleHelp();e.preventDefault();break;
+    }
+  });
+  stage.addEventListener('click',(e)=>{
+    if(deck.classList.contains('overview')){
+      const s=e.target.closest('.slide');
+      if(!s)return;
+      const idx=slides.indexOf(s);
+      if(idx>=0){toggleOverview();show(idx)}
+    } else {
+      const x=e.clientX/window.innerWidth;
+      if(x>0.5)next();else prev();
+    }
+  });
+  document.getElementById('b-theme').addEventListener('click',toggleTheme);
+  document.getElementById('b-help').addEventListener('click',toggleHelp);
+  document.getElementById('b-overview').addEventListener('click',toggleOverview);
+  document.getElementById('b-print').addEventListener('click',()=>window.print());
+
+  fragIdx=0;
+  revealFragments();
+})();
+</script>
+</body>
+</html>

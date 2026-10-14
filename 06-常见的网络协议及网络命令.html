@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>第 4 章  常见的网络协议及网络命令</title>
+<title>第 6 章  常见的网络协议及网络命令</title>
 <style>
 /* =====================================================================
      LINEAR DARK · design tokens
@@ -52,7 +52,7 @@
       rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
     transition:background 600ms var(--ease)}
   .stage{position:absolute;inset:0}
-  .slide{position:absolute;inset:0;padding:6vh 7vw;
+  .slide{position:absolute;inset:0;padding:6vh max(80px,6vw) 6vh 6vw;
     display:flex;flex-direction:column;justify-content:center;
     background:transparent;opacity:0;transform:translateY(36px) scale(.985);
     transition:opacity var(--dur-slide) var(--ease-soft),
@@ -243,22 +243,48 @@
     color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
     font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
   .counter .now{color:var(--accent);font-weight:500}
-  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
-  .toolbar button{background:transparent;border:1px solid var(--hairline);
-    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
-    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
-    letter-spacing:.02em;transition:all 300ms var(--ease)}
-  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
-    background:var(--accent-soft)}
-  .deck.overview .stage{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
-    padding:80px 28px 80px 72px;overflow:auto;height:100vh;inset:0}
-  .deck.overview .slide{position:relative;inset:auto;aspect-ratio:16/9;
-    padding:1rem;border:1px solid var(--hairline);border-radius:10px;
-    background:var(--bg-elev-1);cursor:pointer;overflow:hidden;
-    transform:none!important;opacity:1!important}
-  .deck.overview .slide.active{border-color:var(--accent);
-    box-shadow:0 0 0 1px var(--accent),0 0 16px var(--accent-glow)}
-  .deck.overview .slide>*{transform:scale(.18);transform-origin:top left}
+      /* Toolbar: only icon + text, no frame, no background */
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.15rem;
+    padding:0;background:transparent;border:0;box-shadow:none;backdrop-filter:none}
+  .toolbar button{display:inline-flex;align-items:center;gap:.32rem;
+    background:transparent;border:0;box-shadow:none;
+    color:var(--accent);padding:.3rem .6rem;border-radius:0;
+    cursor:pointer;font:inherit;font-size:.8rem;font-weight:500;
+    letter-spacing:.02em;line-height:1;
+    transition:color 180ms ease}
+  .toolbar button:hover{color:var(--accent-strong);background:transparent;
+    border:0;box-shadow:none;transform:none}
+  .toolbar button:active{background:transparent;border:0;box-shadow:none;transform:none}
+  .toolbar button:focus-visible{outline:1px solid var(--accent);outline-offset:2px;
+    border-radius:2px}
+  .toolbar button svg{width:13px;height:13px;opacity:.9;flex:none;display:block;
+    transition:opacity 180ms ease}
+  .toolbar button:hover svg{opacity:1}
+  .deck[data-theme="light"] .toolbar button{color:var(--accent)}
+  .deck[data-theme="light"] .toolbar button:hover{color:var(--accent-strong)}
+  .deck[data-theme="light"] .toolbar button svg{opacity:.9}
+  .deck[data-theme="light"] .toolbar button:hover svg{opacity:1}
+  /* Sidebar toggle (mobile) */
+  .sidebar-toggle{
+    position:fixed;top:28px;left:14px;z-index:40;
+    display:none;align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:8px;
+    background:var(--bg-elev-2);border:1px solid var(--hairline);
+    color:var(--ink-2);cursor:pointer;
+    transition:all var(--dur-fast) var(--ease);
+  }
+  .sidebar-toggle:hover{color:var(--accent);border-color:var(--accent-ring)}
+  .sidebar-toggle{font-size:20px;line-height:1;padding-bottom:2px}
+  /* Mobile / narrow viewport: hide sidebar & toggle entirely */
+  @media (max-width:720px){
+    .sidebar{display:none}
+    .sidebar-toggle{display:none}
+    .slide{padding-left:max(16px,4vw)!important;padding-right:max(16px,4vw)!important}
+    .brand{left:16px!important}
+    .toolbar{left:16px!important;bottom:14px!important;right:14px!important;
+      justify-content:flex-end}
+    .counter{bottom:60px!important;right:14px!important}
+  }
   .help{position:fixed;inset:0;background:rgba(8,8,10,.65);
     backdrop-filter:blur(8px);display:none;align-items:center;
     justify-content:center;z-index:40}
@@ -274,22 +300,16 @@
     padding:.55rem 0;border-bottom:1px solid var(--hairline)}
   .help .row:last-child{border-bottom:0}
   .help .row span:last-child{font-family:var(--font-mono);font-size:.82em;color:var(--ink-3)}
-  @media print{.stage{position:static;display:block}
-    .slide{display:flex!important;opacity:1!important;transform:none!important;
-      page-break-after:always;height:100vh;background:#fff;color:#000}
-    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
-  @media (prefers-reduced-motion:reduce){
-    .slide,.fragment,.chip,.card,.toolbar button,
-    .help,.help .panel,.progress,.nav-dot{transition-duration:0ms!important}}
 </style>
 </head>
 <body>
 <div class="deck" id="deck">
+  <button id="sidebar-toggle" class="sidebar-toggle" title="显示侧边栏 (M)" aria-label="toggle sidebar">≡</button>
   <aside class="sidebar" id="sidebar">
     <div class="mark">JN</div>
     <div class="nav-dots" id="nav-dots"></div>
   </aside>
-  <div class="brand">第 4 章  常见的网络协议及网络命令  <strong>|  Leonard F. Li</strong></div>
+  <div class="brand">第 6 章  常见的网络协议及网络命令  <strong>|  Leonard F. Li</strong></div>
   <div class="progress" id="progress"></div>
   <div class="counter">
     <span class="now" id="now">01</span>
@@ -300,7 +320,7 @@
   <div class="stage" id="stage">
 
     <section class="slide title active">
-      <p class="eyebrow">Chapter 04  |  Protocols &amp; Commands</p>
+      <p class="eyebrow">Chapter 6  |  Protocols Commands</p>
       <h1 class="title-h">网络协议<br><span class="accent">与命令</span></h1>
       <p class="lead">ICMP、ARP、ping、tracert——会<strong>用</strong>命令的网络工程师,才算真的入了门。</p>
       <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
@@ -891,7 +911,7 @@
       </div>
       <div class="case-box fragment" style="border-color:var(--status-good)">
         <div class="case-title" style="color:var(--status-good)">结论</div>
-        <p>✅ 本机能 ping 127.0.0.1 → <strong>本机协议栈 OK</strong>。问题在<em>局域网内</em>——大概率是<strong>网线 / 网关配置</strong>。</p>
+        <p>✅ 本机能 ping 127.0.0.1 → <strong>本机协议栈 OK</strong>。问题在<em>局域网内</em>——多数情况下为<strong>网线 / 网关配置</strong>。</p>
       </div>
     </section>
 
@@ -996,8 +1016,8 @@
         <li class="fragment">抓包工具的<strong>业界标准</strong>　免费、开源、跨平台</li>
         <li class="fragment">支持<em>上千种</em>协议解析</li>
         <li class="fragment">过滤器:<code>icmp</code>、<code>tcp.port == 80</code>、<code>ip.addr == 192.168.1.1</code></li>
-        <li class="fragment">课程项目:用 Wireshark 抓一次完整的<em>浏览器访问网页</em>过程</li>
-        <li class="fragment">你会看到:DNS 查询 → TCP 三次握手 → HTTP 请求 → 响应</li>
+        <li class="fragment">课程项目：用 Wireshark 抓一次完整的<em>浏览器访问网页</em>过程</li>
+        <li class="fragment">抓包过程可见：DNS 查询 → TCP 三次握手 → HTTP 请求 → 响应</li>
       </ul>
     </section>
 
@@ -1058,12 +1078,112 @@
       </div>
     </section>
 
+
+
+    <section class="slide section">
+      <p class="eyebrow">PART 05</p>
+      <h2>网络排错方法论</h2>
+      <p class="lead">从「瞎猜」到「系统化」——<strong>OSI 分层 + 由近及远 + 二分法</strong>。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">OSI Method</p>
+      <h2>OSI 分层排错法（自下而上）</h2>
+      <table class="t" style="margin-top:1.4rem">
+        <thead>
+          <tr><th>层级</th><th>检查方法</th><th>典型故障</th></tr>
+        </thead>
+        <tbody>
+          <tr class="fragment"><td>1 物理层</td><td>看 Link 灯、换网线、测线仪</td><td>网线断、端口坏</td></tr>
+          <tr class="fragment"><td>2 数据链路层</td><td><code>arp -a</code>、交换机端口状态</td><td>ARP 表无条目</td></tr>
+          <tr class="fragment"><td>3 网络层</td><td><code>ping</code> 网关、查路由表</td><td>默认路由缺失</td></tr>
+          <tr class="fragment"><td>4 传输层</td><td><code>netstat</code> 看连接状态</td><td>端口未监听</td></tr>
+          <tr class="fragment"><td>5-7 应用层</td><td>浏览器/客户端测试</td><td>服务未启动</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Step by Step</p>
+      <h2>由近及远法（最常用）</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>ping 127.0.0.1</strong></p>
+          <p class="muted" style="margin-top:.3rem">→ 协议栈 OK？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>ping 本机 IP</strong></p>
+          <p class="muted" style="margin-top:.3rem">→ 网卡 + IP 配置 OK？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>ping 默认网关</strong></p>
+          <p class="muted" style="margin-top:.3rem">→ 网线 + 网关 OK？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">04</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>ping 公网 IP（如 8.8.8.8）</strong></p>
+          <p class="muted" style="margin-top:.3rem">→ 默认路由 + ISP OK？</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">05</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>ping 域名（如 www.baidu.com）</strong></p>
+          <p class="muted" style="margin-top:.3rem">→ DNS OK？</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Binary Search</p>
+      <h2>二分法（多跳网络定位）</h2>
+      <p class="lead">在链路中途<strong>找一个中间点</strong>，先测这一段——把故障段一分为二。</p>
+      <div class="callout" style="margin-top:1.4rem">
+        <div class="ico">例</div>
+        <div>
+          <p style="font-size:1rem;color:var(--ink)">3 路由器串接网络不通 → 先 <strong>ping R2 的 LAN 口</strong>：</p>
+          <ul style="margin-top:.4rem;color:var(--ink-2);font-size:.92rem;line-height:1.7">
+            <li>若通 → 故障在 R2-R3 之间</li>
+            <li>若不通 → 故障在 R1-R2 之间</li>
+          </ul>
+        </div>
+      </div>
+      <h3 style="margin-top:1.4rem">症状速查</h3>
+      <div class="grid-2" style="margin-top:.8rem">
+        <div class="card fragment compact">
+          <h3>ping 不通 127.0.0.1</h3>
+          <p class="muted">协议栈损坏 → <code>netsh int ip reset</code></p>
+        </div>
+        <div class="card fragment compact">
+          <h3>ping 不通本机 IP</h3>
+          <p class="muted">网卡禁用 / IP 冲突 → <code>ipconfig /all</code></p>
+        </div>
+        <div class="card fragment compact">
+          <h3>ping 不通网关</h3>
+          <p class="muted">网线 / 网关地址错 → 看 Link 灯、<code>arp -a</code></p>
+        </div>
+        <div class="card fragment compact">
+          <h3>ping 不通域名</h3>
+          <p class="muted">DNS 错 → <code>nslookup</code>、改 8.8.8.8</p>
+        </div>
+      </div>
+    </section>
+
 <section class="slide title">
-      <p class="eyebrow">End of Chapter 04</p>
-      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">认识 IP 地址</span></h1>
+      <p class="eyebrow">End of Chapter 6  |  Protocols Commands</p>
+      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<span class="accent">认识局域网 IP </span></h1>
       <p class="lead" style="margin-top:1.4rem">从 <code>192.168.1.1</code> 到五类地址——网络世界的「门牌号」。</p>
       <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
-        End · 43 slides · Chapter 04
+        End · 43 slides · Chapter 6  |  Protocols Commands
       </p>
     </section>
 
@@ -1071,10 +1191,10 @@
   </div>
 
   <div class="toolbar">
-    <button id="b-theme" title="切换主题 (T)">Theme</button>
-    <button id="b-help" title="键盘帮助 (?)">Help</button>
-    <button id="b-overview" title="总览 (Esc)">Overview</button>
-    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+    <button id="b-theme" title="切换主题 (T)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><circle cx="12" cy="12" r="3"/></svg><span>主题</span></button>
+    <button id="b-help" title="键盘帮助 (?)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>帮助</span></button>
+    <button id="b-overview" title="总览 (Esc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>总览</span></button>
+    <button id="b-print" title="打印 / 导出 PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span>打印</span></button>
   </div>
 
   <div class="help" id="help">
@@ -1109,14 +1229,17 @@
   function slideFrags(slide){ return slide.querySelectorAll('.fragment'); }
   function revealFragments(){
     const frags=slideFrags(slides[i]);
+    // Reveal fragments one at a time, driven by the user's → keypress.
+    // fragIdx advances on each →; fragments ≤ fragIdx become visible.
+    // --frag-stagger is 0ms because the user controls reveal cadence
+    // manually — there is no automatic cascade on slide entry.
     for(let k=0;k<frags.length;k++){
       if(k<fragIdx){
         frags[k].classList.add('visible');
-        frags[k].style.setProperty('--frag-stagger','0ms');
       } else {
         frags[k].classList.remove('visible');
-        frags[k].style.setProperty('--frag-stagger','0ms');
       }
+      frags[k].style.setProperty('--frag-stagger','0ms');
     }
   }
   total.textContent=String(slides.length).padStart(2,'0');
@@ -1241,7 +1364,25 @@
   document.getElementById('b-theme').addEventListener('click',toggleTheme);
   document.getElementById('b-help').addEventListener('click',toggleHelp);
   document.getElementById('b-overview').addEventListener('click',toggleOverview);
-  document.getElementById('b-print').addEventListener('click',()=>window.print());
+    // Sidebar toggle (mobile)
+  var sidebar = document.getElementById('sidebar');
+  var sidebarToggle = document.getElementById('sidebar-toggle');
+  function toggleSidebar(){
+    var open = sidebar.classList.toggle('open');
+    document.body.classList.toggle('sidebar-open', open);
+  }
+  sidebarToggle.addEventListener('click', toggleSidebar);
+  // Auto-collapse on narrow viewports
+  function autoCollapseSidebar(){
+    if (window.innerWidth <= 720) {
+      sidebar.classList.remove('open');
+      document.body.classList.remove('sidebar-open');
+    }
+  }
+  autoCollapseSidebar();
+  window.addEventListener('resize', autoCollapseSidebar);
+  // Keyboard shortcut 'M' to toggle
+document.getElementById('b-print').addEventListener('click',()=>window.print());
 
   fragIdx=0;
   revealFragments();

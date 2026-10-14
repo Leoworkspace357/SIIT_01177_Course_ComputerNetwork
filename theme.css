@@ -1,0 +1,67 @@
+/* =====================================================================
+   LINEAR · design tokens
+   ---------------------------------------------------------------------
+   Standalone theme file — usable in any page that imports this stylesheet.
+   Default: light theme.  Pair with Linear Dark chapter pages for consistency.
+   ===================================================================== */
+:root{
+  /* Brand accent (Linear Dark blue) */
+  --accent:#5e6ad2;
+  --accent-strong:#7170ff;
+  --accent-soft:rgba(94,106,210,.10);
+  --accent-glow:rgba(94,106,210,.18);
+  --accent-ring:rgba(94,106,210,.30);
+
+  /* Status colors (kept for diagnostic / status UI) */
+  --status-good:#1f8a5c;
+  --status-warning:#c89012;
+  --status-serious:#c5621d;
+  --status-critical:#c0392b;
+
+  /* Motion */
+  --ease:cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out:cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-soft:cubic-bezier(0.45, 0, 0.15, 1);
+  --dur:600ms;
+  --dur-fast:320ms;
+  --stagger:90ms;
+
+  /* Type stack */
+  --font-sans:"Inter",system-ui,-apple-system,"Segoe UI",
+    "PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+    "Source Han Sans SC","Noto Sans CJK SC",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SF Mono",
+    "SFMono-Regular","Menlo","Consolas",monospace;
+
+  /* Light theme palette (default) */
+  --bg:#fbfbfc;
+  --bg-elev-1:#fff;
+  --bg-elev-2:#f4f4f7;
+  --bg-elev-3:#ebebef;
+  --ink:#0a0a0c;
+  --ink-2:#4a4d57;
+  --ink-3:#6f727a;
+  --ink-mute:#989ba2;
+  --hairline:rgba(10,10,12,.08);
+  --hairline-strong:rgba(10,10,12,.16);
+  --code-bg:#f0f0f3;
+}
+
+/* =====================================================================
+   Dark theme override — apply by setting data-theme="dark" on a parent
+   (e.g. <html data-theme="dark"> or <body data-theme="dark">).
+   Mirrors the Linear Dark chapter-page palette for visual consistency.
+   ===================================================================== */
+[data-theme="dark"]{
+  --bg:#08080a;
+  --bg-elev-1:#0d0d10;
+  --bg-elev-2:#141417;
+  --bg-elev-3:#1c1c1f;
+  --ink:#f7f8f8;
+  --ink-2:#b4b8c0;
+  --ink-3:#8a8f98;
+  --ink-mute:#62666d;
+  --hairline:rgba(255,255,255,.08);
+  --hairline-strong:rgba(255,255,255,.14);
+  --code-bg:#141418;
+}

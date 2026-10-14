@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>第 5 章  认识 IP 地址</title>
+<title>第 4 章  认识 IP 地址</title>
 <style>
 /* =====================================================================
      LINEAR DARK · design tokens
@@ -52,7 +52,7 @@
       rgba(94,106,210,.07) 0%,transparent 60%),var(--bg);
     transition:background 600ms var(--ease)}
   .stage{position:absolute;inset:0}
-  .slide{position:absolute;inset:0;padding:6vh 7vw;
+  .slide{position:absolute;inset:0;padding:6vh max(80px,6vw) 6vh 6vw;
     display:flex;flex-direction:column;justify-content:center;
     background:transparent;opacity:0;transform:translateY(36px) scale(.985);
     transition:opacity var(--dur-slide) var(--ease-soft),
@@ -263,22 +263,48 @@
     color:var(--ink-3);font-family:var(--font-mono);font-size:.78rem;
     font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:.5rem}
   .counter .now{color:var(--accent);font-weight:500}
-  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.25rem}
-  .toolbar button{background:transparent;border:1px solid var(--hairline);
-    color:var(--ink-2);padding:.32rem .7rem;border-radius:6px;
-    cursor:pointer;font:inherit;font-size:.78rem;font-family:var(--font-mono);
-    letter-spacing:.02em;transition:all 300ms var(--ease)}
-  .toolbar button:hover{color:var(--accent);border-color:var(--accent-ring);
-    background:var(--accent-soft)}
-  .deck.overview .stage{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
-    padding:80px 28px 80px 72px;overflow:auto;height:100vh;inset:0}
-  .deck.overview .slide{position:relative;inset:auto;aspect-ratio:16/9;
-    padding:1rem;border:1px solid var(--hairline);border-radius:10px;
-    background:var(--bg-elev-1);cursor:pointer;overflow:hidden;
-    transform:none!important;opacity:1!important}
-  .deck.overview .slide.active{border-color:var(--accent);
-    box-shadow:0 0 0 1px var(--accent),0 0 16px var(--accent-glow)}
-  .deck.overview .slide>*{transform:scale(.18);transform-origin:top left}
+      /* Toolbar: only icon + text, no frame, no background */
+  .toolbar{position:fixed;bottom:22px;left:72px;z-index:30;display:flex;gap:.15rem;
+    padding:0;background:transparent;border:0;box-shadow:none;backdrop-filter:none}
+  .toolbar button{display:inline-flex;align-items:center;gap:.32rem;
+    background:transparent;border:0;box-shadow:none;
+    color:var(--accent);padding:.3rem .6rem;border-radius:0;
+    cursor:pointer;font:inherit;font-size:.8rem;font-weight:500;
+    letter-spacing:.02em;line-height:1;
+    transition:color 180ms ease}
+  .toolbar button:hover{color:var(--accent-strong);background:transparent;
+    border:0;box-shadow:none;transform:none}
+  .toolbar button:active{background:transparent;border:0;box-shadow:none;transform:none}
+  .toolbar button:focus-visible{outline:1px solid var(--accent);outline-offset:2px;
+    border-radius:2px}
+  .toolbar button svg{width:13px;height:13px;opacity:.9;flex:none;display:block;
+    transition:opacity 180ms ease}
+  .toolbar button:hover svg{opacity:1}
+  .deck[data-theme="light"] .toolbar button{color:var(--accent)}
+  .deck[data-theme="light"] .toolbar button:hover{color:var(--accent-strong)}
+  .deck[data-theme="light"] .toolbar button svg{opacity:.9}
+  .deck[data-theme="light"] .toolbar button:hover svg{opacity:1}
+  /* Sidebar toggle (mobile) */
+  .sidebar-toggle{
+    position:fixed;top:28px;left:14px;z-index:40;
+    display:none;align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:8px;
+    background:var(--bg-elev-2);border:1px solid var(--hairline);
+    color:var(--ink-2);cursor:pointer;
+    transition:all var(--dur-fast) var(--ease);
+  }
+  .sidebar-toggle:hover{color:var(--accent);border-color:var(--accent-ring)}
+  .sidebar-toggle{font-size:20px;line-height:1;padding-bottom:2px}
+  /* Mobile / narrow viewport: hide sidebar & toggle entirely */
+  @media (max-width:720px){
+    .sidebar{display:none}
+    .sidebar-toggle{display:none}
+    .slide{padding-left:max(16px,4vw)!important;padding-right:max(16px,4vw)!important}
+    .brand{left:16px!important}
+    .toolbar{left:16px!important;bottom:14px!important;right:14px!important;
+      justify-content:flex-end}
+    .counter{bottom:60px!important;right:14px!important}
+  }
   .help{position:fixed;inset:0;background:rgba(8,8,10,.65);
     backdrop-filter:blur(8px);display:none;align-items:center;
     justify-content:center;z-index:40}
@@ -294,50 +320,16 @@
     padding:.55rem 0;border-bottom:1px solid var(--hairline)}
   .help .row:last-child{border-bottom:0}
   .help .row span:last-child{font-family:var(--font-mono);font-size:.82em;color:var(--ink-3)}
-  
-  /* ============ Calculation block ============ */
-  .calc-block{border:1px solid var(--accent-ring);border-radius:10px;
-    padding:1.2rem 1.4rem;background:var(--bg-elev-2);
-    margin-top:1.4rem;border-left:3px solid var(--accent);
-    transition:border-color 300ms var(--ease)}
-  .calc-block:hover{border-color:var(--accent);background:var(--bg-elev-3)}
-  .calc-block .calc-title{font-family:var(--font-mono);font-size:.72rem;
-    color:var(--accent);margin-bottom:.8rem;letter-spacing:.04em;
-    display:flex;align-items:center;gap:.5rem}
-  .calc-block .calc-title::before{content:"Σ";font-size:1rem;
-    color:var(--accent);font-weight:700}
-  .calc-step{display:grid;grid-template-columns:30px 1fr;gap:.8rem;
-    padding:.5rem 0;border-bottom:1px dashed var(--hairline);
-    font-family:var(--font-mono);font-size:.82rem;line-height:1.5}
-  .calc-step:last-child{border-bottom:0}
-  .calc-step .num{color:var(--accent);font-weight:600;
-    text-align:right;padding-top:.05rem}
-  .calc-step .label{color:var(--ink);font-weight:500}
-  .calc-step .formula{color:var(--status-warning);font-weight:500;
-    font-family:var(--font-mono);margin-top:.2rem;display:block;
-    font-size:.78rem}
-  .calc-step .result{color:var(--status-good);font-weight:600;
-    font-family:var(--font-mono);margin-top:.2rem;display:block;
-    font-size:.78rem}
-  .calc-step .note{color:var(--ink-3);font-style:italic;
-    margin-top:.2rem;display:block;font-size:.76rem;font-family:var(--font-sans)}
-
-  @media print{.stage{position:static;display:block}
-    .slide{display:flex!important;opacity:1!important;transform:none!important;
-      page-break-after:always;height:100vh;background:#fff;color:#000}
-    .progress,.toolbar,.counter,.brand,.sidebar,.help{display:none!important}}
-  @media (prefers-reduced-motion:reduce){
-    .slide,.fragment,.chip,.card,.toolbar button,
-    .help,.help .panel,.progress,.nav-dot{transition-duration:0ms!important}}
 </style>
 </head>
 <body>
 <div class="deck" id="deck">
+  <button id="sidebar-toggle" class="sidebar-toggle" title="显示侧边栏 (M)" aria-label="toggle sidebar">≡</button>
   <aside class="sidebar" id="sidebar">
     <div class="mark">JN</div>
     <div class="nav-dots" id="nav-dots"></div>
   </aside>
-  <div class="brand">第 5 章  认识 IP 地址  <strong>|  Leonard F. Li</strong></div>
+  <div class="brand">第 4 章  认识 IP 地址  <strong>|  Leonard F. Li</strong></div>
   <div class="progress" id="progress"></div>
   <div class="counter">
     <span class="now" id="now">01</span>
@@ -348,7 +340,7 @@
   <div class="stage" id="stage">
 
     <section class="slide title active">
-      <p class="eyebrow">Chapter 05  |  IP Addresses</p>
+      <p class="eyebrow">Chapter 4  |  IP Addresses</p>
       <h1 class="title-h">认识<br><span class="accent">IP 地址</span></h1>
       <p class="lead">互联网中<strong>每台设备的「门牌号」</strong>——32 位二进制、点分十进制、五类划分、特殊地址……</p>
       <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
@@ -424,7 +416,7 @@
       </ul>
       <div class="case-box fragment">
         <div class="case-title">CASE · 多接口设备的 IP 数量</div>
-        <p>一台家用路由器通常有 <strong>2 个接口</strong>：WAN 口（公网 IP，比如 110.242.68.66）和 LAN 口（私网 IP，比如 192.168.1.1）。它<strong>同时拥有两个 IP</strong>。</p>
+        <p>一台家用路由器通常有 <strong>2 个接口</strong>：WAN 口(公网 IP,例如 110.242.68.66) 和 LAN 口(私网 IP,例如 192.168.1.1)。它<strong>同时拥有两个 IP</strong>。</p>
         <p>一台服务器绑定了多个网站？可以用<strong>同一个网卡的不同 IP</strong>，对外呈现多个站点。</p>
       </div>
     </section>
@@ -882,7 +874,7 @@
       </div>
       <div class="case-box fragment">
         <div class="case-title">CASE · 启动 Web 服务器</div>
-        <p>开发 Node.js / Python Flask 时，你访问 <code>http://localhost:3000</code>——其实就是在访问 <code>127.0.0.1:3000</code>。数据<em>根本不会离开你的电脑</em>。</p>
+        <p>开发 Node.js / Python Flask 时，访问 <code>http://localhost:3000</code>——实质上即在访问 <code>127.0.0.1:3000</code>。数据<em>根本不会离开本机</em>。</p>
       </div>
     </section>
 
@@ -1045,12 +1037,111 @@
       </div>
     </section>
 
-    <section class="slide title">
-      <p class="eyebrow">End of Chapter 05</p>
-      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<br><span class="accent">子网编址</span></h1>
+    
+
+    <section class="slide section">
+      <p class="eyebrow">PART 06</p>
+      <h2>扩展 · IPv6 概述</h2>
+      <p class="lead">互联网的下一代——<strong>128 位地址，3.4 × 10³⁸ 个地址空间</strong>。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Why IPv6</p>
+      <h2>为什么需要 IPv6？</h2>
+      <div class="grid-2" style="margin-top:1.6rem">
+        <div class="card fragment">
+          <span class="tag">问题</span>
+          <h3>IPv4 地址枯竭</h3>
+          <p class="muted">32 位 = 约 43 亿个地址，2011 年 IANA 正式宣告耗尽。即使 NAT 缓解，公网 IP 仍紧张。</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">解决</span>
+          <h3>128 位地址</h3>
+          <p class="muted">约 3.4 × 10³⁸ 个地址——<strong>每平方米地球表面约 6.6 × 10²³ 个 IP</strong>。</p>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.6rem;font-size:.92rem">中国 2017-2020 年大规模部署 IPv6；目前 CERNET 2（教育网）已全面支持。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Format</p>
+      <h2>IPv6 地址格式 · 冒分十六进制</h2>
+      <p class="lead">用 8 组、每组 4 位十六进制数表示，中间用冒号分隔。</p>
+      <div class="callout" style="margin-top:1.4rem">
+        <div class="ico">例</div>
+        <div>
+          <p style="font-family:var(--font-mono);font-size:1.05rem;color:var(--ink)"><strong>2001:0db8:0000:0000:0000:ff00:0042:8329</strong></p>
+        </div>
+      </div>
+      <h3 style="margin-top:1.6rem">简化规则</h3>
+      <ul class="clean" style="margin-top:.8rem">
+        <li class="fragment"><strong>前导 0 可省</strong>：<code>2001:db8:0:0:0:ff00:42:8329</code></li>
+        <li class="fragment"><strong>连续全 0 用 <code>::</code> 替代</strong>（<em style="color:var(--status-serious)">只能一次</em>）：<code>2001:db8::ff00:42:8329</code></li>
+        <li class="fragment"><strong>特殊地址</strong>：<code>::1</code> = 回送；<code>fe80::/10</code> = 链路本地；<code>2001::/16</code> = 全球单播</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">IPv4 vs IPv6</p>
+      <h2>核心差异对比</h2>
+      <div class="grid-2" style="margin-top:1.4rem">
+        <div class="card fragment">
+          <span class="tag">差异</span>
+          <h3>地址</h3>
+          <p class="muted" style="font-size:.9rem">32 位 → <strong>128 位</strong><br>点分十进制 → <strong>冒分十六进制</strong></p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">头部</span>
+          <h3>包头</h3>
+          <p class="muted" style="font-size:.9rem">20-60B → <strong>固定 40B</strong><br>简化处理（无校验和）</p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">转发</span>
+          <h3>分片</h3>
+          <p class="muted" style="font-size:.9rem">路由器 + 主机 → <strong>仅主机</strong></p>
+        </div>
+        <div class="card fragment">
+          <span class="tag">寻址</span>
+          <h3>ARP / 广播</h3>
+          <p class="muted" style="font-size:.9rem">ARP / 广播 → <strong>NDP 组播</strong></p>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.6rem;font-size:.92rem">IPv6 默认禁用广播——用组播替代。原生支持 <strong>IPSec</strong>。</p>
+    </section>
+
+    <section class="slide">
+      <p class="eyebrow">Transition</p>
+      <h2>IPv4 → IPv6 过渡技术</h2>
+      <div class="callout fragment">
+        <div class="ico">01</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>双栈（Dual Stack）</strong></p>
+          <p class="muted" style="margin-top:.3rem">设备<strong>同时</strong>跑 IPv4 + IPv6（最常见）。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">02</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>隧道（Tunnel）</strong></p>
+          <p class="muted" style="margin-top:.3rem">把 IPv6 包<strong>封装</strong>在 IPv4 包里走 IPv4 网络。</p>
+        </div>
+      </div>
+      <div class="callout fragment">
+        <div class="ico">03</div>
+        <div>
+          <p style="font-size:1.1rem;color:var(--ink)"><strong>NAT64 + DNS64</strong></p>
+          <p class="muted" style="margin-top:.3rem">IPv6 客户端访问 IPv4 服务器的地址+协议转换。</p>
+        </div>
+      </div>
+      <p class="muted fragment" style="margin-top:1.6rem;font-size:.92rem">当前主流：<strong>双栈 + NAT64</strong>。地址 URL 需用方括号：<code>http://[2001:da8::666]/</code></p>
+    </section>
+
+<section class="slide title">
+      <p class="eyebrow">End of Chapter 4  |  IP Addresses</p>
+      <h1 class="title-h" style="font-size:clamp(2.2rem,4vw,3.4rem)">下一章<span class="accent">子网编址</span></h1>
       <p class="lead" style="margin-top:1.4rem">分类地址太死板——<strong>子网掩码 + CIDR</strong> 让 IP 划分更灵活。</p>
       <p class="muted" style="margin-top:3rem;font-size:.85rem;font-family:var(--font-mono)">
-        End · 34 slides · Chapter 05
+        End · 34 slides · Chapter 4  |  IP Addresses
       </p>
     </section>
 
@@ -1058,10 +1149,10 @@
   </div>
 
   <div class="toolbar">
-    <button id="b-theme" title="切换主题 (T)">Theme</button>
-    <button id="b-help" title="键盘帮助 (?)">Help</button>
-    <button id="b-overview" title="总览 (Esc)">Overview</button>
-    <button id="b-print" title="打印 / 导出 PDF">Print</button>
+    <button id="b-theme" title="切换主题 (T)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><circle cx="12" cy="12" r="3"/></svg><span>主题</span></button>
+    <button id="b-help" title="键盘帮助 (?)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>帮助</span></button>
+    <button id="b-overview" title="总览 (Esc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>总览</span></button>
+    <button id="b-print" title="打印 / 导出 PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span>打印</span></button>
   </div>
 
   <div class="help" id="help">
@@ -1096,14 +1187,17 @@
   function slideFrags(slide){ return slide.querySelectorAll('.fragment'); }
   function revealFragments(){
     const frags=slideFrags(slides[i]);
+    // Reveal fragments one at a time, driven by the user's → keypress.
+    // fragIdx advances on each →; fragments ≤ fragIdx become visible.
+    // --frag-stagger is 0ms because the user controls reveal cadence
+    // manually — there is no automatic cascade on slide entry.
     for(let k=0;k<frags.length;k++){
       if(k<fragIdx){
         frags[k].classList.add('visible');
-        frags[k].style.setProperty('--frag-stagger','0ms');
       } else {
         frags[k].classList.remove('visible');
-        frags[k].style.setProperty('--frag-stagger','0ms');
       }
+      frags[k].style.setProperty('--frag-stagger','0ms');
     }
   }
   total.textContent=String(slides.length).padStart(2,'0');
@@ -1228,7 +1322,25 @@
   document.getElementById('b-theme').addEventListener('click',toggleTheme);
   document.getElementById('b-help').addEventListener('click',toggleHelp);
   document.getElementById('b-overview').addEventListener('click',toggleOverview);
-  document.getElementById('b-print').addEventListener('click',()=>window.print());
+    // Sidebar toggle (mobile)
+  var sidebar = document.getElementById('sidebar');
+  var sidebarToggle = document.getElementById('sidebar-toggle');
+  function toggleSidebar(){
+    var open = sidebar.classList.toggle('open');
+    document.body.classList.toggle('sidebar-open', open);
+  }
+  sidebarToggle.addEventListener('click', toggleSidebar);
+  // Auto-collapse on narrow viewports
+  function autoCollapseSidebar(){
+    if (window.innerWidth <= 720) {
+      sidebar.classList.remove('open');
+      document.body.classList.remove('sidebar-open');
+    }
+  }
+  autoCollapseSidebar();
+  window.addEventListener('resize', autoCollapseSidebar);
+  // Keyboard shortcut 'M' to toggle
+document.getElementById('b-print').addEventListener('click',()=>window.print());
 
   fragIdx=0;
   revealFragments();
